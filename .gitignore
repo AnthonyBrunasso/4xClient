@@ -1,0 +1,44 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Project folders
+projects/
+build/
+
+# Vim swap files
+*.swp
+
+# Auto generated files
+include/GL/gl3w.h
+include/GL/glcorearb.h
+src/gl3w.c
+
+#python
+*.pyc
+__pycache__
