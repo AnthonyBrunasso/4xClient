@@ -27,15 +27,6 @@
 *.out
 *.app
 
-# Cmake garbage
-CMakeCache.txt
-CMakeFiles/
-Makefile
-*.pc
-*.cmake
-# Generated via cmake 
-src/glfw-3.2/src/glfw_config.h
-
 # Project folders
 projects/
 build/
