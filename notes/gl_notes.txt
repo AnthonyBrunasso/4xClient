@@ -1,0 +1,90 @@
+These focus on the following OpenGL concepts.
+
+  1. Vertex Buffer Objects
+  2. Vertex Array Objects
+  3. Vertex/Fragment shaders
+  4. Drawing
+
+Vertex Buffer Objects. Commonly called VBOs:
+
+  Object in which chunks of memory will be copied to the graphics card.
+
+  To make a vbo:
+    1. Generate an empty buffer.
+    2. Set it as the current buffer in OpenGL's state machine.
+    3. Copy data into the bound buffer.
+
+    1.  GLuint vbo = 0;
+        glGenBuffers(1, &vbo);
+    2.  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        // Given we have some array of points data
+    3.  glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW); 
+
+Vertex Attribute Objects. Commonly called VAOs:
+
+  Objects which *remember* all of the vertex buffers that you want to use and memory layout
+  of each one. Set up a VAO once per mesh. When we want to draw, all we need to do is bind a VAO.
+
+  NOTE: In old GL implementations we would have to bind all vertex, texture, normal, etc data
+  each time before a draw occurred. The VAO is a way of collecting all that data into a singular location.
+
+  To make a vao:
+    1. Generate the vertex array object.
+    2. Set it as the current vertex array in OpenGL's state machine.
+    3. Enable it.
+    4. Bind your data to it.
+
+    1.  GLuint vao = 0;
+        glGenVertexArray(vao);
+    2.  glBindVertexArray(vao);
+    3.  glEnableVertexAttribArray(0);
+    4.  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+The VAO will match up input variables with a shader. 0 being the first variable to occur in the shader.
+We enable that vertex attrib array and bind the vbo to it. In a simple example, the vbo could
+contain vertex data for a triangle, 9 points in all, or 3 points per vertex where the first input 
+variable in our vertex shader is a 3 component position vector. Binding this buffer will cause
+the shader to run on the GPU in parallel 3 times for each vertex input.
+
+    // Triangle.
+    GLfloat data[9] = { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f };
+ 
+    // Vertex shader.
+    in vec3 vp;
+    void main() { gl_Position = vec4(vb, 1.0); };
+
+If the vao were used with this data and vertex shader three instances of the vertex shader
+would run at once. One with {0.0f, 0.5f, 0.0f} the second with {0.5f, -0.5f, 0.0f} and the
+final with {-0.5f, -0.5f, 0.0f}. This data would be present in the variable 'vp'.
+
+gl_Position is just a global that will be used as input for the fragment shader for coloring.
+It's a vec4, that's not really important yet (it's used for perspective), set it to 1.0 for now.
+
+    // Fragment shader.
+    out vec4 color
+    void main() { color = vec4(0.5, 0.0, 0.5, 1.0); };
+
+The vertex shader runs once for each vertex, the fragment shader will run once for each pixel
+within the triangle. In this example shader it just sets it to an arbitrary color.
+
+In order to use the shaders opengl must compile them. After being compiled they must be linked, 
+the output is a program id that can be set before drawing. See shader.h/shader.cpp for
+the code. 
+
+Drawing:
+
+  After our vao is set up and shaders compiled and linked the program is ready to draw.
+  The steps to drawing are the following:
+
+  1. Clear the surface.
+  2. Set the shader program to be used (the one we compiled and linked).
+  3. Bind the target vertex array object.
+  4. Draw.
+
+  1.  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  2.  glUseProgram(program_id);
+  3.  glBindVertexArray(vao)
+  4.  glDrawArray(GL_TRIANGLES, 0, 3); // Draw three points from the bound vao.
+
+GL_TRIANGLES means we want to draw triangles for every three points.

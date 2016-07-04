@@ -49,13 +49,13 @@ GLFWwindow* gl::initialize(int width, int height, const char* title) {
   }
 
   glfwMakeContextCurrent(window);
-  gl3wInit();
+  // Log the return but don't treat it as an error, this way we can attempt
+  // to get the opengl info below on failure.
+  ss << "gl3wInit() returned: " << gl3wInit() << std::endl;
 
-  const GLubyte* renderer = glGetString(GL_RENDERER); // Get renderer string
-  const GLubyte* version = glGetString(GL_VERSION);   // Version as a string
-
-  ss << "Renderer: " << renderer << std::endl;
-  ss << "OpenGL verion supported: " << version << std::endl;
+  // Log the gl info.
+  ss << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+  ss << "OpenGL verion supported: " << glGetString(GL_VERSION) << std::endl;
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
