@@ -11,20 +11,6 @@ namespace shader {
 #define SHADER_LOG "shader.log"
 #define SHADER_DIR "../../data/shaders"
 
-  const char* BASIC_V =
-  "#version 400\n"
-  "in vec3 vp;"
-  "void main() {"
-  "  gl_Position = vec4(vp, 1.0);"
-  "}";
-
-  const char* BASIC_F =
-  "#version 400\n"
-  "out vec4 frag_color;"
-  "void main() {"
-  "  frag_color = vec4(0.5, 0.0, 0.5, 1.0);"
-  "}";
-
   std::string load_shader(const char* file) {
     std::string filename = SHADER_DIR;
     filename += "/" + std::string(file);

@@ -1,0 +1,25 @@
+Vertex Buffer Objects
+
+  Usually a vertex buffer object is simply an array of data.
+  Often floats for vertex information.
+
+  VBOs give us the power to copy entire chunks of data to the gpu, instead
+  of copying data one-by-one on each draw call from the days of immediate mode.
+  We also get the power to copy the data before drawing starts.
+
+Rendering wireframe:
+
+  call:
+  glPolygonMode(GL_FRONT, GL_LINE);
+  Before rendering.
+
+We don't have to store just 3d data in vertex buffers.
+Common uses include; 2d texture, coordinates that describe how to fit an image
+to a surface, and 3d normals that describe which way a surface is facing
+so that we can calculate lighting.
+
+Most objects will have 2 or 3 vertex buffers each.
+
+Multiple VBOs for a VAO
+
+  Must bind each VBO to the vao.

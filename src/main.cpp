@@ -5,6 +5,7 @@
 #include <glm/vec3.hpp>
 
 #include "shader.h"
+#include "geometry.h"
 #include "log.h"
 #include "gl.h"
 
@@ -15,26 +16,37 @@ int main() {
     return 1;
   }
 
-  float points[] = {
-    0.0f, 0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
-  };
+  GLuint points_vbo = 0;
+  glGenBuffers(1, &points_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+  glBufferData(GL_ARRAY_BUFFER, 
+    geometry::get_triangle().size() * sizeof(GLfloat), 
+    geometry::get_triangle().data(), 
+    GL_STATIC_DRAW);
 
-  GLuint vbo = 0;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
+  GLuint colors_vbo = 0;
+  glGenBuffers(1, &colors_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+  glBufferData(GL_ARRAY_BUFFER, 
+    geometry::get_triangle_color().size() * sizeof(GLfloat),
+    geometry::get_triangle_color().data(),
+    GL_STATIC_DRAW);
 
   GLuint vao = 0;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
+
   glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  GLuint vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple.vert");
-  GLuint fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple.frag");
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+
+  GLuint vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple_color.vert");
+  GLuint fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple_color.frag");
   GLuint program = shader::link({ vs, fs });
 
   while (!glfwWindowShouldClose(window)) {
@@ -43,6 +55,7 @@ int main() {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glViewport(0, 0, width, height);
     glUseProgram(program);
     glBindVertexArray(vao);
