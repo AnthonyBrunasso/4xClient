@@ -32,7 +32,7 @@ GLFWwindow* gl::initialize(int width, int height, const char* title) {
   }
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
   // Anti-aliasing
   glfwWindowHint(GLFW_SAMPLES, 4);
