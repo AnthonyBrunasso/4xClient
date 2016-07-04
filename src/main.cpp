@@ -5,36 +5,15 @@
 #include <glm/vec3.hpp>
 
 #include "shader.h"
+#include "log.h"
+#include "gl.h"
 
 int main() {
-  if (!glfwInit()) {
-    std::cout << "Error: could not start glfw3\n" << std::endl;
-    return 1;
-  }
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  GLFWwindow* window = glfwCreateWindow(640, 480, "Hello Triangle", NULL, NULL);
+  GLFWwindow* window = gl::initialize(640, 480, "Hello Triangle");
   if (!window) {
-    std::cout << "Error: could not open window with glfw3\n" << std::endl;
-    glfwTerminate();
+    std::cout << "Failed to initialize gl context. See logs." << std::endl;
     return 1;
   }
-
-  glfwMakeContextCurrent(window);
-  gl3wInit();
-
-  const GLubyte* renderer = glGetString(GL_RENDERER); // Get renderer string
-  const GLubyte* version = glGetString(GL_VERSION);   // Version as a string
-
-  std::cout << "renderer: " << renderer << std::endl;
-  std::cout << "OpenGL verion supported: " << version << std::endl;
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
 
   float points[] = {
     0.0f, 0.5f, 0.0f,
