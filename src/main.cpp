@@ -33,8 +33,8 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  GLuint vs = shader::compile_from_buffer(GL_VERTEX_SHADER, shader::BASIC_V);
-  GLuint fs = shader::compile_from_buffer(GL_FRAGMENT_SHADER, shader::BASIC_F);
+  GLuint vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple.vert");
+  GLuint fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple.frag");
   GLuint program = shader::link({ vs, fs });
 
   while (!glfwWindowShouldClose(window)) {
@@ -49,6 +49,19 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glfwPollEvents();
     glfwSwapBuffers(window);
+
+    // Recompile shaders
+    if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_R)) {
+      // Delete program and shaders
+      glDeleteProgram(program);
+      glDeleteShader(vs);
+      glDeleteShader(fs);
+
+      // Recompile and relink
+      vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple.vert");
+      fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple.frag");
+      program = shader::link({ vs, fs });
+    }
 
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
       glfwSetWindowShouldClose(window, 1);

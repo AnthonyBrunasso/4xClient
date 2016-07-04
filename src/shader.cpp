@@ -1,13 +1,15 @@
 #include "shader.h"
 #include "log.h"
 
-
+#include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 namespace shader {
 
 #define SHADER_LOG "shader.log"
+#define SHADER_DIR "../../data/shaders"
 
   const char* BASIC_V =
   "#version 400\n"
@@ -23,8 +25,17 @@ namespace shader {
   "  frag_color = vec4(0.5, 0.0, 0.5, 1.0);"
   "}";
 
-  const char* load_shader(const char* file) {
-    return "";
+  std::string load_shader(const char* file) {
+    std::string filename = SHADER_DIR;
+    filename += "/" + std::string(file);
+    std::ifstream shaderfile(filename);
+    std::ostringstream ss;
+    std::string line;
+    while (std::getline(shaderfile, line)) {
+      ss << line << std::endl;
+    }
+    shaderfile.close();
+    return ss.str();
   }
 
   const char* gl_type_to_string(GLenum type) {
@@ -49,8 +60,8 @@ namespace shader {
 }
 
 GLuint shader::compile_from_file(GLenum type, const char* file) {
-  const char* source = load_shader(file);
-  return compile_from_buffer(type, source);
+  std::string source = load_shader(file);
+  return compile_from_buffer(type, source.c_str());
 }
 
 GLuint shader::compile_from_buffer(GLenum type, const char* buffer) {
@@ -69,6 +80,9 @@ GLuint shader::compile_from_buffer(GLenum type, const char* buffer) {
 
     std::vector<GLchar> error_log(max_length);
     glGetShaderInfoLog(s, max_length, &max_length, &error_log[0]);
+
+    std::cout << "Buffer failed to compile:" << std::endl;
+    std::cout << buffer << std::endl;
 
     // Report error to out.
     for (auto c : error_log) {

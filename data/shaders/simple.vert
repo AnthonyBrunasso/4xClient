@@ -1,5 +1,5 @@
 #version 410
 in vec3 position;
-int main() {
+void main() {
   gl_Position = vec4(position, 1.0);
 };
