@@ -7,13 +7,85 @@
 
 #define GL_LOG_FILE "gl.log"
 
-void glfw_error_callback(int error, const char* description) {
-  std::ostringstream ss;
+namespace gl {
+  // glfw callbacks.
+  void glfw_error_callback(int error, const char* description) {
+    std::ostringstream ss;
 
-  ss << "GLFW ERROR - code: " << error 
-     << " description: " << description << std::endl;
+    ss << "GLFW ERROR - code: " << error 
+       << " description: " << description << std::endl;
 
-  logging::write(GL_LOG_FILE, ss.str());
+    logging::write(GL_LOG_FILE, ss.str());
+  }
+
+  void glfw_window_size_callback(GLFWwindow* window, int width, int height) {
+    std::ostringstream ss;
+    ss << "Window changed event - new width: " <<  width
+       << " new height: " << height;
+    logging::write(GL_LOG_FILE, ss.str());
+  }
+
+  void glfw_framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
+    std::ostringstream ss;
+    ss << "Framebuffer changed event - new width: " <<  width
+       << " new height: " << height;
+    logging::write(GL_LOG_FILE, ss.str());
+  }
+
+  // Log gl params.
+  void log_gl_params() {
+    GLenum params[] = {
+      GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,
+      GL_MAX_CUBE_MAP_TEXTURE_SIZE,
+      GL_MAX_DRAW_BUFFERS,
+      GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,
+      GL_MAX_TEXTURE_IMAGE_UNITS,
+      GL_MAX_TEXTURE_SIZE,
+      GL_MAX_VARYING_FLOATS,
+      GL_MAX_VERTEX_ATTRIBS,
+      GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS,
+      GL_MAX_VERTEX_UNIFORM_COMPONENTS,
+      GL_MAX_VIEWPORT_DIMS,
+      GL_STEREO,
+    };
+
+    const char* names[] = {
+      "GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS",
+      "GL_MAX_CUBE_MAP_TEXTURE_SIZE",
+      "GL_MAX_DRAW_BUFFERS",
+      "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS",
+      "GL_MAX_TEXTURE_IMAGE_UNITS",
+      "GL_MAX_TEXTURE_SIZE",
+      "GL_MAX_VARYING_FLOATS",
+      "GL_MAX_VERTEX_ATTRIBS",
+      "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS",
+      "GL_MAX_VERTEX_UNIFORM_COMPONENTS",
+      "GL_MAX_VIEWPORT_DIMS",
+      "GL_STEREO",
+    };
+
+    std::ostringstream ss;
+    ss << "GL Context params: " << std::endl;
+    for (int i = 0; i < 10; ++i) {
+      int v = 0;
+      glGetIntegerv(params[i], &v);
+      ss << names[i] << ": " << v << std::endl;
+    }
+
+    // Others
+    int v[2];
+    v[0] = v[1] = 0;
+    glGetIntegerv(params[10], v);
+    ss << names[10] << ": " << v[0] << " " << v[1] << std::endl;
+    unsigned char s = 0;
+    glGetBooleanv(params[11], &s);
+    ss << names[11] << ": " << static_cast<unsigned int>(s); 
+
+    logging::write(GL_LOG_FILE, ss.str());
+  }
+  
+  double s_previous_seconds;
+  int s_frame_count;
 }
 
 GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int height) {
@@ -24,7 +96,7 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
      << title << std::endl;
 
   glfwSetErrorCallback(glfw_error_callback);
-
+ 
   if (!glfwInit()) {
     ss << "Error: Failed glfwInit()" << std::endl;
     logging::write(GL_LOG_FILE, ss.str());
@@ -58,6 +130,9 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
     return nullptr;
   }
 
+  glfwSetWindowSizeCallback(window, glfw_window_size_callback);
+  glfwSetFramebufferSizeCallback(window, glfw_framebuffer_resize_callback);
+
   glfwMakeContextCurrent(window);
   // Log the return but don't treat it as an error, this way we can attempt
   // to get the opengl info below on failure.
@@ -65,12 +140,29 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
 
   // Log the gl info.
   ss << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-  ss << "OpenGL verion supported: " << glGetString(GL_VERSION) << std::endl;
+  ss << "OpenGL verion supported: " << glGetString(GL_VERSION);
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
   logging::write(GL_LOG_FILE, ss.str());
+  log_gl_params();
 
   return window;
+}
+
+void gl::update_fps_counter(GLFWwindow* window) {
+  double current_seconds;
+  double elapsed_seconds;
+  current_seconds = glfwGetTime();
+  elapsed_seconds = current_seconds - s_previous_seconds;
+  if (elapsed_seconds > 0.25) {
+    s_previous_seconds = current_seconds;
+    static char tmp[128];
+    double fps = static_cast<double>(s_frame_count) / elapsed_seconds;
+    sprintf(tmp, "opengl @ fps: %.2f", fps);
+    glfwSetWindowTitle(window, tmp);
+    s_frame_count = 0;
+  }
+  ++s_frame_count;
 }

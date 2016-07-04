@@ -38,7 +38,12 @@ int main() {
   GLuint program = shader::link({ vs, fs });
 
   while (!glfwWindowShouldClose(window)) {
+    gl::update_fps_counter(window);
+    // Get framebuffer size.
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, width, height);
     glUseProgram(program);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
