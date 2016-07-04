@@ -1,0 +1,68 @@
+Shaders
+
+Shader programs run on the GPU and are highly parallelized. Each vertex shader
+transforms 1 vertex. Therefore if a mesh has 2000 vertices, then 2000 vertex shaders
+will be launched when we draw it.
+
+Depending on processors it is possible to process al vertices simultaneously.
+Example core counts:
+
+GeForce 605: 48 shader cores
+Radeon HD 7350: 80 shader cores
+GeForce GTX 580: 512 shader cores
+Radeon HD 8750: 768 Shader cores
+
+Keeping the number of seperate meshes drawn per-scene to a low level is more 
+beneficial. This reduces the batch count per rendered frame. Idea is to keep as many
+processors in use at once as possible.
+
+Pixels
+
+A pixel is a picture element. In OpenGL pixels are the elements that maek up the
+final 2d image that draws inside a window.
+
+Fragment
+
+A pixel-sized area on a surface. Fragment shader determines the color ofe ach one.
+
+Each fragment is written into the framebuffer that wiill display the final pixels.
+If depth testing is enabled the front most fragment will paint on top of the further ones.
+
+Vertex Shader
+
+  The vertex shader is responsible for transforming vertex positions into clip space.
+  The final coordinate space we must transform points before OpenGL rasterises (flattens)
+  our geometry into a 2d image.
+
+  Vertex shaders can also be used to send data from the vertex buffer to fragment
+  shaders. 
+
+  This shader does nothing but take the vertex positions that are already in clip space
+  and output them as final clip-space positions.
+  #version 410
+  in vec3 pos;
+  void main() { gl_Position = vec4(pos, 1.0); };
+
+  gl_Position variable is a built-in GLSL variable used to set final cilp-space.
+  the input to a vertex buffer (the in variables) are called per-vertex
+  attributes and come from blocks of memory on the graphics hardware memory
+  called vertex buffers.
+
+Fragment shader
+
+  Once all vertex shaders have computed the position of every vertex in clip
+  space, then the fragment shader is run once for eery pixel-sized space (fragment)
+  between vertices. The fragment shader is responsible for setting the color of each
+  fragment.
+
+  #version 410
+  uniform vec4 input_color;
+  out vec4 frag_color;
+  void main() { frag_color = input_color; };
+
+  Uniform key-word says we are sending a vraible to the shader program from the CPU.
+  This variable is global to all shaders within the program. Therefore, we can access
+  it in vertex shader. 
+
+  The hardware pipeling knows the first vec4 it gets as output from the fragment shader
+  should be the color of the fragment. 
