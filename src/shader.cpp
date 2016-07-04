@@ -121,7 +121,6 @@ GLuint shader::link(std::vector<GLuint> shaders) {
     return 0;
   }
 
-  // Log before the shaders are detached.
   logging::write(SHADER_LOG, get_debug(p));
 
   // Detach the shaders after a successful link.

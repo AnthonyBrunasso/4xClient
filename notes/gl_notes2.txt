@@ -66,3 +66,16 @@ Fragment shader
 
   The hardware pipeling knows the first vec4 it gets as output from the fragment shader
   should be the color of the fragment. 
+
+Some best practices:
+
+  * All uniform variables are initialized to 0 when a program links so you only
+  need to intialize them if you don't want 0. 
+  * Calling glUniform is expensive during run-time. Structure code so glUniform
+  is only called when the value needs to change. Maybe when a new object is drawn.
+  * Calling glGetUniformLocation during run-time can be expensive. Do this during
+  initialization if possible. 
+  * glGetUniformLocation returns -1 if the uniform variable wasn't found to be active.
+  * Modifying attributes (vertex buffers) during run-time is extremely expensive.
+  * Get shaders to do as much as possible. They run in parallel so are extremely fast.
+  * Where possible merge many smaller objects into fewer larger ones. Drawing lots of small sepearte objects is expensive.

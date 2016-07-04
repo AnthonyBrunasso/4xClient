@@ -13,4 +13,6 @@ namespace shader {
 
   GLuint link(std::vector<GLuint> shaders);
   std::string get_debug(GLuint program);
+
+  bool valid(GLuint program);
 }
