@@ -16,7 +16,7 @@ void glfw_error_callback(int error, const char* description) {
   logging::write(GL_LOG_FILE, ss.str());
 }
 
-GLFWwindow* gl::initialize(int width, int height, const char* title) {
+GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int height) {
   std::ostringstream ss;
   ss << "Initializing OpenGL window with width: "
      << width << " height: "
@@ -39,8 +39,18 @@ GLFWwindow* gl::initialize(int width, int height, const char* title) {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  GLFWwindow* window = nullptr;
+  if (fullscreen) {
+    // Get your primary monitor if two monitors are enabled.
+    GLFWmonitor* mon = glfwGetPrimaryMonitor();
+    // Gets monitor data, primary width and height.
+    const GLFWvidmode* vmode = glfwGetVideoMode(mon);
+    window = glfwCreateWindow(vmode->width, vmode->height, title, mon, NULL);
+  }
+  else {
+    window = glfwCreateWindow(width, height, title, NULL, NULL);
+  }
 
-  GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
   if (!window) {
     ss << "Error: Could not open window with glfw3" << std::endl;
     glfwTerminate();

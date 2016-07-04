@@ -3,5 +3,6 @@
 struct GLFWwindow;
 
 namespace gl {
-  GLFWwindow* initialize(int width, int height, const char* title);
+  // If fullscreen is enabled width and height are ignored.
+  GLFWwindow* initialize(const char* title, bool fullscreen, int width=640, int height=480);
 }

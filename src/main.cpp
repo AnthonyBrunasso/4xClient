@@ -9,7 +9,7 @@
 #include "gl.h"
 
 int main() {
-  GLFWwindow* window = gl::initialize(640, 480, "Hello Triangle");
+  GLFWwindow* window = gl::initialize("Hello Triangle", false);
   if (!window) {
     std::cout << "Failed to initialize gl context. See logs." << std::endl;
     return 1;
@@ -44,6 +44,10 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glfwPollEvents();
     glfwSwapBuffers(window);
+
+    if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+      glfwSetWindowShouldClose(window, 1);
+    }
   }
 
   glfwTerminate();
