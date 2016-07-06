@@ -77,6 +77,12 @@ void Mesh::initialize() {
 }
 
 void Mesh::update(float delta) {
+  static float speed = 1.0f;
+  if (fabs(m_position.x) > 1.0f) {
+    speed *= -1;
+  }
+
+  m_position.x += delta * speed;
 }
 
 void Mesh::draw() {

@@ -19,8 +19,6 @@ int main() {
     return 1;
   }
 
-  //glm::mat4 matrix(1.0);
-
   Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), 
       geometry::get_hexagon2d(), 
       geometry::get_triangle_color(),
@@ -31,9 +29,6 @@ int main() {
 
   mesh.initialize();
 
-  float speed = 1.0f;
-  float last_position = 0.0f;
-
   while (!glfwWindowShouldClose(window)) {
     static double previous_seconds = glfwGetTime();
     double current_seconds = glfwGetTime();
@@ -41,16 +36,7 @@ int main() {
     previous_seconds = current_seconds;
     mesh.update(delta_seconds);
 
-    //if (fabs(last_position) > 1.0f) {
-    //  speed *= -1;
-   // }
-
-    //matrix[3][0] = delta_seconds * speed + last_position;
-    //last_position = matrix[3][0];
-    //glUseProgram(program);
-    //glUniformMatrix4fv(matrix_loc, 1, GL_FALSE, glm::value_ptr(matrix));*/
-
-    // Draw and stuff
+    // Draw and stuff.
     gl::update_fps_counter(window);
     // Get framebuffer size.
     int width, height;
@@ -59,8 +45,6 @@ int main() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glViewport(0, 0, width, height);
     mesh.draw();
-    //glBindVertexArray(vao);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
     glfwPollEvents();
     glfwSwapBuffers(window);
 
