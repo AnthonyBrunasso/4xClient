@@ -7,17 +7,45 @@
 
 Mesh::Mesh(const glm::vec3& start, 
     const std::vector<GLfloat>& vertices, 
-    const std::vector<GLfloat>& colors) {
-  m_position = start;
-  m_vertices = vertices;
-  m_colors = colors;
+    const std::vector<GLfloat>& colors,
+    const std::vector<std::pair<GLenum, std::string> >& shaders) : 
+  m_position(start)
+  , m_vertices(vertices)
+  , m_colors(colors)
+  , m_program(0) 
+  , m_shaders(shaders) {
 }
 
 Mesh::~Mesh() {
 }
 
+void Mesh::initialize_shaders() {
+  for (auto s : m_shaders) {
+    GLuint shader = shader::compile_from_file(s.first, s.second.c_str());
+    m_shader_ids.push_back(shader);
+  }
+  m_program = shader::link(m_shader_ids);
+}
+
+void Mesh::reset_shaders() {
+  // First delete the meshes program
+  glDeleteProgram(m_program);
+  // Delete its shaders
+  for (auto id : m_shader_ids) {
+    glDeleteShader(id); 
+  }
+  // Clear the shader ids, they are invalid now.
+  m_shader_ids.clear();
+  // Rebuild the shaders and relink the program.
+  initialize_shaders();
+}
+
 // Binds vertex data to GL.
 void Mesh::initialize() {
+  if (m_program == 0) {
+    initialize_shaders();
+  }
+
   GLuint m_points_vbo = 0;
   glGenBuffers(1, &m_points_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, m_points_vbo);
@@ -44,14 +72,6 @@ void Mesh::initialize() {
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, m_colors_vbo);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-  // TEMP
-  // TODO: Shader should return cached compiled file.
-  GLuint vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple_transform.vert");
-  GLuint fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple.frag");
-  m_shaders.push_back(vs);   
-  m_shaders.push_back(fs);
-  m_program = shader::link({ vs, fs });
 
   m_mat_uniform = glGetUniformLocation(m_program, "matrix");
 }

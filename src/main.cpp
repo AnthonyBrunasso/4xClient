@@ -23,7 +23,11 @@ int main() {
 
   Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), 
       geometry::get_hexagon2d(), 
-      geometry::get_triangle_color());
+      geometry::get_triangle_color(),
+      {
+        {GL_VERTEX_SHADER, "simple_transform.vert"}, 
+        {GL_FRAGMENT_SHADER, "simple.frag"}
+      });
 
   mesh.initialize();
 
@@ -62,16 +66,7 @@ int main() {
 
     // Recompile shaders
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_R)) {
-      // Delete program and shaders
-      //glDeleteProgram(program);
-      //glDeleteShader(vs);
-      //glDeleteShader(fs);
-
-      // Recompile and relink
-      //vs = shader::compile_from_file(GL_VERTEX_SHADER, "simple.vert");
-      //fs = shader::compile_from_file(GL_FRAGMENT_SHADER, "simple.frag");
-      //program = shader::link({ vs, fs });
-      //glUseProgram(program);
+      mesh.reset_shaders();
     }
 
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
