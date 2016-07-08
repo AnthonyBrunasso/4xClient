@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include <utility>
+#include <functional>
 
 class Mesh {
 public:
@@ -29,6 +30,8 @@ public:
 
   virtual void draw();
 
+  void add_predraw(std::function<void(GLuint)> op);
+
 private:
   std::vector<GLfloat> m_vertices;
   std::vector<GLfloat> m_colors;
@@ -45,4 +48,5 @@ private:
   GLint m_mat_uniform;
   glm::mat4 m_matrix;
   std::vector<std::pair<GLenum, std::string> > m_shaders;
+  std::vector<std::function<void(GLuint)> > m_predraw_ops;
 };

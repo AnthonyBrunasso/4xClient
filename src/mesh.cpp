@@ -73,7 +73,7 @@ void Mesh::initialize() {
   glBindBuffer(GL_ARRAY_BUFFER, m_colors_vbo);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  m_mat_uniform = glGetUniformLocation(m_program, "matrix");
+  m_mat_uniform = glGetUniformLocation(m_program, "model");
 }
 
 void Mesh::update(float delta) {
@@ -88,14 +88,19 @@ void Mesh::update(float delta) {
 void Mesh::draw() {
   glUseProgram(m_program);
   if (m_mat_uniform != -1) {
-    // Set identity.
-    m_matrix = glm::mat4();
     // Move it to the meshes position.
-    m_matrix = glm::translate(m_matrix, m_position);
+    m_matrix = glm::translate(glm::mat4(), m_position);
     glUniformMatrix4fv(m_mat_uniform, 1, GL_FALSE, glm::value_ptr(m_matrix));
+  }
+
+  for (auto op : m_predraw_ops) {
+    op(m_program);
   }
 
   glBindVertexArray(m_vao);
   glDrawArrays(GL_TRIANGLES, 0, m_vertices.size() / 3);
 }
 
+void Mesh::add_predraw(std::function<void(GLuint)> op) {
+  m_predraw_ops.push_back(op);
+}
