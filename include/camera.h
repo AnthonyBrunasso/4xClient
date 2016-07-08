@@ -7,7 +7,7 @@ class Camera {
 public:
   Camera(float near, float far, float fov, float aspect);
 
-  void update();
+  void update(float delta);
 
   float m_speed;
 

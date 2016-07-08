@@ -55,6 +55,7 @@ int main() {
     double delta_seconds = current_seconds - previous_seconds;
     previous_seconds = current_seconds;
     mesh.update(delta_seconds);
+    camera.update(delta_seconds);
 
     // Draw and stuff.
     gl::update_fps_counter(window);
@@ -64,7 +65,6 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glViewport(0, 0, width, height);
-    camera.update();
     mesh.draw();
     glfwPollEvents();
     glfwSwapBuffers(window);

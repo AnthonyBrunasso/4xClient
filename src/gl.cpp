@@ -8,6 +8,7 @@
 #define GL_LOG_FILE "gl.log"
 
 namespace gl {
+  GLFWwindow* s_current_window = nullptr;
   // glfw callbacks.
   void glfw_error_callback(int error, const char* description) {
     std::ostringstream ss;
@@ -148,6 +149,8 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
   logging::write(GL_LOG_FILE, ss.str());
   log_gl_params();
 
+  s_current_window = window;
+
   return window;
 }
 
@@ -165,4 +168,12 @@ void gl::update_fps_counter(GLFWwindow* window) {
     s_frame_count = 0;
   }
   ++s_frame_count;
+}
+
+void gl::set_current_window(GLFWwindow* window) {
+  s_current_window = window;
+}
+
+GLFWwindow* gl::get_current_window() {
+  return s_current_window;
 }
