@@ -35,6 +35,9 @@ public:
   virtual void draw();
 
   void add_predraw(std::function<void(GLuint)> op);
+  void add_preupdate(std::function<void(float, glm::vec3&)> op);
+
+  void set_position(const glm::vec3& position) { m_position = position; };
 
 private:
   std::vector<GLfloat> m_vertices;
@@ -53,4 +56,5 @@ private:
   glm::mat4 m_matrix;
   std::vector<std::pair<GLenum, std::string> > m_shaders;
   std::vector<std::function<void(GLuint)> > m_predraw_ops;
+  std::vector<std::function<void(float, glm::vec3&)> > m_preupdate_ops;
 };

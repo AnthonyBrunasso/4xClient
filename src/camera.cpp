@@ -1,16 +1,15 @@
 #include "camera.h"
 
-#include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
 #include "gl.h"
 
-Camera::Camera(float near, float far, float fov, float aspect) :
+Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
     m_speed(10.0f) {
-  //m_projection = glm::perspective(45.0f, 1024.0f/768.0f, 0.1f, 200.0f);
-  m_projection = glm::perspective(fov, aspect, near, far);
-  m_position = glm::vec3(0.0f, 0.0f, -3.0f);
+  m_projection = glm::perspective(fov, aspect, near_plane, far_plane);
+  m_position = glm::vec3(0.0f, 0.0f, -20.0f);
 }
 
 void Camera::update(float delta) {
@@ -35,6 +34,23 @@ void Camera::update(float delta) {
   }
 
   m_view = glm::lookAt(m_position, 
-      glm::vec3(0.0f, 0.0f, 0.0f), 
-      glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::vec3(0.0f, 0.0f, 0.0f), 
+    glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void camera::set_uniforms(GLuint program, Camera* camera) {
+  if (!camera) return;
+
+  // Shader view and projection matrices are always named view/proj.
+  GLint view_mat_location = glGetUniformLocation(program, "view");
+  glUniformMatrix4fv(view_mat_location, 
+    1, 
+    GL_FALSE, 
+    glm::value_ptr(camera->m_view));
+
+  GLint proj_mat_location = glGetUniformLocation(program, "proj");
+  glUniformMatrix4fv(proj_mat_location, 
+    1, 
+    GL_FALSE, 
+    glm::value_ptr(camera->m_projection));
 }

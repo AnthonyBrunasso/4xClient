@@ -1,5 +1,6 @@
 #include "Mesh.h"
 
+#include <GL/gl3w.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -96,12 +97,9 @@ void Mesh::initialize() {
 }
 
 void Mesh::update(float delta) {
-  static float speed = 1.0f;
-  if (fabs(m_position.x) > 1.0f) {
-    speed *= -1;
+  for (auto op : m_preupdate_ops) {
+    op(delta, m_position); 
   }
-
-  m_position.x += delta * speed;
 }
 
 void Mesh::draw() {
@@ -122,4 +120,8 @@ void Mesh::draw() {
 
 void Mesh::add_predraw(std::function<void(GLuint)> op) {
   m_predraw_ops.push_back(op);
+}
+
+void Mesh::add_preupdate(std::function<void(float, glm::vec3&)> op) {
+  m_preupdate_ops.push_back(op);
 }

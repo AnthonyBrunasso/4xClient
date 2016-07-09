@@ -11,6 +11,7 @@
 #include "geometry.h"
 #include "log.h"
 #include "gl.h"
+#include "map.h"
 #include "mesh.h"
 #include "sim_interface.h"
 
@@ -21,20 +22,21 @@ int main() {
     return 1;
   }
 
-  sim_interface::start();
-
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
-  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
-    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-    {GL_FRAGMENT_SHADER, "simple.frag"}
-  });
+  sim_interface::start();
+  map::initialize(&camera);
 
-  mesh.initialize();
+//  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
+//    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
+//    {GL_FRAGMENT_SHADER, "simple.frag"}
+//  });
 
-  auto set_view = [&camera](GLuint program) {
+//  mesh.initialize();
+
+/*  auto set_view = [&camera](GLuint program) {
     GLint view_mat_location = glGetUniformLocation(program, "view");
     glUniformMatrix4fv(view_mat_location, 
         1, 
@@ -47,14 +49,16 @@ int main() {
         GL_FALSE, 
         glm::value_ptr(camera.m_projection));
   };
-  mesh.add_predraw(set_view);
+  mesh.add_predraw(set_view);*/
 
   while (!glfwWindowShouldClose(window)) {
     static double previous_seconds = glfwGetTime();
     double current_seconds = glfwGetTime();
     double delta_seconds = current_seconds - previous_seconds;
     previous_seconds = current_seconds;
-    mesh.update(delta_seconds);
+
+    map::update();
+    //mesh.update(delta_seconds);
     camera.update(delta_seconds);
 
     // Draw and stuff.
@@ -65,13 +69,14 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glViewport(0, 0, width, height);
-    mesh.draw();
+    map::draw();
+    //mesh.draw();
     glfwPollEvents();
     glfwSwapBuffers(window);
 
     // Recompile shaders
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_R)) {
-      mesh.reset_shaders();
+      //mesh.reset_shaders();
     }
 
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
