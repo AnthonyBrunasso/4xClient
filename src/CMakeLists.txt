@@ -1,4 +1,4 @@
-file(GLOB Sources "*.cpp" "*.c")
+file(GLOB Sources "*.cpp" "*.c" "../include/*.h")
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

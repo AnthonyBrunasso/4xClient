@@ -38,19 +38,17 @@ void Camera::update(float delta) {
     glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-void camera::set_uniforms(GLuint program, Camera* camera) {
-  if (!camera) return;
+void camera::set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera* c) {
+  if (!c) return;
 
   // Shader view and projection matrices are always named view/proj.
-  GLint view_mat_location = glGetUniformLocation(program, "view");
-  glUniformMatrix4fv(view_mat_location, 
+  glUniformMatrix4fv(view_loc,
     1, 
     GL_FALSE, 
-    glm::value_ptr(camera->m_view));
+    glm::value_ptr(c->m_view));
 
-  GLint proj_mat_location = glGetUniformLocation(program, "proj");
-  glUniformMatrix4fv(proj_mat_location, 
+  glUniformMatrix4fv(proj_loc,
     1, 
     GL_FALSE, 
-    glm::value_ptr(camera->m_projection));
+    glm::value_ptr(c->m_projection));
 }

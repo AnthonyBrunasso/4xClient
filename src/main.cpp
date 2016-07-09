@@ -29,28 +29,6 @@ int main() {
   sim_interface::start();
   map::initialize(&camera);
 
-//  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
-//    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-//    {GL_FRAGMENT_SHADER, "simple.frag"}
-//  });
-
-//  mesh.initialize();
-
-/*  auto set_view = [&camera](GLuint program) {
-    GLint view_mat_location = glGetUniformLocation(program, "view");
-    glUniformMatrix4fv(view_mat_location, 
-        1, 
-        GL_FALSE, 
-        glm::value_ptr(camera.m_view));
-
-    GLint proj_mat_location = glGetUniformLocation(program, "proj");
-    glUniformMatrix4fv(proj_mat_location, 
-        1, 
-        GL_FALSE, 
-        glm::value_ptr(camera.m_projection));
-  };
-  mesh.add_predraw(set_view);*/
-
   while (!glfwWindowShouldClose(window)) {
     static double previous_seconds = glfwGetTime();
     double current_seconds = glfwGetTime();

@@ -20,5 +20,5 @@ public:
 };
 
 namespace camera {
-  void set_uniforms(GLuint program, Camera* camera);
+  void set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera* c);
 }

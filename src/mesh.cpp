@@ -37,6 +37,9 @@ void Mesh::initialize_shaders() {
     m_shader_ids.push_back(shader);
   }
   m_program = shader::link(m_shader_ids);
+
+  // Setup the uniform locations.
+  get_uniform_locations();
 }
 
 void Mesh::reset_shaders() {
@@ -93,7 +96,6 @@ void Mesh::initialize() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   }
 
-  m_mat_uniform = glGetUniformLocation(m_program, "model");
 }
 
 void Mesh::update(float delta) {
@@ -104,10 +106,10 @@ void Mesh::update(float delta) {
 
 void Mesh::draw() {
   glUseProgram(m_program);
-  if (m_mat_uniform != -1) {
+  if (m_model_mat_loc != -1) {
     // Move it to the meshes position.
     m_matrix = glm::translate(glm::mat4(), m_position);
-    glUniformMatrix4fv(m_mat_uniform, 1, GL_FALSE, glm::value_ptr(m_matrix));
+    glUniformMatrix4fv(m_model_mat_loc, 1, GL_FALSE, glm::value_ptr(m_matrix));
   }
 
   for (auto op : m_predraw_ops) {
@@ -124,4 +126,23 @@ void Mesh::add_predraw(std::function<void(GLuint)> op) {
 
 void Mesh::add_preupdate(std::function<void(float, glm::vec3&)> op) {
   m_preupdate_ops.push_back(op);
+}
+
+void Mesh::get_uniform_locations() {
+  // MVP should be apart of every shader pipeline/mesh.
+  m_view_mat_loc = glGetUniformLocation(m_program, "view");
+  m_proj_mat_loc = glGetUniformLocation(m_program, "proj");
+  m_model_mat_loc = glGetUniformLocation(m_program, "model");
+}
+
+void UColorMesh::get_uniform_locations() {
+  Mesh::get_uniform_locations();
+  m_color_loc = glGetUniformLocation(m_program, "color");
+  // Set the color before drawing.
+  auto predraw = [&](GLuint program) {
+    glUniform4fv(m_color_loc,
+      1,
+      glm::value_ptr(m_color));
+  };
+  add_predraw(predraw);
 }

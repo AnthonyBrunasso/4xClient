@@ -2,6 +2,7 @@
 
 #include <GL/gl3w.h>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <functional>
@@ -38,8 +39,12 @@ public:
   void add_preupdate(std::function<void(float, glm::vec3&)> op);
 
   void set_position(const glm::vec3& position) { m_position = position; };
+  virtual void get_uniform_locations();
 
-private:
+  GLint m_view_mat_loc;
+  GLint m_proj_mat_loc;
+  GLint m_model_mat_loc;
+
   std::vector<GLfloat> m_vertices;
   std::vector<GLfloat> m_colors;
 
@@ -52,9 +57,24 @@ private:
   GLuint m_vao;
   glm::vec3 m_position;
 
-  GLint m_mat_uniform;
+  //GLint m_mat_uniform;
   glm::mat4 m_matrix;
   std::vector<std::pair<GLenum, std::string> > m_shaders;
   std::vector<std::function<void(GLuint)> > m_predraw_ops;
   std::vector<std::function<void(float, glm::vec3&)> > m_preupdate_ops;
+};
+
+// Mesh with a uniform color.
+class UColorMesh : public Mesh {
+public:
+  UColorMesh(const glm::vec3& position, 
+      const std::vector<GLfloat>& vertices, 
+      const std::vector<std::pair<GLenum, std::string> >& shaders) :
+        Mesh(position, vertices, shaders) {};
+
+  void get_uniform_locations() override;
+  void set_color(const glm::vec4& color) { m_color = color; };
+
+  glm::vec4 m_color;
+  GLint m_color_loc;
 };
