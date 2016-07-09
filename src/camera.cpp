@@ -10,7 +10,7 @@ Camera::Camera(float near, float far, float fov, float aspect) :
     m_speed(10.0f) {
   //m_projection = glm::perspective(45.0f, 1024.0f/768.0f, 0.1f, 200.0f);
   m_projection = glm::perspective(fov, aspect, near, far);
-  m_position = glm::vec3(0.0f, 0.0f, -10.0f);
+  m_position = glm::vec3(0.0f, 0.0f, -3.0f);
 }
 
 void Camera::update(float delta) {
@@ -35,6 +35,6 @@ void Camera::update(float delta) {
   }
 
   m_view = glm::lookAt(m_position, 
-      glm::vec3(m_position.x, m_position.y, 0.0f), 
+      glm::vec3(0.0f, 0.0f, 0.0f), 
       glm::vec3(0.0f, 1.0f, 0.0f));
 }

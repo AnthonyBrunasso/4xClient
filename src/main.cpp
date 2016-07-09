@@ -25,7 +25,7 @@ int main() {
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
   Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), 
-      geometry::get_hexagon2d(), 
+      geometry::get_hexagon(), 
       geometry::get_triangle_color(),
       {
         {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
