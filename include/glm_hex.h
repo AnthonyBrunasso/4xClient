@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <vector>
 
-namespace hex
+// glm namespace to avoid collision with simulations hex library
+namespace glm_hex
 {
   // Hexagons coordinates have 6 neighbors
   const static unsigned int NEIGHBOR_COUNT = 6;

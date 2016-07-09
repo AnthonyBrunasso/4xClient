@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-#include "hex.h"
+#include "glm_hex.h"
 
 std::vector<GLfloat>& geometry::get_triangle() {
   static std::vector<GLfloat> triangle = {
@@ -30,12 +30,12 @@ std::vector<GLfloat> geometry::get_hexagon2d() {
     hexagon.push_back(0.0f);
 
     // Get hex corner.
-    glm::vec2 corner = hex::hex_corner(1, i);
+    glm::vec2 corner = glm_hex::hex_corner(1, i);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(0.0);
 
-    corner = hex::hex_corner(1, (i + 1) % 6);
+    corner = glm_hex::hex_corner(1, (i + 1) % 6);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(0.0);
@@ -55,12 +55,12 @@ std::vector<GLfloat> geometry::get_hexagon() {
     hexagon.push_back(0.0f);
 
     // Get hex corner.
-    glm::vec2 corner1 = hex::hex_corner(1, i);
+    glm::vec2 corner1 = glm_hex::hex_corner(1, i);
     hexagon.push_back(corner1.x);
     hexagon.push_back(corner1.y);
     hexagon.push_back(0.0);
 
-    glm::vec2 corner2 = hex::hex_corner(1, (i + 1) % 6);
+    glm::vec2 corner2 = glm_hex::hex_corner(1, (i + 1) % 6);
     hexagon.push_back(corner2.x);
     hexagon.push_back(corner2.y);
     hexagon.push_back(0.0);
@@ -98,12 +98,12 @@ std::vector<GLfloat> geometry::get_hexagon() {
     hexagon.push_back(depth);
 
     // Get hex corner.
-    glm::vec2 corner = hex::hex_corner(1, i);
+    glm::vec2 corner = glm_hex::hex_corner(1, i);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(depth);
 
-    corner = hex::hex_corner(1, (i + 1) % 6);
+    corner = glm_hex::hex_corner(1, (i + 1) % 6);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(depth);
