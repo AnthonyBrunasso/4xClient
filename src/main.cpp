@@ -36,7 +36,6 @@ int main() {
     previous_seconds = current_seconds;
 
     map::update();
-    //mesh.update(delta_seconds);
     camera.update(delta_seconds);
 
     // Draw and stuff.
