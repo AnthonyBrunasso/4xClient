@@ -5,11 +5,22 @@
 
 #include "shader.h"
 
-Mesh::Mesh(const glm::vec3& start, 
+Mesh::Mesh(const glm::vec3& position, 
+      const std::vector<GLfloat>& vertices, 
+      const std::vector<std::pair<GLenum, std::string> >& shaders) : 
+  m_position(position)
+  , m_vertices(vertices)
+  , m_colors()
+  , m_program(0) 
+  , m_shaders(shaders) {
+}
+
+
+Mesh::Mesh(const glm::vec3& position,
     const std::vector<GLfloat>& vertices, 
     const std::vector<GLfloat>& colors,
     const std::vector<std::pair<GLenum, std::string> >& shaders) : 
-  m_position(start)
+  m_position(position)
   , m_vertices(vertices)
   , m_colors(colors)
   , m_program(0) 
@@ -46,32 +57,40 @@ void Mesh::initialize() {
     initialize_shaders();
   }
 
-  GLuint m_points_vbo = 0;
-  glGenBuffers(1, &m_points_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, m_points_vbo);
-  glBufferData(GL_ARRAY_BUFFER, 
-    m_vertices.size() * sizeof(GLfloat), 
-    m_vertices.data(), 
-    GL_STATIC_DRAW);
+  if (m_vertices.size()) {
+    m_points_vbo = 0;
+    glGenBuffers(1, &m_points_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_points_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 
+      m_vertices.size() * sizeof(GLfloat), 
+      m_vertices.data(), 
+      GL_STATIC_DRAW);
+  }
 
-  GLuint m_colors_vbo = 0;
-  glGenBuffers(1, &m_colors_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, m_colors_vbo);
-  glBufferData(GL_ARRAY_BUFFER, 
-    m_colors.size() * sizeof(GLfloat), 
-    m_colors.data(), 
-    GL_STATIC_DRAW);
+  if (m_colors.size()) {
+    m_color_vbo = 0;
+    glGenBuffers(1, &m_color_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_color_vbo);
+    glBufferData(GL_ARRAY_BUFFER, 
+      m_colors.size() * sizeof(GLfloat), 
+      m_colors.data(), 
+      GL_STATIC_DRAW);
+  }
 
   glGenVertexArrays(1, &m_vao);
   glBindVertexArray(m_vao);
 
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, m_points_vbo);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  if (m_vertices.size()) {
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, m_points_vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  }
 
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, m_colors_vbo);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  if (m_colors.size()) {
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, m_color_vbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  }
 
   m_mat_uniform = glGetUniformLocation(m_program, "model");
 }

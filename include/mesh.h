@@ -13,6 +13,10 @@ class Mesh {
 public:
   Mesh(const glm::vec3& position, 
       const std::vector<GLfloat>& vertices, 
+      const std::vector<std::pair<GLenum, std::string> >& shaders);
+
+  Mesh(const glm::vec3& position, 
+      const std::vector<GLfloat>& vertices, 
       const std::vector<GLfloat>& colors,
       const std::vector<std::pair<GLenum, std::string> >& shaders);
 

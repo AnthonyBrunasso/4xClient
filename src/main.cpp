@@ -12,6 +12,7 @@
 #include "log.h"
 #include "gl.h"
 #include "mesh.h"
+#include "sim_interface.h"
 
 int main() {
   GLFWwindow* window = gl::initialize("Hello Triangle", false);
@@ -20,17 +21,16 @@ int main() {
     return 1;
   }
 
+  sim_interface::start();
+
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
-  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), 
-      geometry::get_hexagon(), 
-      geometry::get_triangle_color(),
-      {
-        {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-        {GL_FRAGMENT_SHADER, "simple.frag"}
-      });
+  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
+    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
+    {GL_FRAGMENT_SHADER, "simple.frag"}
+  });
 
   mesh.initialize();
 
@@ -80,6 +80,7 @@ int main() {
   }
 
   glfwTerminate();
+  sim_interface::kill();
 
   return 0;
 }
