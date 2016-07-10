@@ -18,7 +18,7 @@ glm::vec3 ray::from_mouseclick(double mx, double my) {
   if (!camera) return glm::vec3(0.0f, 0.0f, 0.0f);
 
   int width, height;
-  glfwGetFramebufferSize(window, &width, &height);
+  glfwGetWindowSize(window, &width, &height);
 
   // Transform click into normalized device coordinates.
   // These should range: [-1:1, -1:1, -1:1]
