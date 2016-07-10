@@ -7,12 +7,18 @@
 
 #include "gl.h"
 
+namespace camera {
+  // This pointer will point to the most recently created camera
+  Camera* s_camera = nullptr;
+}
+
 Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
     m_speed(10.0f) {
   m_projection = glm::perspective(fov, aspect, near_plane, far_plane);
   m_position = glm::vec3(0.0f, -6.0f, 8.0f);
   m_forward = glm::vec3(0.0f, 0.20f, -0.15f);
   m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+  camera::s_camera = this;
 }
 
 void Camera::update(float delta) {
@@ -42,6 +48,7 @@ void Camera::update(float delta) {
   }
 }
 
+
 void camera::set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera* c) {
   if (!c) return;
 
@@ -55,4 +62,8 @@ void camera::set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera
     1, 
     GL_FALSE, 
     glm::value_ptr(c->m_projection));
+}
+
+Camera* camera::get_current() {
+  return s_camera;
 }

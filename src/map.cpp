@@ -12,21 +12,21 @@
 
 namespace map {
   world_map::TileMap s_tiles;
-  Camera* s_camera = nullptr;
   UColorMesh s_mesh{glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
     {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
     {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
   }};
 }
 
-void map::initialize(Camera* c) {
+void map::initialize() {
+  Camera* c = camera::get_current();
+
   s_mesh.initialize();
   s_tiles = sim_interface::get_map();
-  s_camera = c;
 
   // Setup mesh to use perspective and camera view.
-  auto set_view = [](GLuint program) {
-    camera::set_uniforms(program, s_mesh.m_view_mat_loc, s_mesh.m_proj_mat_loc, s_camera);
+  auto set_view = [c](GLuint program) {
+    camera::set_uniforms(program, s_mesh.m_view_mat_loc, s_mesh.m_proj_mat_loc, c);
   };
 
   s_mesh.add_predraw(set_view);

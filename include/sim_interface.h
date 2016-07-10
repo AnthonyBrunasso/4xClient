@@ -9,5 +9,5 @@ namespace sim_interface {
   void start();
   void kill();
 
-  world_map::TileMap& get_map();
+  world_map::TileMap get_map();
 }

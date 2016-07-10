@@ -1,9 +1,7 @@
 #pragma once
 
-class Camera;
-
 namespace map {
-  void initialize(Camera* camera);
+  void initialize();
   void update();
   void draw();
 }

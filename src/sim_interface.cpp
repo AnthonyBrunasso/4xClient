@@ -57,7 +57,7 @@ void sim_interface::kill() {
   s_thread.join();
 }
 
-world_map::TileMap& sim_interface::get_map() {
+world_map::TileMap sim_interface::get_map() {
   std::lock_guard<std::mutex> lock(s_simmutex);
   return world_map::get_map();
 }

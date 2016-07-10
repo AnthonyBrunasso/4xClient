@@ -24,10 +24,11 @@ int main() {
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
+  // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
   sim_interface::start();
-  map::initialize(&camera);
+  map::initialize();
 
   while (!glfwWindowShouldClose(window)) {
     static double previous_seconds = glfwGetTime();
