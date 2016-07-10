@@ -42,7 +42,6 @@ namespace gl {
       GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,
       GL_MAX_TEXTURE_IMAGE_UNITS,
       GL_MAX_TEXTURE_SIZE,
-      GL_MAX_VARYING_FLOATS,
       GL_MAX_VERTEX_ATTRIBS,
       GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS,
       GL_MAX_VERTEX_UNIFORM_COMPONENTS,
@@ -57,7 +56,6 @@ namespace gl {
       "GL_MAX_FRAGMENT_UNIFORM_COMPONENTS",
       "GL_MAX_TEXTURE_IMAGE_UNITS",
       "GL_MAX_TEXTURE_SIZE",
-      "GL_MAX_VARYING_FLOATS",
       "GL_MAX_VERTEX_ATTRIBS",
       "GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS",
       "GL_MAX_VERTEX_UNIFORM_COMPONENTS",
@@ -67,7 +65,7 @@ namespace gl {
 
     std::ostringstream ss;
     ss << "GL Context params: " << std::endl;
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 9; ++i) {
       int v = 0;
       glGetIntegerv(params[i], &v);
       ss << names[i] << ": " << v << std::endl;
@@ -76,15 +74,15 @@ namespace gl {
     // Others
     int v[2];
     v[0] = v[1] = 0;
-    glGetIntegerv(params[10], v);
-    ss << names[10] << ": " << v[0] << " " << v[1] << std::endl;
+    glGetIntegerv(params[9], v);
+    ss << names[9] << ": " << v[0] << " " << v[1] << std::endl;
     unsigned char s = 0;
-    glGetBooleanv(params[11], &s);
-    ss << names[11] << ": " << static_cast<unsigned int>(s); 
+    glGetBooleanv(params[10], &s);
+    ss << names[10] << ": " << static_cast<unsigned int>(s); 
 
     logging::write(GL_LOG_FILE, ss.str());
   }
-  
+
   double s_previous_seconds;
   int s_frame_count;
 }

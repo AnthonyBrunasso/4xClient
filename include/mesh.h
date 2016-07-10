@@ -10,8 +10,16 @@
 #include <utility>
 #include <functional>
 
+#include <cstdint>
+
 class Mesh {
 public:
+  // This mesh loads a model.
+  Mesh(const glm::vec3& position, 
+      const std::string& filename, 
+      const std::vector<std::pair<GLenum, std::string> >& shaders);
+
+
   Mesh(const glm::vec3& position, 
       const std::vector<GLfloat>& vertices, 
       const std::vector<std::pair<GLenum, std::string> >& shaders);
@@ -39,13 +47,21 @@ public:
   void add_preupdate(std::function<void(float, glm::vec3&)> op);
 
   void set_position(const glm::vec3& position) { m_position = position; };
+  void set_scale(const glm::vec3& scale) { m_scale = scale; };
+  void set_rotate(float degree, const glm::vec3& axis) { m_degree = degree;  m_rotate_axis = axis; };
   virtual void get_uniform_locations();
+
+  glm::vec3 m_position;
+  glm::vec3 m_scale;
+  glm::vec3 m_rotate_axis;
+  float m_degree;
 
   GLint m_view_mat_loc;
   GLint m_proj_mat_loc;
   GLint m_model_mat_loc;
 
   std::vector<GLfloat> m_vertices;
+  std::vector<GLuint> m_indices;
   std::vector<GLfloat> m_colors;
 
   std::vector<GLuint> m_shader_ids;
@@ -53,9 +69,9 @@ public:
 
   // Do I need the vbo ints in here?
   GLuint m_points_vbo;
+  GLuint m_index_vbo;
   GLuint m_color_vbo;
   GLuint m_vao;
-  glm::vec3 m_position;
 
   //GLint m_mat_uniform;
   glm::mat4 m_matrix;

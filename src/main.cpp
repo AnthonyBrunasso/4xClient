@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
@@ -14,9 +15,10 @@
 #include "map.h"
 #include "mesh.h"
 #include "sim_interface.h"
+#include "tiny_obj_loader.h"
 
 int main() {
-  GLFWwindow* window = gl::initialize("Hello Triangle", true);
+  GLFWwindow* window = gl::initialize("Hello Triangle", false);
   if (!window) {
     std::cout << "Failed to initialize gl context. See logs." << std::endl;
     return 1;
@@ -26,6 +28,19 @@ int main() {
   glfwGetFramebufferSize(window, &width, &height);
   // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
+
+  Mesh mesh(glm::vec3(0.0f, 0.0f, 0.3f), "bunny.obj", {
+    {GL_VERTEX_SHADER, "simple_perspective.vert"},
+    {GL_FRAGMENT_SHADER, "simple.frag"}
+  });
+  mesh.initialize();
+  // Setup mesh to use perspective and camera view.
+  auto set_view = [&camera, &mesh](GLuint program) {
+    camera::set_uniforms(program, mesh.m_view_mat_loc, mesh.m_proj_mat_loc, &camera);
+  };
+  mesh.set_scale(glm::vec3(5.0f, 5.0f, 5.0f));
+  mesh.set_rotate(90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  mesh.add_predraw(set_view);
 
   sim_interface::start();
   map::initialize();
@@ -48,7 +63,7 @@ int main() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glViewport(0, 0, width, height);
     map::draw();
-    //mesh.draw();
+    mesh.draw();
     glfwPollEvents();
     glfwSwapBuffers(window);
 

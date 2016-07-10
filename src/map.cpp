@@ -36,7 +36,7 @@ namespace map {
       // Intersect with the xy plane positioned at origin.
       if (glm::intersectRayPlane(c->m_position, 
           r, 
-          // Hexagon is height 0.3f, so lift the place by that much.
+          // Hexagon is height 0.3f, so lift the plane by that much.
           glm::vec3(0.0f, 0.0f, 0.3f), 
           glm::vec3(0.0f, 0.0f, 1.0f), 
           distance)) {
