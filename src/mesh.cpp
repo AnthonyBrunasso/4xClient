@@ -32,13 +32,8 @@ namespace mesh {
       ss << "Loading - " << (shapes[i].name.empty() ? "Unknown name" : shapes[i].name) << std::endl;
       ss << "  size: " << shapes[i].mesh.indices.size() << std::endl;
       ss << "  material ids: " << shapes[i].mesh.material_ids.size() << std::endl;
-      for (size_t j = 0, e = shapes[i].mesh.positions.size(); j < e; ++j) {
-        mesh.m_vertices.push_back(shapes[i].mesh.positions[j]);
-      }
-
-      for (size_t j = 0, e = shapes[i].mesh.indices.size(); j < e; ++j) {
-        mesh.m_indices.push_back(shapes[i].mesh.indices[j]);
-      }
+      mesh.m_vertices = std::move(shapes[i].mesh.positions);
+      mesh.m_indices = std::move(shapes[i].mesh.indices);
     }
 
     logging::write(MESH_LOG_FILE, ss.str());
