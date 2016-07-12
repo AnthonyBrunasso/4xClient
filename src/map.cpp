@@ -47,6 +47,12 @@ namespace map {
       }
     }
   }
+
+  void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    Camera* c = camera::get_current();
+    if (!c) return;
+    c->zoom(yoffset);
+  }
 }
 
 void map::initialize() {
@@ -65,6 +71,7 @@ void map::initialize() {
   GLFWwindow* w = gl::get_current_window();
   if (w) {
     glfwSetMouseButtonCallback(w, mouse_button_callback);
+    glfwSetScrollCallback(w, mouse_scroll_callback);
   }
 }
 

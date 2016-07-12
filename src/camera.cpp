@@ -46,8 +46,15 @@ void Camera::update(float delta) {
 
     m_view = glm::lookAt(m_position, m_position + m_forward, m_up);
   }
+
+  m_delta = delta;
 }
 
+void Camera::zoom(float amount) {
+  static const float sensitivity = 11.0f;
+  float c_speed = m_speed * m_delta * amount * sensitivity;
+  m_position += m_forward * c_speed;
+}
 
 void camera::set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera* c) {
   if (!c) return;

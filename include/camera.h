@@ -16,6 +16,8 @@ public:
 
   void update(float delta);
 
+  void zoom(float amount);
+
   glm::mat4 m_view;
   glm::mat4 m_projection;
 
@@ -29,6 +31,9 @@ public:
 
   float m_yaw;
   float m_pitch;
+
+  // Value of the last frame delta.
+  float m_delta;
 };
 
 namespace camera {
