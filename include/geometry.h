@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <gl/gl3w.h>
+#include <GL/gl3w.h>
 
 namespace geometry {
   std::vector<GLfloat>& get_triangle();
