@@ -15,6 +15,9 @@ namespace shader {
     std::string filename = SHADER_DIR;
     filename += "/" + std::string(file);
     std::ifstream shaderfile(filename);
+    if (!shaderfile.good()) {
+      std::cout << "warning, file " << filename << " not good" << std::endl;
+    }
     std::ostringstream ss;
     std::string line;
     while (std::getline(shaderfile, line)) {
