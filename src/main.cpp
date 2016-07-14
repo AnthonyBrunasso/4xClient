@@ -30,8 +30,8 @@ int main() {
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
   Mesh mesh(glm::vec3(0.0f, 0.0f, 0.3f), "bunny.obj", {
-    {GL_VERTEX_SHADER, "simple_perspective.vert"},
-    {GL_FRAGMENT_SHADER, "simple.frag"}
+    {GL_VERTEX_SHADER, "simple_phong.vert"},
+    {GL_FRAGMENT_SHADER, "simple_phong.frag"}
   });
   mesh.initialize();
   // Setup mesh to use perspective and camera view.

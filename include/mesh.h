@@ -26,7 +26,7 @@ public:
 
   Mesh(const glm::vec3& position, 
       const std::vector<GLfloat>& vertices, 
-      const std::vector<GLfloat>& colors,
+      const std::vector<GLfloat>& normals,
       const std::vector<std::pair<GLenum, std::string> >& shaders);
 
   ~Mesh();
@@ -62,7 +62,7 @@ public:
 
   std::vector<GLfloat> m_vertices;
   std::vector<GLuint> m_indices;
-  std::vector<GLfloat> m_colors;
+  std::vector<GLfloat> m_normals;
 
   std::vector<GLuint> m_shader_ids;
   GLuint m_program;
@@ -70,7 +70,7 @@ public:
   // Do I need the vbo ints in here?
   GLuint m_points_vbo;
   GLuint m_index_vbo;
-  GLuint m_color_vbo;
+  GLuint m_normal_vbo;
   GLuint m_vao;
 
   //GLint m_mat_uniform;

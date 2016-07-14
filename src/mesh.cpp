@@ -22,7 +22,7 @@ namespace mesh {
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
-    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str())) {
+    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str(), NULL, tinyobj::calculate_normals)) {
       logging::write(MESH_LOG_FILE, err);
       return;
     }
@@ -34,6 +34,7 @@ namespace mesh {
       ss << "  material ids: " << shapes[i].mesh.material_ids.size() << std::endl;
       mesh.m_vertices = std::move(shapes[i].mesh.positions);
       mesh.m_indices = std::move(shapes[i].mesh.indices);
+      mesh.m_normals = std::move(shapes[i].mesh.normals);
     }
 
     logging::write(MESH_LOG_FILE, ss.str());
@@ -62,7 +63,7 @@ Mesh::Mesh(const glm::vec3& position,
   , m_degree(0.0f)
   , m_vertices(vertices)
   , m_indices()
-  , m_colors()
+  , m_normals()
   , m_program(0) 
   , m_shaders(shaders) {
 }
@@ -70,7 +71,7 @@ Mesh::Mesh(const glm::vec3& position,
 
 Mesh::Mesh(const glm::vec3& position,
     const std::vector<GLfloat>& vertices, 
-    const std::vector<GLfloat>& colors,
+    const std::vector<GLfloat>& normals,
     const std::vector<std::pair<GLenum, std::string> >& shaders) : 
   m_position(position)
   , m_scale(1.0f, 1.0f, 1.0f)
@@ -78,7 +79,7 @@ Mesh::Mesh(const glm::vec3& position,
   , m_degree(0.0f)
   , m_vertices(vertices)
   , m_indices()
-  , m_colors(colors)
+  , m_normals(normals)
   , m_program(0) 
   , m_shaders(shaders) {
 }
@@ -132,17 +133,22 @@ void Mesh::initialize() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   }
 
-  if (m_colors.size()) {
-    m_color_vbo = 0;
-    glGenBuffers(1, &m_color_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, m_color_vbo);
+  if (m_normals.size()) {
+    m_normal_vbo = 0;
+    glGenBuffers(1, &m_normal_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, m_normal_vbo);
     glBufferData(GL_ARRAY_BUFFER,
-      m_colors.size() * sizeof(GLfloat),
-      m_colors.data(),
+      m_normals.size() * sizeof(GLfloat),
+      m_normals.data(),
       GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glVertexAttribPointer(1/* index of attribute in shader */
+      , 3/* components per vertex */
+      , GL_FLOAT
+      , GL_FALSE
+      , 0
+      , NULL);
   }
 
   if (m_indices.size()) {
