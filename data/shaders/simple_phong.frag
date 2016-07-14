@@ -4,16 +4,16 @@ in vec3 eye_pos, eye_norm;
 
 uniform mat4 view;
 
-vec3 light_position = vec3(0.0, 2.0, 3.0);
+vec3 light_position = vec3(0.0, 0.0, 3.0);
 vec3 ls = vec3(1.0, 1.0, 1.0); // white specular
 vec3 ld = vec3(0.7, 0.7, 0.7); // dull white diffuse
 vec3 la = vec3(0.2, 0.2, 0.2); // grey ambient color 
 
 // Object surface properties
-vec3 ks = vec3(1.0, 1.0, 1.0); // Fully reflect specular light
+vec3 ks = vec3(0.2, 0.2, 0.2); // Fully reflect specular light
 vec3 kd = vec3(1.0, 0.5, 0.0); // Orange diffuse surface reflectance 
 vec3 ka = vec3(1.0, 1.0, 1.0); // Fully reflect ambient light
-float specular_exponent = 50.0; // Specular power
+float specular_exponent = 1.0; // Specular power
 
 out vec4 frag_color;
 
@@ -33,6 +33,7 @@ void main() {
   float sdot = max(dot(half_eye, eye_norm), 0.0);
   float sfac = pow(sdot, specular_exponent);
   vec3 is = ls * ks * sfac;
+//  is = vec3(0.0, 0.0, 0.0);
 
   frag_color = vec4(is + id + ia, 1.0);
 }
