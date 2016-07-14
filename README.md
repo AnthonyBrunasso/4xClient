@@ -3,7 +3,6 @@
 ## Linux Pre-requirements (Ubuntu 16.04)
 apt-get install libpthread-stubs0-dev
 apt-get install mesa-common-dev
-apt-get install freeglut3-dev
 apt-get install xorg-dev
 
 ## General Pre-reqs
