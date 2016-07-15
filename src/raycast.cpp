@@ -22,8 +22,8 @@ glm::vec3 ray::from_mouseclick(double mx, double my) {
 
   // Transform click into normalized device coordinates.
   // These should range: [-1:1, -1:1, -1:1]
-  float x = (2.0f * mx) / width - 1.0f;
-  float y = 1.0f - (2.0f * my) / height;
+  float x = (2.0f * static_cast<float>(mx)) / width - 1.0f;
+  float y = 1.0f - (2.0f * static_cast<float>(my)) / height;
   float z = 1.0f;
   glm::vec3 ray_nds(x, y, z);
 

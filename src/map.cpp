@@ -17,7 +17,7 @@
 namespace map {
   world_map::TileMap s_tiles;
   glm::ivec3 s_selected;
-  UColorMesh s_mesh{glm::vec3(0.0f, 0.0f, 0.0f), geometry::get_hexagon(), {
+  UColorMesh s_mesh{glm::vec3(0.0f, 0.0f, 0.0f), std::vector<GLfloat>(), {
     {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
     {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
   }};
@@ -51,12 +51,14 @@ namespace map {
   void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     Camera* c = camera::get_current();
     if (!c) return;
-    c->zoom(yoffset);
+    c->zoom(static_cast<float>(yoffset));
   }
 }
 
 void map::initialize() {
   Camera* c = camera::get_current();
+
+  geometry::get_hexagon(s_mesh.m_vertices, s_mesh.m_normals, s_mesh.m_indices);
 
   s_mesh.initialize();
   s_tiles = sim_interface::get_map();
@@ -75,7 +77,7 @@ void map::initialize() {
   }
 }
 
-void map::update() {
+void map::update(double delta) {
 }
 
 void map::draw() {

@@ -14,7 +14,7 @@ class Camera {
 public:
   Camera(float near_plane, float far_plane, float fov, float aspect);
 
-  void update(float delta);
+  void update(double delta);
 
   void zoom(float amount);
 

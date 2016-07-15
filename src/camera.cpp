@@ -21,11 +21,11 @@ Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
   camera::s_camera = this;
 }
 
-void Camera::update(float delta) {
+void Camera::update(double delta) {
   GLFWwindow* window = gl::get_current_window();   
 
   if (window) {
-    float c_speed = m_speed * delta;
+    float c_speed = m_speed * static_cast<float>(delta);
 
     // Move camera with WASD
     if (glfwGetKey(window, GLFW_KEY_W)) {

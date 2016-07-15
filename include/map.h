@@ -2,6 +2,6 @@
 
 namespace map {
   void initialize();
-  void update();
+  void update(double delta);
   void draw();
 }

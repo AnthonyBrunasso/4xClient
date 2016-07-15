@@ -190,10 +190,10 @@ void Mesh::draw() {
   glBindVertexArray(m_vao);
 
   if (m_indices.size()) {
-    glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0);
   }
   else {
-    glDrawArrays(GL_TRIANGLES, 0, m_vertices.size() / 3);
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_vertices.size()) / 3);
   }
 
   glBindVertexArray(0);

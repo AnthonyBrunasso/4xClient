@@ -8,5 +8,7 @@ namespace geometry {
   std::vector<GLfloat>& get_triangle_color();
   
   std::vector<GLfloat> get_hexagon2d();
-  std::vector<GLfloat> get_hexagon();
+  void get_hexagon(std::vector<GLfloat>& vertices
+    , std::vector<GLfloat>& normals
+    , std::vector<GLuint>& indices);
 }

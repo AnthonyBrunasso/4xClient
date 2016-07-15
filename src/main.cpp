@@ -51,7 +51,7 @@ int main() {
     double delta_seconds = current_seconds - previous_seconds;
     previous_seconds = current_seconds;
 
-    map::update();
+    map::update(delta_seconds);
     camera.update(delta_seconds);
 
     // Draw and stuff.
@@ -62,8 +62,10 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.2f, 0.2f, 0.75f, 1.0f);
     glViewport(0, 0, width, height);
+
     map::draw();
     mesh.draw();
+
     glfwPollEvents();
     glfwSwapBuffers(window);
 
@@ -76,6 +78,9 @@ int main() {
       glfwSetWindowShouldClose(window, 1);
     }
   }
+  
+  // Don't commit if there is a gl error.
+  assert(!glGetError());
 
   glfwTerminate();
   sim_interface::kill();
