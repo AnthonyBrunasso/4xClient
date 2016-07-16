@@ -47,17 +47,12 @@ namespace mesh {
   static const uint32_t PROJ_IDX = 1; 
   static const uint32_t MODL_IDX = 2; 
 
-  Mesh* create(const glm::vec3& position
-    , const std::string& filename
+  Mesh* create(const std::string& filename
     , const std::vector<std::pair<GLenum, std::string> >& shaders);
 
-  Mesh* create(const glm::vec3& position
-    , const std::vector<GLfloat>& vertices
-    , const std::vector<std::pair<GLenum, std::string> >& shaders);
-
-  Mesh* create(const glm::vec3& position
-    , const std::vector<GLfloat>& vertices
+  Mesh* create(const std::vector<GLfloat>& vertices
     , const std::vector<GLfloat>& normals
+    , const std::vector<GLuint>& indices
     , const std::vector<std::pair<GLenum, std::string> >& shaders);
 
   void draw(Mesh* m);

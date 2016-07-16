@@ -60,7 +60,7 @@ void map::initialize() {
   std::vector<GLuint> indcs;
   geometry::get_hexagon(verts, norms, indcs);
 
-  s_mesh = mesh::create(glm::vec3(0.0f, 0.0f, 0.0f), std::move(verts), std::move(norms), {
+  s_mesh = mesh::create(std::move(verts), std::move(norms), std::move(indcs), {
     {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
     {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
   });
@@ -74,6 +74,10 @@ void map::initialize() {
     glfwSetMouseButtonCallback(w, mouse_button_callback);
     glfwSetScrollCallback(w, mouse_scroll_callback);
   }
+}
+
+void map::teardown() {
+  delete s_mesh;
 }
 
 void map::update(double delta) {

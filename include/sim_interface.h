@@ -7,7 +7,7 @@
 
 namespace sim_interface {
   void start();
-  void kill();
+  void teardown();
 
   world_map::TileMap get_map();
 }

@@ -52,7 +52,7 @@ void sim_interface::start() {
   s_thread = std::thread(&run_sim);
 }
 
-void sim_interface::kill() {
+void sim_interface::teardown() {
   s_killsim = true;
   s_thread.join();
 }

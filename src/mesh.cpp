@@ -110,22 +110,24 @@ namespace mesh {
       GLint view = glGetUniformLocation(p.first, "view");
       GLint proj = glGetUniformLocation(p.first, "proj");
       GLint modl = glGetUniformLocation(p.first, "model");
-      if (view != -1 && proj != -1 && modl != -1) {
-        p.second.resize(3);
-        p.second[VIEW_IDX] = view;
-        p.second[PROJ_IDX] = proj;
-        p.second[MODL_IDX] = modl;
-      }
+
+      // These uniforms must exist in all vertex shaders.
+      assert(view != -1);
+      assert(proj != -1);
+      assert(modl != -1);
+
+      p.second.resize(3);
+      p.second[VIEW_IDX] = view;
+      p.second[PROJ_IDX] = proj;
+      p.second[MODL_IDX] = modl;
     }
   }
 }
 
-// TODO: Remove.
-Mesh* mesh::create(const glm::vec3& position
-    , const std::string& filename
+Mesh* mesh::create(const std::string& filename
     , const std::vector<std::pair<GLenum, std::string> >& shaders) {
   Mesh* mesh = new Mesh();
-  mesh::set_position(mesh, position);
+  mesh::set_position(mesh, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
   mesh::set_scale(mesh, glm::vec3(1.0f, 1.0f, 1.0f));
   mesh->m_shaders = shaders;
@@ -136,34 +138,17 @@ Mesh* mesh::create(const glm::vec3& position
   return mesh;
 }
 
-// TODO: Remove.
-Mesh* mesh::create(const glm::vec3& position
-    , const std::vector<GLfloat>& vertices
-    , const std::vector<std::pair<GLenum, std::string> >& shaders) {
-  Mesh* mesh = new Mesh();
-  mesh::set_position(mesh, position);
-  mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
-  mesh::set_scale(mesh, glm::vec3(1.0f, 1.0f, 1.0f));
-  mesh->m_vertices = vertices;
-  mesh->m_shaders = shaders;
-  mesh->m_update_matrix = true;
-  initialize_shaders(mesh);
-  bind_vertex_data(mesh);
-  setup_mvp(mesh);
-  return mesh;
-}
-
-// TODO: Remove.
-Mesh* mesh::create(const glm::vec3& position
-    , const std::vector<GLfloat>& vertices
+Mesh* mesh::create(const std::vector<GLfloat>& vertices
     , const std::vector<GLfloat>& normals
+    , const std::vector<GLuint>& indices
     , const std::vector<std::pair<GLenum, std::string> >& shaders) {
   Mesh* mesh = new Mesh();
-  mesh::set_position(mesh, position);
+  mesh::set_position(mesh, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
   mesh::set_scale(mesh, glm::vec3(1.0f, 1.0f, 1.0f));
   mesh->m_vertices = vertices;
   mesh->m_normals = normals;
+  mesh->m_indices = indices;
   mesh->m_shaders = shaders;
   mesh->m_update_matrix = true;
   initialize_shaders(mesh);
