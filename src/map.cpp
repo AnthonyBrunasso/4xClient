@@ -17,10 +17,8 @@
 namespace map {
   world_map::TileMap s_tiles;
   glm::ivec3 s_selected;
-  UColorMesh s_mesh{glm::vec3(0.0f, 0.0f, 0.0f), std::vector<GLfloat>(), {
-    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-    {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
-  }};
+  Mesh* s_mesh = nullptr;
+  glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
@@ -58,19 +56,20 @@ namespace map {
 void map::initialize() {
   Camera* c = camera::get_current();
 
-  geometry::get_hexagon(s_mesh.m_vertices, s_mesh.m_normals, s_mesh.m_indices);
+  std::vector<GLfloat> verts, norms;
+  std::vector<GLuint> indcs;
+  geometry::get_hexagon(verts, norms, indcs);
 
-  s_mesh.initialize();
+  s_mesh = mesh::create(glm::vec3(0.0f, 0.0f, 0.0f), std::move(verts), std::move(norms), {
+    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
+    {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
+  });
+
+  mesh::add_uniform(s_mesh, "color", glm::value_ptr(s_color));
+
   s_tiles = sim_interface::get_map();
-
-  // Setup mesh to use perspective and camera view.
-  auto set_view = [c](GLuint program) {
-    camera::set_uniforms(program, s_mesh.m_view_mat_loc, s_mesh.m_proj_mat_loc, c);
-  };
-
-  s_mesh.add_predraw(set_view);
-
   GLFWwindow* w = gl::get_current_window();
+
   if (w) {
     glfwSetMouseButtonCallback(w, mouse_button_callback);
     glfwSetScrollCallback(w, mouse_scroll_callback);
@@ -85,31 +84,32 @@ void map::draw() {
   for (const auto& t : s_tiles) {
     pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 1);
-    s_mesh.set_position(glm::vec3(world.x, world.y, 0.0f));
+    mesh::set_position(s_mesh, glm::vec3(world.x, world.y, 0.0f));
     if (pos == s_selected) {
-      s_mesh.set_color(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+      s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     }
     else {
       switch (t.second.m_terrain_type) {
       case TERRAIN_TYPE::DESERT:
-        s_mesh.set_color(glm::vec4(0.97f, 0.80f, 0.70f, 1.0f));
+        s_color = glm::vec4(0.97f, 0.80f, 0.70f, 1.0f);
         break;
       case TERRAIN_TYPE::GRASSLAND:
-        s_mesh.set_color(glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        s_color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
         break;
       case TERRAIN_TYPE::MOUNTAIN:
-        s_mesh.set_color(glm::vec4(0.51f, 0.51f, 0.51f, 1.0f));
+        s_color = glm::vec4(0.51f, 0.51f, 0.51f, 1.0f);
         break;
       case TERRAIN_TYPE::PLAINS:
-        s_mesh.set_color(glm::vec4(0.62f, 0.32f, 0.17f, 1.0f));
+        s_color = glm::vec4(0.62f, 0.32f, 0.17f, 1.0f);
         break;
       case TERRAIN_TYPE::WATER:
-        s_mesh.set_color(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
+        s_color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
         break;
       case TERRAIN_TYPE::UNKNOWN:
         break;
       }
     }
-    s_mesh.draw();
+    
+    mesh::draw(s_mesh);
   }
 }

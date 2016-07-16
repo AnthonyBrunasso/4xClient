@@ -56,21 +56,6 @@ void Camera::zoom(float amount) {
   m_position += m_forward * c_speed;
 }
 
-void camera::set_uniforms(GLuint program, GLint view_loc, GLint proj_loc, Camera* c) {
-  if (!c) return;
-
-  // Shader view and projection matrices are always named view/proj.
-  glUniformMatrix4fv(view_loc,
-    1, 
-    GL_FALSE, 
-    glm::value_ptr(c->m_view));
-
-  glUniformMatrix4fv(proj_loc,
-    1, 
-    GL_FALSE, 
-    glm::value_ptr(c->m_projection));
-}
-
 Camera* camera::get_current() {
   return s_camera;
 }
