@@ -37,7 +37,6 @@ public:
 
   bool m_update_matrix;
   glm::mat4 m_matrix;
-  std::vector<std::pair<GLenum, std::string> > m_shaders;
 };
 
 namespace mesh {
@@ -47,13 +46,12 @@ namespace mesh {
   static const uint32_t PROJ_IDX = 1; 
   static const uint32_t MODL_IDX = 2; 
 
-  Mesh* create(const std::string& filename
-    , const std::vector<std::pair<GLenum, std::string> >& shaders);
+  Mesh* create(const std::string& filename, const std::vector<GLuint>& programs);
 
   Mesh* create(const std::vector<GLfloat>& vertices
     , const std::vector<GLfloat>& normals
     , const std::vector<GLuint>& indices
-    , const std::vector<std::pair<GLenum, std::string> >& shaders);
+    , const std::vector<GLuint>& programs);
 
   void draw(Mesh* m);
 

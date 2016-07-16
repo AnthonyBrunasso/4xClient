@@ -8,14 +8,23 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "camera.h"
-#include "shader.h"
-#include "geometry.h"
-#include "log.h"
 #include "gl.h"
 #include "map.h"
 #include "mesh.h"
 #include "sim_interface.h"
-#include "tiny_obj_loader.h"
+#include "program.h"
+
+void build_programs() {
+  program::build("phong", {
+    {GL_VERTEX_SHADER, "simple_phong.vert"},
+    {GL_FRAGMENT_SHADER, "simple_phong.frag"}
+  });
+
+  program::build("ucolor", {
+    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
+    {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
+  });
+}
 
 int main() {
   GLFWwindow* window = gl::initialize("Hello Triangle", false);
@@ -26,13 +35,11 @@ int main() {
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
+  build_programs();
+
   // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
-
-  Mesh* m = mesh::create("bunny.obj", {
-    {GL_VERTEX_SHADER, "simple_phong.vert"},
-    {GL_FRAGMENT_SHADER, "simple_phong.frag"}
-  });
+  Mesh* m = mesh::create("bunny.obj", { program::get("phong") });
 
   mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.3f));
   mesh::set_scale(m, glm::vec3(5.0f, 5.0f, 5.0f));

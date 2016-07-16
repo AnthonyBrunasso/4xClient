@@ -48,17 +48,6 @@ namespace mesh {
     logging::write(MESH_LOG_FILE, ss.str());
   }
 
-  // TODO: Remove.
-  void initialize_shaders(Mesh* m) {
-    if (!m) return;
-    std::vector<GLuint> shaders;
-    for (auto s : m->m_shaders) {
-      GLuint shader = shader::compile_from_file(s.first, s.second.c_str());
-      shaders.push_back(shader);
-    }
-    m->m_programs.push_back(std::pair<GLuint, std::vector<GLint> >(shader::link(shaders), {}));
-  }
-
   // Binds vertex, index and normal data to the vao.
   void bind_vertex_data(Mesh* m) {
     if (!m) return;
@@ -122,17 +111,22 @@ namespace mesh {
       p.second[MODL_IDX] = modl;
     }
   }
+
+  void set_programs(Mesh* m, const std::vector<GLuint>& programs) {
+    if (!m) return;
+    for (auto& p : programs) {
+      m->m_programs.push_back(std::pair<GLuint, std::vector<GLint> >(p, {}));
+    }
+  }
 }
 
-Mesh* mesh::create(const std::string& filename
-    , const std::vector<std::pair<GLenum, std::string> >& shaders) {
+Mesh* mesh::create(const std::string& filename, const std::vector<GLuint>& programs) {
   Mesh* mesh = new Mesh();
   mesh::set_position(mesh, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
   mesh::set_scale(mesh, glm::vec3(1.0f, 1.0f, 1.0f));
-  mesh->m_shaders = shaders;
+  set_programs(mesh, programs);
   load_from_file(mesh, filename);
-  initialize_shaders(mesh);
   bind_vertex_data(mesh);
   setup_mvp(mesh);
   return mesh;
@@ -141,7 +135,7 @@ Mesh* mesh::create(const std::string& filename
 Mesh* mesh::create(const std::vector<GLfloat>& vertices
     , const std::vector<GLfloat>& normals
     , const std::vector<GLuint>& indices
-    , const std::vector<std::pair<GLenum, std::string> >& shaders) {
+    , const std::vector<GLuint>& programs) {
   Mesh* mesh = new Mesh();
   mesh::set_position(mesh, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -149,9 +143,8 @@ Mesh* mesh::create(const std::vector<GLfloat>& vertices
   mesh->m_vertices = vertices;
   mesh->m_normals = normals;
   mesh->m_indices = indices;
-  mesh->m_shaders = shaders;
   mesh->m_update_matrix = true;
-  initialize_shaders(mesh);
+  set_programs(mesh, programs);
   bind_vertex_data(mesh);
   setup_mvp(mesh);
   return mesh;

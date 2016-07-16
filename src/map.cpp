@@ -7,6 +7,7 @@
 #include "glm_hex.h"
 #include "gl.h"
 #include "raycast.h"
+#include "program.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -61,8 +62,7 @@ void map::initialize() {
   geometry::get_hexagon(verts, norms, indcs);
 
   s_mesh = mesh::create(std::move(verts), std::move(norms), std::move(indcs), {
-    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-    {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
+    program::get("ucolor")
   });
 
   mesh::add_uniform(s_mesh, "color", glm::value_ptr(s_color));
