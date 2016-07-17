@@ -17,4 +17,6 @@ namespace geometry {
   void get_hexagon(std::vector<GLfloat>& vertices
     , std::vector<GLfloat>& normals
     , std::vector<GLuint>& indices);
+
+  std::vector<GLfloat> get_hexagontexcoords();
 }

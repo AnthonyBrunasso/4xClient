@@ -13,8 +13,6 @@
 #include "mesh.h"
 #include "sim_interface.h"
 #include "program.h"
-#include "texloader.h"
-#include "geometry.h"
 
 void build_programs() {
   program::build("phong", {
@@ -48,25 +46,9 @@ int main() {
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
   Mesh* m = mesh::create("bunny.obj", { program::get("phong") });
 
-  mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.3f));
+  mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_scale(m, glm::vec3(5.0f, 5.0f, 5.0f));
   mesh::set_rotate(m, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-
-  std::vector<GLfloat> verts, norms;
-  std::vector<GLuint> indcs;
-  geometry::get_square(verts, norms);
-
-  GLuint tex;
-  texloader::load("skulluvmap.png", GL_TEXTURE0, tex);
-  Mesh* tri = mesh::create(verts, norms, indcs, { program::get("texture") });
-
-  // Bind the texture data for the mesh to gl.
-  mesh::bind_texture_data(tri, geometry::get_squaretexcoords());
-
-  // Set the texture uniform location.
-  GLint texloc = 0;
-  mesh::add_uniform(tri, "basic_texture", &texloc);
-  mesh::set_position(tri, glm::vec3(0.0f, 0.0f, 2.0f));
 
   sim_interface::initialize();
   map::initialize();
@@ -90,7 +72,7 @@ int main() {
     glViewport(0, 0, width, height);
 
     mesh::draw(m);
-    mesh::draw(tri);
+    //mesh::draw(tri);
     map::draw();
 
     glfwPollEvents();

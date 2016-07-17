@@ -189,7 +189,7 @@ void mesh::draw(Mesh* m) {
 
     idx = 0;
     for (uint32_t i = ucount, e = ucount + m->m_uniform_idata.size(); i < e; ++i, ++idx) {
-      glUniform1i(uniforms[i], 0);
+      glUniform1iv(uniforms[i], 1, m->m_uniform_idata[idx]);
       ++ucount;
     }
 
