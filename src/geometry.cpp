@@ -2,6 +2,14 @@
 
 #include "glm_hex.h"
 
+void geometry::get_triangle(std::vector<GLfloat>& vertices
+    , std::vector<GLfloat>& normals) {
+  vertices = geometry::get_triangle();
+  normals = {
+    0.0f, 0.0f, 1.0f
+  };
+}
+
 std::vector<GLfloat>& geometry::get_triangle() {
   static std::vector<GLfloat> triangle = {
     0.0f, 0.5f, 0.0f,
@@ -11,13 +19,36 @@ std::vector<GLfloat>& geometry::get_triangle() {
   return triangle;
 }
 
-std::vector<GLfloat>& geometry::get_triangle_color() {
-  static std::vector<GLfloat> triangle_color = {
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
+std::vector<GLfloat>& geometry::get_square() {
+  static std::vector<GLfloat> square = {
+    -0.5f, -0.5f,  0.0f,
+    0.5f, -0.5f,  0.0f,
+    0.5f,  0.5f,  0.0f,
+    0.5f,  0.5f,  0.0f,
+    -0.5f,  0.5f,  0.0f,
+    -0.5f, -0.5f,  0.0f
+  };
+  return square;
+}
+void geometry::get_square(std::vector<GLfloat>& vertices
+    , std::vector<GLfloat>& normals) {
+  vertices = geometry::get_square();
+  normals = {
+    0.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 1.0f,
   };
-  return triangle_color;
+}
+
+std::vector<GLfloat>& geometry::get_squaretexcoords() {
+  static std::vector<GLfloat> square = {
+    0.0f, 0.0f,
+    1.0f, 0.0f,
+    1.0f, 1.0f,
+    1.0f, 1.0f,
+    0.0f, 1.0f,
+    0.0f, 0.0f
+  };
+  return square;
 }
 
 std::vector<GLfloat> geometry::get_hexagon2d() {

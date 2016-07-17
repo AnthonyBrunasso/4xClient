@@ -159,7 +159,10 @@ void mesh::draw(Mesh* m) {
 
     const std::vector<GLint>& uniforms = p.second;
     // At the very least the mvp must exist for all meshes.
-    assert(uniforms.size() >= 3); 
+    uint32_t ucount = 3;
+
+    // All meshes must have mvp uniforms.
+    assert(uniforms.size() >= ucount); 
 
     Camera* c = camera::get_current();
 
@@ -178,8 +181,16 @@ void mesh::draw(Mesh* m) {
     glUniformMatrix4fv(uniforms[MODL_IDX], 1, GL_FALSE, glm::value_ptr(m->m_matrix));
 
     // Bind any other uniforms the mesh may have.
-    for (uint32_t i = 3; i < uniforms.size(); ++i) {
-      glUniform4fv(uniforms[i], 1, m->m_uniform_data[i - 3]);
+    uint32_t idx = 0;
+    for (uint32_t i = ucount, e = ucount + m->m_uniform_fdata.size(); i < e; ++i, ++idx) {
+      glUniform4fv(uniforms[i], 1, m->m_uniform_fdata[idx]);
+      ++ucount;
+    }
+
+    idx = 0;
+    for (uint32_t i = ucount, e = ucount + m->m_uniform_idata.size(); i < e; ++i, ++idx) {
+      glUniform1i(uniforms[i], 0);
+      ++ucount;
     }
 
     glBindVertexArray(m->m_vao);
@@ -193,6 +204,26 @@ void mesh::draw(Mesh* m) {
     }
     glBindVertexArray(0);
   }
+}
+
+void mesh::bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords) {
+  if (!m) return;
+  glBindVertexArray(m->m_vao);
+
+  m->m_texcoords = texcoords;
+  m->m_vbos.push_back(0);
+  GLuint& vbo = m->m_vbos.back();
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER,
+    m->m_texcoords.size() * sizeof(GLfloat),
+    m->m_texcoords.data(),
+    GL_STATIC_DRAW);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(2);
+
+  glBindVertexArray(0);
 }
 
 // Set property of mesh and update its transform matrix.
@@ -233,7 +264,19 @@ void mesh::add_uniform(Mesh* m, const char* name, GLfloat* value) {
     GLint loc = glGetUniformLocation(p.first, name);
     if (loc != -1) {
       p.second.push_back(loc);
-      m->m_uniform_data.push_back(value);
+      m->m_uniform_fdata.push_back(value);
+    }
+  }
+}
+
+void mesh::add_uniform(Mesh* m, const char* name, GLint* value) {
+  if (!m) return;
+  // Do it for all the programs on the current mesh.
+  for (auto& p : m->m_programs) {
+    GLint loc = glGetUniformLocation(p.first, name);
+    if (loc != -1) {
+      p.second.push_back(loc);
+      m->m_uniform_idata.push_back(value);
     }
   }
 }

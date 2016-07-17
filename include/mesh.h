@@ -23,20 +23,23 @@ public:
   std::vector<std::pair<GLuint, std::vector<GLint> > > m_programs;
   // Starting from index 3 and on, from the vector above, this is 
   // the uniform data that will be bound.
-  std::vector<GLfloat*> m_uniform_data;
+  std::vector<GLfloat*> m_uniform_fdata;
+  std::vector<GLint*> m_uniform_idata;
+  std::vector<GLuint> m_vbos;
 
   std::vector<GLfloat> m_vertices;
   std::vector<GLuint> m_indices;
   std::vector<GLfloat> m_normals;
 
-  std::vector<GLuint> m_shader_ids;
-
-  std::vector<GLuint> m_vbos;
+  // If texcoords is empty the mesh does not use a texture.
+  std::vector<GLfloat> m_texcoords;
 
   GLuint m_vao;
 
   bool m_update_matrix;
   glm::mat4 m_matrix;
+  
+
 };
 
 namespace mesh {
@@ -55,11 +58,16 @@ namespace mesh {
 
   void draw(Mesh* m);
 
+  // Textures are not initialized on creation. Bind it seperately.
+  void bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords);
+
   // Set property of mesh and update its transform matrix.
   void set_position(Mesh* m, const glm::vec3& position);
   void set_scale(Mesh* m, const glm::vec3& scale);
   void set_rotate(Mesh* m, float degree, const glm::vec3& axis);
 
   void update_transform(Mesh* m);
+  // Add all floating uniforms before integer uniforms. 
   void add_uniform(Mesh* m, const char* name, GLfloat *value);
+  void add_uniform(Mesh* m, const char* name, GLint *value);
 }

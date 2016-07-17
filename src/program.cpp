@@ -29,7 +29,7 @@ void program::build(const std::string& name, const ShaderNames& shaders) {
   ProgramData pdata;
 
   pdata.m_shader_names = shaders;
-  for (auto s : pdata.m_shader_names) {
+  for (const auto& s : pdata.m_shader_names) {
     GLuint sc = shader::compile_from_file(s.first, s.second.c_str());
     pdata.m_shader_ids.push_back(sc);
   }
