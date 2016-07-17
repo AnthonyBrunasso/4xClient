@@ -45,7 +45,7 @@ namespace sim_interface {
   }
 }
 
-void sim_interface::start() {
+void sim_interface::initialize() {
   simulation::start();
   terminal::initialize();
 

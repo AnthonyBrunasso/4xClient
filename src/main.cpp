@@ -45,7 +45,7 @@ int main() {
   mesh::set_scale(m, glm::vec3(5.0f, 5.0f, 5.0f));
   mesh::set_rotate(m, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
-  sim_interface::start();
+  sim_interface::initialize();
   map::initialize();
 
   while (!glfwWindowShouldClose(window)) {
