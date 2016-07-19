@@ -13,9 +13,9 @@ namespace camera {
 }
 
 Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
-    m_speed(10.0f) {
+    m_speed(25.0f) {
   m_projection = glm::perspective(fov, aspect, near_plane, far_plane);
-  m_position = glm::vec3(0.0f, -6.0f, 8.0f);
+  m_position = glm::vec3(0.0f, -16.0f, 18.0f);
   m_forward = glm::vec3(0.0f, 0.20f, -0.15f);
   m_up = glm::vec3(0.0f, 1.0f, 0.0f);
   camera::s_camera = this;

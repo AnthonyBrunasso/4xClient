@@ -46,9 +46,9 @@ int main() {
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
   Mesh* m = mesh::create("pawn.obj", { program::get("phong") });
 
-  mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.5f));
-  mesh::set_scale(m, glm::vec3(0.3f, 0.3f, 0.3f));
-  mesh::set_rotate(m, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+  mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.0f));
+  mesh::set_scale(m, glm::vec3(1.0f, 1.0f, 1.0f));
+  mesh::set_rotate(m, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
 
   sim_interface::initialize();
   map::initialize();

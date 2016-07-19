@@ -63,12 +63,12 @@ std::vector<GLfloat> geometry::get_hexagon2d() {
     hexagon.push_back(0.0f);
 
     // Get hex corner.
-    glm::vec2 corner = glm_hex::hex_corner(1, i);
+    glm::vec2 corner = glm_hex::hex_corner(3, i);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(0.0);
 
-    corner = glm_hex::hex_corner(1, (i + 1) % 6);
+    corner = glm_hex::hex_corner(3, (i + 1) % 6);
     hexagon.push_back(corner.x);
     hexagon.push_back(corner.y);
     hexagon.push_back(0.0);
@@ -95,7 +95,7 @@ void geometry::get_hexagon(std::vector<GLfloat>& vertices
     normals.push_back(1.0f);
 
     // Get hex corner.
-    glm::vec2 corner = glm_hex::hex_corner(1, i);
+    glm::vec2 corner = glm_hex::hex_corner(3, i);
     vertices.push_back(corner.x);
     vertices.push_back(corner.y);
     vertices.push_back(depth);
@@ -104,7 +104,7 @@ void geometry::get_hexagon(std::vector<GLfloat>& vertices
     normals.push_back(0.0f);
     normals.push_back(1.0f);
 
-    corner = glm_hex::hex_corner(1, (i + 1) % 6);
+    corner = glm_hex::hex_corner(3, (i + 1) % 6);
     vertices.push_back(corner.x);
     vertices.push_back(corner.y);
     vertices.push_back(depth);

@@ -106,7 +106,7 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 
   // Anti-aliasing
-  glfwWindowHint(GLFW_SAMPLES, 4);
+  glfwWindowHint(GLFW_SAMPLES, 8);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

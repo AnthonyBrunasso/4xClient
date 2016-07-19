@@ -43,7 +43,7 @@ namespace map {
           distance)) {
         // The intersected point is the defined by p = camera_position + ray * distance.
         glm::vec3 position = c->m_position + r * distance;
-        glm::ivec3 cube = glm_hex::world_to_cube(glm::vec2(position.x, position.y), 1);
+        glm::ivec3 cube = glm_hex::world_to_cube(glm::vec2(position.x, position.y), 3);
         s_selected = cube;
       }
     }
@@ -97,12 +97,8 @@ void map::draw() {
   glm::ivec3 pos;
   for (const auto& t : s_tiles) {
     pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
-    glm::vec2 world = glm_hex::cube_to_world(pos, 1);
+    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
     mesh::set_position(s_mesh, glm::vec3(world.x, world.y, 0.0f));
-/*    if (pos == s_selected) {
-      s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else {*/
     s_texloc = 0;
     switch (t.second.m_terrain_type) {
     case TERRAIN_TYPE::DESERT:
@@ -123,8 +119,6 @@ void map::draw() {
     case TERRAIN_TYPE::UNKNOWN:
       break;
     }
-/*    }*/
-    
     mesh::draw(s_mesh);
   }
 }
