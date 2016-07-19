@@ -10,9 +10,9 @@ vec3 ld = vec3(0.7, 0.7, 0.7); // dull white diffuse
 vec3 la = vec3(0.3, 0.3, 0.3); // grey ambient color 
 
 // Object surface properties
-vec3 ks = vec3(1.0, 1.0, 1.0); // Fully reflect specular light
-vec3 kd = vec3(0.7, 0.7, 0.7); // Orange diffuse surface reflectance 
-vec3 ka = vec3(1.0, 1.0, 1.0); // Fully reflect ambient light
+vec3 ks = vec3(0.8, 0.8, 0.8); // Fully reflect specular light
+vec3 kd = vec3(0.8, 0.8, 0.8); // Orange diffuse surface reflectance 
+vec3 ka = vec3(0.5, 0.5, 0.5); // Fully reflect ambient light
 float specular_exponent = 100.0; // Specular power
 
 out vec4 frag_color;

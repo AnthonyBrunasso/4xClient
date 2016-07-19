@@ -14,7 +14,7 @@
 #include "camera.h"
 
 #define MESH_LOG_FILE "mesh.log"
-#define MESH_DIR "../../data/models"
+#define MESH_DIR "../../data/models/"
 
 namespace mesh {
   static const uint32_t VERT_VBO_IDX = 0; 
@@ -24,13 +24,14 @@ namespace mesh {
   void load_from_file(Mesh* m, const std::string& filename) {
     if (!m) return;
     std::string file = MESH_DIR;
-    file += "/" + filename;
+    file += filename;
 
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
-    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str())) {
+    // Material file is in the mesh dir, for now.
+    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str(), MESH_DIR)) {
       logging::write(MESH_LOG_FILE, err);
       return;
     }
