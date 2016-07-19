@@ -91,4 +91,6 @@ void texloader::load(const char* filename, GLenum slot, GLuint& tex) {
   GLfloat max_ansio = 0.0f;
   glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_ansio);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_ansio);
+
+  delete[] imdata;
 }

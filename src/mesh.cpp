@@ -44,10 +44,22 @@ namespace mesh {
       m->m_vertices = std::move(shapes[i].mesh.positions);
       m->m_indices = std::move(shapes[i].mesh.indices);
       m->m_normals = std::move(shapes[i].mesh.normals);
+    }
 
-      /*m->m_vertices.insert(m->m_vertices.begin(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
-      m->m_indices.insert(m->m_indices.begin(), shapes[i].mesh.indices.begin(), shapes[i].mesh.indices.end());
-      m->m_normals.insert(m->m_normals.begin(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());*/
+    for (size_t i = 0; i < materials.size(); ++i) {
+      // Ka, kd, ks.
+      m->m_light_material.resize(3);
+      m->m_light_material[0] = glm::vec3(materials[i].ambient[0],
+        materials[i].ambient[1],
+        materials[i].ambient[2]);
+
+      m->m_light_material[1] = glm::vec3(materials[i].diffuse[0],
+        materials[i].diffuse[1],
+        materials[i].diffuse[2]);
+
+      m->m_light_material[2] = glm::vec3(materials[i].specular[0],
+        materials[i].specular[1],
+        materials[i].specular[2]);
     }
 
     logging::write(MESH_LOG_FILE, ss.str());
@@ -117,6 +129,34 @@ namespace mesh {
     }
   }
 
+  void setup_material(Mesh* m) {
+    if (!m) return;
+    // Check each program for possible material values.
+    for (auto& p : m->m_programs) {
+      GLint ka = glGetUniformLocation(p.first, "ka");
+      GLint kd = glGetUniformLocation(p.first, "kd");
+      GLint ks = glGetUniformLocation(p.first, "ks");
+
+      if (ka != -1) {
+        p.second.push_back(ka);
+        m->m_uniform_fdata.push_back(
+          std::pair<GLenum, GLfloat*>(GL_FLOAT_VEC3, &m->m_light_material[0][0]));
+      }
+
+      if (kd != -1) {
+        p.second.push_back(kd);
+        m->m_uniform_fdata.push_back(
+          std::pair<GLenum, GLfloat*>(GL_FLOAT_VEC3, &m->m_light_material[1][0]));
+      }
+
+      if (ks != -1) {
+        p.second.push_back(ks);
+        m->m_uniform_fdata.push_back(
+          std::pair<GLenum, GLfloat*>(GL_FLOAT_VEC3, &m->m_light_material[2][0]));
+      }
+    }
+  }
+
   void set_programs(Mesh* m, const std::vector<GLuint>& programs) {
     if (!m) return;
     for (auto& p : programs) {
@@ -134,6 +174,7 @@ Mesh* mesh::create(const std::string& filename, const std::vector<GLuint>& progr
   load_from_file(mesh, filename);
   bind_vertex_data(mesh);
   setup_mvp(mesh);
+  setup_material(mesh);
   return mesh;
 }
 
@@ -152,6 +193,7 @@ Mesh* mesh::create(const std::vector<GLfloat>& vertices
   set_programs(mesh, programs);
   bind_vertex_data(mesh);
   setup_mvp(mesh);
+  setup_material(mesh);
   return mesh;
 }
 
@@ -188,7 +230,16 @@ void mesh::draw(Mesh* m) {
     // Bind any other uniforms the mesh may have.
     uint32_t idx = 0;
     for (uint32_t i = ucount, e = ucount + m->m_uniform_fdata.size(); i < e; ++i, ++idx) {
-      glUniform4fv(uniforms[i], 1, m->m_uniform_fdata[idx]);
+      const std::pair<GLenum, GLfloat*> u = m->m_uniform_fdata[idx];
+      switch(u.first) {
+      case GL_FLOAT_VEC4:
+        glUniform4fv(uniforms[i], 1, u.second);
+        break;
+      case GL_FLOAT_VEC3:
+        glUniform3fv(uniforms[i], 1, u.second);
+        break;
+      default: break;
+      }
       ++ucount;
     }
 
@@ -262,14 +313,14 @@ void mesh::update_transform(Mesh* m) {
 }
 
 // TODO: Make to support all different types of uniforms.
-void mesh::add_uniform(Mesh* m, const char* name, GLfloat* value) {
+void mesh::add_uniform(Mesh* m, const char* name, GLenum type, GLfloat* value) {
   if (!m) return;
   // Do it for all the programs on the current mesh.
   for (auto& p : m->m_programs) {
     GLint loc = glGetUniformLocation(p.first, name);
     if (loc != -1) {
       p.second.push_back(loc);
-      m->m_uniform_fdata.push_back(value);
+      m->m_uniform_fdata.push_back(std::pair<GLenum, GLfloat*>(type, value));
     }
   }
 }

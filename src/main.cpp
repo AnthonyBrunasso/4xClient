@@ -72,7 +72,6 @@ int main() {
     glViewport(0, 0, width, height);
 
     mesh::draw(m);
-    //mesh::draw(tri);
     map::draw();
 
     glfwPollEvents();

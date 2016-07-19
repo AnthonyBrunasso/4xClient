@@ -21,9 +21,9 @@ public:
 
   // All the programs and uniforms for this mesh
   std::vector<std::pair<GLuint, std::vector<GLint> > > m_programs;
-  // Starting from index 3 and on, from the vector above, this is 
-  // the uniform data that will be bound.
-  std::vector<GLfloat*> m_uniform_fdata;
+  // Starting from index 3 and on, from the vector above in the pair, this is 
+  // the uniform data that will be bound. The first three are for the model matrix.
+  std::vector<std::pair<GLenum, GLfloat*> > m_uniform_fdata;
   std::vector<GLint*> m_uniform_idata;
   std::vector<GLuint> m_vbos;
 
@@ -38,8 +38,9 @@ public:
 
   bool m_update_matrix;
   glm::mat4 m_matrix;
-  
-
+ 
+  // Order is ka, kd, ks. 
+  std::vector<glm::vec3> m_light_material;
 };
 
 namespace mesh {
@@ -68,6 +69,6 @@ namespace mesh {
 
   void update_transform(Mesh* m);
   // Add all floating uniforms before integer uniforms. 
-  void add_uniform(Mesh* m, const char* name, GLfloat *value);
+  void add_uniform(Mesh* m, const char* name, GLenum type, GLfloat *value);
   void add_uniform(Mesh* m, const char* name, GLint *value);
 }
