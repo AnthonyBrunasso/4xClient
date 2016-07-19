@@ -238,7 +238,10 @@ void mesh::draw(Mesh* m) {
       case GL_FLOAT_VEC3:
         glUniform3fv(uniforms[i], 1, u.second);
         break;
-      default: break;
+      default: 
+        // Add the case. 
+        assert(false);
+        break;
       }
       ++ucount;
     }

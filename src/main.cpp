@@ -32,7 +32,7 @@ void build_programs() {
 }
 
 int main() {
-  GLFWwindow* window = gl::initialize("Hello Triangle", false);
+  GLFWwindow* window = gl::initialize("Hello Triangle", true);
   if (!window) {
     std::cout << "Failed to initialize gl context. See logs." << std::endl;
     return 1;
