@@ -30,7 +30,7 @@ namespace mesh {
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
-    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str(), NULL, tinyobj::calculate_normals)) {
+    if (!tinyobj::LoadObj(shapes, materials, err, file.c_str())) {
       logging::write(MESH_LOG_FILE, err);
       return;
     }
@@ -43,6 +43,10 @@ namespace mesh {
       m->m_vertices = std::move(shapes[i].mesh.positions);
       m->m_indices = std::move(shapes[i].mesh.indices);
       m->m_normals = std::move(shapes[i].mesh.normals);
+
+      /*m->m_vertices.insert(m->m_vertices.begin(), shapes[i].mesh.positions.begin(), shapes[i].mesh.positions.end());
+      m->m_indices.insert(m->m_indices.begin(), shapes[i].mesh.indices.begin(), shapes[i].mesh.indices.end());
+      m->m_normals.insert(m->m_normals.begin(), shapes[i].mesh.normals.begin(), shapes[i].mesh.normals.end());*/
     }
 
     logging::write(MESH_LOG_FILE, ss.str());

@@ -60,6 +60,9 @@ unsigned char* texloader::read(const char* filename, int& width, int& height) {
   return img_data;
 }
 
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
+
 void texloader::load(const char* filename, GLenum slot, GLuint& tex) {
   int width, height;
   // TODO: Memory leaks here
@@ -84,4 +87,8 @@ void texloader::load(const char* filename, GLenum slot, GLuint& tex) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+  GLfloat max_ansio = 0.0f;
+  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_ansio);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_ansio);
 }

@@ -131,8 +131,8 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
 
   glfwSetWindowSizeCallback(window, glfw_window_size_callback);
   glfwSetFramebufferSizeCallback(window, glfw_framebuffer_resize_callback);
-
   glfwMakeContextCurrent(window);
+
   // Log the return but don't treat it as an error, this way we can attempt
   // to get the opengl info below on failure.
   ss << "gl3wInit() returned: " << gl3wInit() << std::endl;
@@ -143,9 +143,9 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  glFrontFace(GL_CCW);
+  //glEnable(GL_CULL_FACE);
+  //glCullFace(GL_BACK);
+  //glFrontFace(GL_CCW);
 
   logging::write(GL_LOG_FILE, ss.str());
   log_gl_params();
