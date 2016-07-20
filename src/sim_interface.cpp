@@ -7,16 +7,23 @@
 
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #define SIM_LOG_FILE "sim.log"
 
 namespace sim_interface {
   std::thread s_thread;
   std::mutex s_simmutex;
+  std::atomic<bool> s_statechanged = false;
+
+  world_map::TileMap s_tiles;
+  std::vector<Unit> s_units;
 
   bool s_killsim = false;
 
   void run_sim() {
+    sim_interface::synch();
+
     while (!s_killsim) {
       Step* step = terminal::parse_input();
 
@@ -36,6 +43,7 @@ namespace sim_interface {
       {
         std::lock_guard<std::mutex> lock(s_simmutex);
         simulation::process_step(step);
+        s_statechanged = true;
       }
 
     }
@@ -48,7 +56,6 @@ namespace sim_interface {
 void sim_interface::initialize() {
   simulation::start();
   terminal::initialize();
-
   s_thread = std::thread(&run_sim);
 }
 
@@ -57,7 +64,27 @@ void sim_interface::teardown() {
   s_thread.join();
 }
 
-world_map::TileMap sim_interface::get_map() {
+const world_map::TileMap& sim_interface::get_map() {
   std::lock_guard<std::mutex> lock(s_simmutex);
-  return world_map::get_map();
+  return s_tiles;
+}
+
+const std::vector<Unit>& sim_interface::get_units() {
+  std::lock_guard<std::mutex> lock(s_simmutex);
+  return s_units;
+}
+
+void sim_interface::synch() {
+  std::lock_guard<std::mutex> lock(s_simmutex);
+  s_tiles = world_map::get_map();
+  s_units.clear();
+  auto append_unit = [](const Unit& unit) {
+    s_units.push_back(unit);
+  };
+  units::for_each_unit(append_unit);
+  s_statechanged = true;
+}
+
+bool sim_interface::poll() {
+  return s_statechanged;
 }

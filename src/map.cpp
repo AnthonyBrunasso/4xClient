@@ -17,9 +17,9 @@
 #include <iostream>
 
 namespace map {
-  world_map::TileMap s_tiles;
   glm::ivec3 s_selected;
   Mesh* s_mesh = nullptr;
+  Mesh* s_pawnmesh = nullptr;
   GLint s_texloc = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -74,10 +74,11 @@ void map::initialize() {
     program::get("texture")
   });
 
+  s_pawnmesh = mesh::create("pawn.obj", { program::get("phong") });
+
   mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
   mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
 
-  s_tiles = sim_interface::get_map();
   GLFWwindow* w = gl::get_current_window();
 
   if (w) {
@@ -87,15 +88,20 @@ void map::initialize() {
 }
 
 void map::teardown() {
+  delete s_pawnmesh;
   delete s_mesh;
 }
 
 void map::update(double delta) {
+  if (sim_interface::poll()) {
+    sim_interface::synch();
+  }
 }
 
 void map::draw() {
   glm::ivec3 pos;
-  for (const auto& t : s_tiles) {
+  const world_map::TileMap& tiles = sim_interface::get_map();
+  for (const auto& t : tiles) {
     pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
     mesh::set_position(s_mesh, glm::vec3(world.x, world.y, 0.0f));
@@ -120,5 +126,13 @@ void map::draw() {
       break;
     }
     mesh::draw(s_mesh);
+  }
+
+  const std::vector<Unit>& units = sim_interface::get_units();
+  for (const auto& u : units) {
+    pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
+    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+    mesh::set_position(s_pawnmesh, glm::vec3(world.x, world.y, 0.0f));
+    mesh::draw(s_pawnmesh);
   }
 }
