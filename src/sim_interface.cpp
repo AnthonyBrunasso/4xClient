@@ -14,7 +14,7 @@
 namespace sim_interface {
   std::thread s_thread;
   std::mutex s_simmutex;
-  std::atomic<bool> s_statechanged = false;
+  std::atomic<bool> s_statechanged (false);
   uint32_t s_currentplayer = 0;
   uint32_t s_playercount = 0;
 
