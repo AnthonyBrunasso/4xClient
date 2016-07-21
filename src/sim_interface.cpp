@@ -65,12 +65,10 @@ void sim_interface::teardown() {
 }
 
 const world_map::TileMap& sim_interface::get_map() {
-  std::lock_guard<std::mutex> lock(s_simmutex);
   return s_tiles;
 }
 
 const std::vector<Unit>& sim_interface::get_units() {
-  std::lock_guard<std::mutex> lock(s_simmutex);
   return s_units;
 }
 
