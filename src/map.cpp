@@ -158,6 +158,5 @@ void map::draw() {
     }
     mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
     mesh::draw(todraw);
-
   }
 }
