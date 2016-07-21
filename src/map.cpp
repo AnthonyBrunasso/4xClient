@@ -21,6 +21,7 @@ namespace map {
   glm::ivec3 s_selected;
   Mesh* s_mesh = nullptr;
   Mesh* s_pawnmesh = nullptr;
+  Mesh* s_rookmesh = nullptr;
   GLint s_texloc = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -84,6 +85,7 @@ void map::initialize() {
   });
 
   s_pawnmesh = mesh::create("pawn.obj", { program::get("phong") });
+  s_rookmesh = mesh::create("rook.obj", { program::get("phong") });
 
   mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
   mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
@@ -97,6 +99,7 @@ void map::initialize() {
 }
 
 void map::teardown() {
+  delete s_rookmesh;
   delete s_pawnmesh;
   delete s_mesh;
 }
@@ -141,7 +144,20 @@ void map::draw() {
   for (const auto& u : units) {
     pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-    mesh::set_position(s_pawnmesh, glm::vec3(world.x, world.y, 0.0f));
-    mesh::draw(s_pawnmesh);
+    Mesh* todraw;
+    switch (u.m_unit_type) {
+    case UNIT_TYPE::PHALANX:
+      todraw = s_rookmesh;
+      break;
+    case UNIT_TYPE::SCOUT:
+    case UNIT_TYPE::ARCHER:
+    case UNIT_TYPE::WORKER:
+    case UNIT_TYPE::UNKNOWN:
+      todraw = s_pawnmesh;
+      break;
+    }
+    mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
+    mesh::draw(todraw);
+
   }
 }

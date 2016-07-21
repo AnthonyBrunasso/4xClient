@@ -32,7 +32,7 @@ void build_programs() {
 }
 
 int main() {
-  GLFWwindow* window = gl::initialize("Hello Triangle", false);
+  GLFWwindow* window = gl::initialize("Hello Triangle", true);
   if (!window) {
     std::cout << "Failed to initialize gl context. See logs." << std::endl;
     return 1;
@@ -44,11 +44,6 @@ int main() {
 
   // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
-  /*Mesh* m = mesh::create("pawn.obj", { program::get("phong") });
-
-  mesh::set_position(m, glm::vec3(0.0f, 0.0f, 0.0f));
-  mesh::set_scale(m, glm::vec3(1.0f, 1.0f, 1.0f));
-  mesh::set_rotate(m, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));*/
 
   sim_interface::initialize();
   map::initialize();
