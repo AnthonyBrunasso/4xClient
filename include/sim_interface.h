@@ -14,6 +14,10 @@ namespace sim_interface {
   void teardown();
 
   void move_unit(uint32_t id, const glm::ivec3& location);
+  void end_turn();
+
+  void join_player();
+  void join_barbarian();
 
   const world_map::TileMap& get_map();
   const std::vector<Unit>& get_units();

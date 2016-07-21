@@ -56,7 +56,18 @@ namespace map {
     else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
       selection::rclick(s_selected);
     }
+  }
 
+  void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS) {
+      sim_interface::end_turn();
+    }
+    else if (key == GLFW_KEY_J && action == GLFW_PRESS) {
+      sim_interface::join_player();
+    }
+    else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+      sim_interface::join_barbarian();
+    }
   }
 
   void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
@@ -95,6 +106,7 @@ void map::initialize() {
   if (w) {
     glfwSetMouseButtonCallback(w, mouse_button_callback);
     glfwSetScrollCallback(w, mouse_scroll_callback);
+    glfwSetKeyCallback(w, key_callback);
   }
 }
 
