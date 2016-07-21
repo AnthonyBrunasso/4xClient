@@ -59,6 +59,22 @@ void sim_interface::initialize() {
   s_thread = std::thread(&run_sim);
 }
 
+void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
+  std::lock_guard<std::mutex> lock(s_simmutex);
+  // Find unit with the id.
+  for (const auto& u : s_units) {
+    // Move it.
+    if (u.m_unique_id == id) {
+      MoveStep* m = new MoveStep();
+      m->m_unit_id = id;
+      m->m_destination = sf::Vector3i(location.x, location.y, location.z);
+      m->m_player = u.m_owner_id;
+      simulation::process_step(m);
+      delete m;
+    }
+  }
+}
+
 void sim_interface::teardown() {
   s_killsim = true;
   s_thread.join();

@@ -9,6 +9,7 @@
 #include "raycast.h"
 #include "program.h"
 #include "texloader.h"
+#include "selection.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,29 +25,37 @@ namespace map {
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-      double xpos, ypos;
-      glfwGetCursorPos(window, &xpos, &ypos);
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
 
-      glm::vec3 from;
-      glm::vec3 r = ray::from_mouseclick(xpos, ypos);
+    glm::vec3 from;
+    glm::vec3 r = ray::from_mouseclick(xpos, ypos);
 
-      Camera* c = camera::get_current();
-      if (!c) return;
-      float distance;
-      // Intersect with the xy plane positioned at origin.
-      if (glm::intersectRayPlane(c->m_position, 
-          r, 
-          // Hexagon is height 0.3f, so lift the plane by that much.
-          glm::vec3(0.0f, 0.0f, 0.0f), 
-          glm::vec3(0.0f, 0.0f, 1.0f), 
-          distance)) {
-        // The intersected point is the defined by p = camera_position + ray * distance.
-        glm::vec3 position = c->m_position + r * distance;
-        glm::ivec3 cube = glm_hex::world_to_cube(glm::vec2(position.x, position.y), 3);
-        s_selected = cube;
-      }
+    Camera* c = camera::get_current();
+    if (!c) return;
+    float distance;
+    // Intersect with the xy plane positioned at origin.
+    if (!glm::intersectRayPlane(c->m_position, 
+        r, 
+        // Hexagon is height 0.3f, so lift the plane by that much.
+        glm::vec3(0.0f, 0.0f, 0.0f), 
+        glm::vec3(0.0f, 0.0f, 1.0f), 
+        distance)) {
+      return;
     }
+
+    // The intersected point is the defined by p = camera_position + ray * distance.
+    glm::vec3 position = c->m_position + r * distance;
+    glm::ivec3 cube = glm_hex::world_to_cube(glm::vec2(position.x, position.y), 3);
+    s_selected = cube;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+      selection::lclick(s_selected);
+    }
+    else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+      selection::rclick(s_selected);
+    }
+
   }
 
   void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
