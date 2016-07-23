@@ -23,6 +23,7 @@ namespace map {
   Mesh* s_pawnmesh = nullptr;
   Mesh* s_rookmesh = nullptr;
   Mesh* s_queenmesh = nullptr;
+  Mesh* s_bishopmesh = nullptr;
   GLint s_texloc = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -99,6 +100,7 @@ void map::initialize() {
   s_pawnmesh = mesh::create("pawn.obj", { program::get("phong") });
   s_rookmesh = mesh::create("rook.obj", { program::get("phong") });
   s_queenmesh = mesh::create("queen.obj", { program::get("phong") });
+  s_bishopmesh = mesh::create("bishop.obj", { program::get("phong") });
 
   mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
   mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
@@ -113,6 +115,7 @@ void map::initialize() {
 }
 
 void map::teardown() {
+  delete s_bishopmesh;
   delete s_queenmesh;
   delete s_rookmesh;
   delete s_pawnmesh;
@@ -170,6 +173,8 @@ void map::draw() {
       todraw = s_queenmesh;
       break;
     case UNIT_TYPE::ARCHER:
+      todraw = s_bishopmesh;
+      break;
     case UNIT_TYPE::UNKNOWN:
       todraw = s_pawnmesh;
       break;
