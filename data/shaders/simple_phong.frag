@@ -20,12 +20,19 @@ float specular_exponent = 26.0; // Specular power
 
 out vec4 frag_color;
 
+vec3 toon_shade(vec3 light_position) {
+  vec3 s = normalize(light_position - eye_pos);
+  float cosine = max(dot(s, eye_norm), 0.0);
+  vec3 diffuse = kd * floor(cosine * 3) * 1.0;
+  return ld * (ka + diffuse);
+}
+
 void main() {
   vec3 ia = la * ka;
 
   // Raise light position to eye space
   for (int i = 0; i < lcount; ++i) {
-    vec3 eye_light_position = vec3(view * vec4(lpositions[i], 1.0));
+/*    vec3 eye_light_position = vec3(view * vec4(lpositions[i], 1.0));
     vec3 distance = eye_light_position - eye_pos;
     vec3 direction = normalize(distance);
     float ddot = dot(direction, eye_norm);
@@ -36,9 +43,9 @@ void main() {
     vec3 half_eye = normalize(eye_surface + direction);
     float sdot = max(dot(half_eye, eye_norm), 0.0);
     float sfac = pow(sdot, specular_exponent);
-    vec3 is = ls * ks * sfac;
+    vec3 is = ls * ks * sfac;*/
 
-    frag_color += vec4(is + id + ia, 1.0);
+    frag_color += vec4(toon_shade(lpositions[i]), 1.0);
   }
 }
 
