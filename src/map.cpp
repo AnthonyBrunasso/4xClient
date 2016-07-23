@@ -25,6 +25,7 @@ namespace map {
   Mesh* s_rookmesh = nullptr;
   Mesh* s_queenmesh = nullptr;
   Mesh* s_bishopmesh = nullptr;
+  Mesh* s_hutmesh = nullptr;
   GLint s_texloc = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -102,11 +103,13 @@ void map::initialize() {
   s_rookmesh = mesh::create("rook.obj", { program::get("phong") });
   s_queenmesh = mesh::create("queen.obj", { program::get("phong") });
   s_bishopmesh = mesh::create("bishop.obj", { program::get("phong") });
+  s_hutmesh = mesh::create("hut.obj", { program::get("phong") });
 
   light::apply(s_pawnmesh);
   light::apply(s_rookmesh);
   light::apply(s_queenmesh);
   light::apply(s_bishopmesh);
+  light::apply(s_hutmesh);
 
   mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
   mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
@@ -121,6 +124,7 @@ void map::initialize() {
 }
 
 void map::teardown() {
+  delete s_hutmesh;
   delete s_bishopmesh;
   delete s_queenmesh;
   delete s_rookmesh;
@@ -188,5 +192,13 @@ void map::draw() {
     }
     mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
     mesh::draw(todraw);
+  }
+
+  const std::vector<City>& cities = sim_interface::get_cities();
+  for (const auto& c : cities) {
+    pos = glm::ivec3(c.m_location.x, c.m_location.y, c.m_location.z);
+    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+    mesh::set_position(s_hutmesh, glm::vec3(world.x, world.y, 0.0f));
+    mesh::draw(s_hutmesh);
   }
 }

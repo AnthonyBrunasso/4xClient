@@ -20,6 +20,7 @@ namespace sim_interface {
 
   world_map::TileMap s_tiles;
   std::vector<Unit> s_units;
+  std::vector<City> s_cities;
 
   bool s_killsim = false;
 
@@ -128,6 +129,10 @@ const std::vector<Unit>& sim_interface::get_units() {
   return s_units;
 }
 
+const std::vector<City>& sim_interface::get_cities() {
+  return s_cities;
+}
+
 void sim_interface::synch() {
   std::lock_guard<std::mutex> lock(s_simmutex);
   s_tiles = world_map::get_map();
@@ -136,6 +141,11 @@ void sim_interface::synch() {
     s_units.push_back(unit);
   };
   units::for_each_unit(append_unit);
+  s_cities.clear();
+  auto append_city = [](const City& city) {
+    s_cities.push_back(city);
+  };
+  city::for_each_city(append_city);
   s_statechanged = false;
 }
 

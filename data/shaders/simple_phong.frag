@@ -43,8 +43,9 @@ void main() {
     vec3 half_eye = normalize(eye_surface + direction);
     float sdot = max(dot(half_eye, eye_norm), 0.0);
     float sfac = pow(sdot, specular_exponent);
-    vec3 is = ls * ks * sfac;*/
+    vec3 is = ls * ks * sfac;
 
+    frag_color += vec4(is + id + ia, 1.0);*/
     frag_color += vec4(toon_shade(lpositions[i]), 1.0);
   }
 }
