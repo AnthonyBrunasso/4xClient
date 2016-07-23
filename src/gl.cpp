@@ -138,8 +138,15 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
   ss << "gl3wInit() returned: " << gl3wInit() << std::endl;
 
   // Log the gl info.
-  ss << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-  ss << "OpenGL verion supported: " << glGetString(GL_VERSION);
+  GLint major, minor;
+  glGetIntegerv(GL_MAJOR_VERSION, &major);
+  glGetIntegerv(GL_MINOR_VERSION, &minor);
+
+  ss << "GL Vendor    : " << glGetString(GL_VENDOR) << std::endl;
+  ss << "GL Renderer  : " << glGetString(GL_RENDERER) << std::endl;
+  ss << "GL Version(s): " << glGetString(GL_VERSION) << std::endl;
+  ss << "GL Version(i): " << major << "." << minor << std::endl;
+  ss << "GLSL Version : " << glGetString(GL_SHADING_LANGUAGE_VERSION);
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
