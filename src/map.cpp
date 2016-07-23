@@ -10,6 +10,7 @@
 #include "program.h"
 #include "texloader.h"
 #include "selection.h"
+#include "light.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -102,6 +103,11 @@ void map::initialize() {
   s_queenmesh = mesh::create("queen.obj", { program::get("phong") });
   s_bishopmesh = mesh::create("bishop.obj", { program::get("phong") });
 
+  light::apply(s_pawnmesh);
+  light::apply(s_rookmesh);
+  light::apply(s_queenmesh);
+  light::apply(s_bishopmesh);
+
   mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
   mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
 
@@ -169,6 +175,7 @@ void map::draw() {
       break;
     case UNIT_TYPE::SCOUT:
       todraw = s_pawnmesh;
+      break;
     case UNIT_TYPE::WORKER:
       todraw = s_queenmesh;
       break;

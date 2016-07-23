@@ -155,7 +155,7 @@ std::string shader::get_debug(GLuint program) {
     if (size > 1) {
       for (int j = 0; j < size; ++j) {
         char long_name[64];
-        sprintf(long_name, "%s[%i]", name, j);
+        sprintf(long_name, "%s", name);
         int location = glGetAttribLocation(program, long_name);
         ss << "(" << i << ") type: " << gl_type_to_string(type)
            << " name: " << long_name
@@ -182,7 +182,7 @@ std::string shader::get_debug(GLuint program) {
     if (size > 1) {
       for (int j = 0; j < size; ++j) {
         char long_name[64];
-        sprintf(long_name, "%s[%i]", name, j);
+        sprintf(long_name, "%s", name);
         int location = glGetUniformLocation(program, long_name);
         ss << "(" << i << ") type: " << gl_type_to_string(type)
            << " name: " << long_name

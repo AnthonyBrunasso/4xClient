@@ -13,8 +13,9 @@
 #include "mesh.h"
 #include "sim_interface.h"
 #include "program.h"
+#include "light.h"
 
-void build_programs() {
+void initialize() {
   program::build("phong", {
     {GL_VERTEX_SHADER, "simple_phong.vert"},
     {GL_FRAGMENT_SHADER, "simple_phong.frag"}
@@ -29,6 +30,12 @@ void build_programs() {
     { GL_VERTEX_SHADER, "simple_texture.vert" },
     { GL_FRAGMENT_SHADER, "simple_texture.frag" }
   });
+
+  glm::vec3 pos(30.0f, 30.0f, 10.0f);
+  light::add(pos);
+  pos.x = -30.0f;
+  pos.y = -30.0f;
+  light::add(pos);
 }
 
 int main() {
@@ -40,7 +47,7 @@ int main() {
 
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
-  build_programs();
+  initialize();
 
   // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);

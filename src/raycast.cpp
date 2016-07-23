@@ -19,7 +19,7 @@ glm::vec3 ray::from_mouseclick(double mx, double my) {
 
   int width, height;
   glfwGetWindowSize(window, &width, &height);
-
+  
   // Transform click into normalized device coordinates.
   // These should range: [-1:1, -1:1, -1:1]
   float x = (2.0f * static_cast<float>(mx)) / width - 1.0f;
