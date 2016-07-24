@@ -1,13 +1,15 @@
 #include "sim_interface.h"
 
-#include "4xSimulation/include/step.h"
-#include "4xSimulation/include/terminal.h"
-#include "4xSimulation/include/simulation.h"
-#include "4xSimulation/include/game_types.h"
+#include "terminal.h"
+#include "simulation.h"
+#include "game_types.h"
+#include "network_types.h"
 
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <iostream>
+#include <string>
 
 #define SIM_LOG_FILE "sim.log"
 
@@ -22,33 +24,39 @@ namespace sim_interface {
   std::vector<Unit> s_units;
   std::vector<City> s_cities;
 
-  bool s_killsim = false;
+  std::atomic<bool> s_killsim = false;
+
+  const size_t BUFFER_LEN = 256;
+  char s_buffer[BUFFER_LEN];
+
+  template<typename T>
+  size_t SimulateStep(const T& step) {
+    std::lock_guard<std::mutex> lock(s_simmutex);
+    size_t bytes = serialize(s_buffer, BUFFER_LEN, step);
+    simulation::process_step(s_buffer, bytes);
+    s_statechanged = true;
+    return bytes;
+  }
 
   void run_sim() {
     sim_interface::synch();
 
     while (!s_killsim) {
-      Step* step = terminal::parse_input();
-
-      // If a kill is invoked simulation has been killed, so don't try to
-      // give it a step. Valid or not.
-      if (s_killsim) {
+      std::string value;
+      std::cout << ">" << std::endl;
+      std::getline(std::cin, value);
+      if (!std::cin.good() || s_killsim) {
         break;
-      }
-
-      // Parse input can return nullptr.
-      if (!step) continue;
-
-      if (step->m_command == COMMAND_TYPE::QUIT) {
-        s_killsim = true;
       }
 
       {
         std::lock_guard<std::mutex> lock(s_simmutex);
-        simulation::process_step(step);
+        // parse_input will return false when quit has been called
+        if (!terminal::parse_input(value)) {
+          break;
+        }
         s_statechanged = true;
       }
-
     }
 
     simulation::kill();
@@ -63,57 +71,47 @@ void sim_interface::initialize() {
 }
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
-  std::lock_guard<std::mutex> lock(s_simmutex);
   // Find unit with the id.
   for (const auto& u : s_units) {
     // Move it.
     if (u.m_unique_id == id) {
-      MoveStep* m = new MoveStep();
-      m->m_unit_id = id;
-      m->m_destination = sf::Vector3i(location.x, location.y, location.z);
-      m->m_player = u.m_owner_id;
-      simulation::process_step(m);
-      s_statechanged = true;
-      delete m;
+      MoveStep m;
+      m.set_unit_id(id);
+      m.set_destination(sf::Vector3i(location.x, location.y, location.z));
+      m.set_player(u.m_owner_id);
+      m.set_immediate(true);
+      SimulateStep(m);
     }
   }
 }
 
 void sim_interface::end_turn() {
-  std::lock_guard<std::mutex> lock(s_simmutex);
-  EndTurnStep* end = new EndTurnStep();
-  end->m_player = s_currentplayer;
+  EndTurnStep step;
+  step.set_player(s_currentplayer);
   ++s_currentplayer;
   // Cycle
-  if (s_currentplayer == s_playercount) {
+  if (s_currentplayer >= s_playercount) {
     s_currentplayer = 0;
   }
-  end->m_next_player = s_currentplayer;
-  simulation::process_step(end);
-  s_statechanged = true;
-  delete end;
+  step.set_next_player(s_currentplayer);
+  SimulateStep(step);
 }
 
 void sim_interface::join_player() {
-  std::lock_guard<std::mutex> lock(s_simmutex);
-  AddPlayerStep* player = new AddPlayerStep();
-  player->m_name = "player" + std::to_string(s_playercount);
-  player->ai_type = AI_TYPE::HUMAN;
-  simulation::process_step(player);
-  s_statechanged = true;
+  AddPlayerStep player;
+  
+  player.set_name("player" + std::to_string(s_playercount));
+  player.set_ai_type(AI_TYPE::HUMAN);
+  SimulateStep(player);
   ++s_playercount;
-  delete player;
 }
 
 void sim_interface::join_barbarian() {
-  std::lock_guard<std::mutex> lock(s_simmutex);
-  AddPlayerStep* barbarian = new AddPlayerStep();
-  barbarian->m_name = "barbarian" + std::to_string(s_playercount);
-  barbarian->ai_type = AI_TYPE::BARBARIAN;
-  simulation::process_step(barbarian);
-  s_statechanged = true;
+  AddPlayerStep barbarian;
+  barbarian.set_name("barbarian" + std::to_string(s_playercount));
+  barbarian.set_ai_type(AI_TYPE::BARBARIAN);
+  SimulateStep(barbarian);
   ++s_playercount;
-  delete barbarian;
 }
 
 void sim_interface::teardown() {
