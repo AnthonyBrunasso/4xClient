@@ -4,6 +4,7 @@
 #include "simulation.h"
 #include "game_types.h"
 #include "network_types.h"
+#include "player.h"
 
 #include <thread>
 #include <mutex>
@@ -103,7 +104,6 @@ void sim_interface::join_player() {
   player.set_name("player" + std::to_string(s_playercount));
   player.set_ai_type(AI_TYPE::HUMAN);
   SimulateStep(player);
-  ++s_playercount;
 }
 
 void sim_interface::join_barbarian() {
@@ -111,7 +111,6 @@ void sim_interface::join_barbarian() {
   barbarian.set_name("barbarian" + std::to_string(s_playercount));
   barbarian.set_ai_type(AI_TYPE::BARBARIAN);
   SimulateStep(barbarian);
-  ++s_playercount;
 }
 
 void sim_interface::teardown() {
@@ -144,6 +143,7 @@ void sim_interface::synch() {
     s_cities.push_back(city);
   };
   city::for_each_city(append_city);
+  s_playercount = player::get_count();
   s_statechanged = false;
 }
 
