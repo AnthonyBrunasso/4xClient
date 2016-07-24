@@ -8,7 +8,7 @@ apt-get install xorg-dev
 ## General Pre-reqs
 git submodule update --init
 cd src/4xSimulation/tools
-python type_generator.py
+python serialization.py 
 cd ../../..
 
 ## Gl4thewin
