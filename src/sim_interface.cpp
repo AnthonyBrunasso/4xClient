@@ -24,7 +24,7 @@ namespace sim_interface {
   std::vector<Unit> s_units;
   std::vector<City> s_cities;
 
-  std::atomic<bool> s_killsim = false;
+  std::atomic<bool> s_killsim (false);
 
   const size_t BUFFER_LEN = 256;
   char s_buffer[BUFFER_LEN];
