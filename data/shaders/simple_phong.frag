@@ -8,45 +8,25 @@ uniform mat4 view;
 uniform vec3 lpositions[10];
 uniform int lcount;
 
-vec3 ls = vec3(1.0, 1.0, 1.0); // white specular
-vec3 ld = vec3(0.4, 0.4, 0.4); // dull white diffuse
-vec3 la = vec3(0.3, 0.3, 0.3); // grey ambient color 
-
 // Object surface properties
-uniform vec3 ka = vec3(0.0, 0.0, 0.0); // Fully reflect ambient light
-uniform vec3 kd = vec3(0.0, 0.0, 0.0); // Orange diffuse surface reflectance 
-uniform vec3 ks = vec3(0.0, 0.0, 0.0); // Fully reflect specular light
-float specular_exponent = 26.0; // Specular power
+uniform vec3 ka = vec3(0.0, 0.0, 0.0);
+uniform vec3 kd = vec3(0.0, 0.0, 0.0);
+uniform vec3 ks = vec3(0.0, 0.0, 0.0);
+
+float sexp = 26.0; // Specular power
 
 out vec4 frag_color;
 
-vec3 toon_shade(vec3 light_position) {
-  vec3 s = normalize(light_position - eye_pos);
-  float cosine = max(dot(s, eye_norm), 0.0);
-  vec3 diffuse = kd * floor(cosine * 3) * 1.0;
-  return ld * (ka + diffuse);
-}
-
 void main() {
-  vec3 ia = la * ka;
-
   // Raise light position to eye space
   for (int i = 0; i < lcount; ++i) {
-/*    vec3 eye_light_position = vec3(view * vec4(lpositions[i], 1.0));
-    vec3 distance = eye_light_position - eye_pos;
-    vec3 direction = normalize(distance);
-    float ddot = dot(direction, eye_norm);
-    ddot = max(ddot, 0.0);
-    vec3 id = ld * kd * ddot;
+    vec3 l = normalize((view * vec4(lpositions[i], 1.0)).xyz - eye_pos);
+    vec3 v = normalize(-eye_pos);
+    vec3 h = normalize(l + v);
+    float costh = max(dot(eye_norm, h), 0.0);
+    float costi = max(dot(eye_norm, l), 0.0);
 
-    vec3 eye_surface = normalize(-eye_pos);
-    vec3 half_eye = normalize(eye_surface + direction);
-    float sdot = max(dot(half_eye, eye_norm), 0.0);
-    float sfac = pow(sdot, specular_exponent);
-    vec3 is = ls * ks * sfac;
-
-    frag_color += vec4(is + id + ia, 1.0);*/
-    frag_color += vec4(toon_shade(lpositions[i]), 1.0);
+    frag_color = vec4(ka + (kd + ks * pow(costh, sexp)) * costi, 1.0);
   }
 }
 

@@ -21,21 +21,12 @@ void initialize() {
     {GL_FRAGMENT_SHADER, "simple_phong.frag"}
   });
 
-  program::build("ucolor", {
-    {GL_VERTEX_SHADER, "simple_perspective.vert"}, 
-    {GL_FRAGMENT_SHADER, "simple_uniform_color.frag"}
-  });
-
   program::build("texture", {
     { GL_VERTEX_SHADER, "simple_texture.vert" },
     { GL_FRAGMENT_SHADER, "simple_texture.frag" }
   });
 
-  glm::vec3 pos(30.0f, 30.0f, 10.0f);
-  light::add(pos);
-  pos.x = -50.0f;
-  pos.y = -50.0f;
-  pos.z = 0.0f;
+  glm::vec3 pos(0.0, 0.0f, 10.0f);
   light::add(pos);
 }
 
