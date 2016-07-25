@@ -8,6 +8,10 @@ namespace selection {
   glm::ivec3 s_selected;
 }
 
+const glm::ivec3& selection::get() {
+  return s_selected;
+}
+
 void selection::lclick(const glm::ivec3& location) {
   s_selected = location;
 }

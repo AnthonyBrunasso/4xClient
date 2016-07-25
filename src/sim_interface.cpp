@@ -4,7 +4,7 @@
 #include "simulation.h"
 #include "game_types.h"
 #include "network_types.h"
-#include "player.h"
+#include "selection.h"
 
 #include <thread>
 #include <mutex>
@@ -24,6 +24,7 @@ namespace sim_interface {
   world_map::TileMap s_tiles;
   std::vector<Unit> s_units;
   std::vector<City> s_cities;
+  std::vector<Player> s_players;
 
   std::atomic<bool> s_killsim (false);
 
@@ -31,11 +32,12 @@ namespace sim_interface {
   char s_buffer[BUFFER_LEN];
 
   template<typename T>
-  size_t SimulateStep(const T& step) {
+  size_t simulate_step(const T& step) {
     std::lock_guard<std::mutex> lock(s_simmutex);
     size_t bytes = serialize(s_buffer, BUFFER_LEN, step);
     simulation::process_step(s_buffer, bytes);
     s_statechanged = true;
+    std::cout << ">";
     return bytes;
   }
 
@@ -44,7 +46,7 @@ namespace sim_interface {
 
     while (!s_killsim) {
       std::string value;
-      std::cout << ">" << std::endl;
+      std::cout << ">";
       std::getline(std::cin, value);
       if (!std::cin.good() || s_killsim) {
         break;
@@ -81,7 +83,7 @@ void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
       m.set_destination(sf::Vector3i(location.x, location.y, location.z));
       m.set_player(u.m_owner_id);
       m.set_immediate(true);
-      SimulateStep(m);
+      simulate_step(m);
     }
   }
 }
@@ -95,22 +97,40 @@ void sim_interface::end_turn() {
     s_currentplayer = 0;
   }
   step.set_next_player(s_currentplayer);
-  SimulateStep(step);
+  simulate_step(step);
 }
 
 void sim_interface::join_player() {
   AddPlayerStep player;
-  
+  std::cout << "Joining player " << std::to_string(s_playercount) << std::endl;
   player.set_name("player" + std::to_string(s_playercount));
   player.set_ai_type(AI_TYPE::HUMAN);
-  SimulateStep(player);
+  simulate_step(player);
 }
 
 void sim_interface::join_barbarian() {
   AddPlayerStep barbarian;
   barbarian.set_name("barbarian" + std::to_string(s_playercount));
   barbarian.set_ai_type(AI_TYPE::BARBARIAN);
-  SimulateStep(barbarian);
+  simulate_step(barbarian);
+}
+
+void sim_interface::initial_settle() {
+  SpawnStep spawn;
+  spawn.set_unit_type(static_cast<uint32_t>(UNIT_TYPE::WORKER));
+  spawn.set_player(s_currentplayer);
+  const glm::vec3& l = selection::get();
+  spawn.set_location(sf::Vector3i(l.x, l.y, l.z));
+  simulate_step(spawn);
+  settle();
+}
+
+void sim_interface::settle() {
+  ColonizeStep colonize;
+  colonize.set_player(s_currentplayer);
+  const glm::vec3& l = selection::get();
+  colonize.set_location(sf::Vector3i(l.x, l.y, l.z));
+  simulate_step(colonize);
 }
 
 void sim_interface::teardown() {
@@ -130,6 +150,10 @@ const std::vector<City>& sim_interface::get_cities() {
   return s_cities;
 }
 
+const std::vector<Player>& sim_interface::get_players() {
+  return s_players;
+}
+
 void sim_interface::synch() {
   std::lock_guard<std::mutex> lock(s_simmutex);
   s_tiles = world_map::get_map();
@@ -143,6 +167,11 @@ void sim_interface::synch() {
     s_cities.push_back(city);
   };
   city::for_each_city(append_city);
+  s_players.clear();
+  auto append_player = [](const Player& player) {
+    s_players.push_back(player);
+  };
+  player::for_each_player(append_player);
   s_playercount = player::get_count();
   s_statechanged = false;
 }

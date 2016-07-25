@@ -33,9 +33,10 @@ void initialize() {
 
   glm::vec3 pos(30.0f, 30.0f, 10.0f);
   light::add(pos);
-  //pos.x = -30.0f;
-  //pos.y = -30.0f;
-  //light::add(pos);
+  pos.x = -50.0f;
+  pos.y = -50.0f;
+  pos.z = 0.0f;
+  light::add(pos);
 }
 
 int main() {

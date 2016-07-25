@@ -9,7 +9,7 @@ uniform vec3 lpositions[10];
 uniform int lcount;
 
 vec3 ls = vec3(1.0, 1.0, 1.0); // white specular
-vec3 ld = vec3(0.2, 0.7, 0.7); // dull white diffuse
+vec3 ld = vec3(0.4, 0.4, 0.4); // dull white diffuse
 vec3 la = vec3(0.3, 0.3, 0.3); // grey ambient color 
 
 // Object surface properties

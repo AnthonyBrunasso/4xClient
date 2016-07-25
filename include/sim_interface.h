@@ -7,6 +7,7 @@
 #include "4xSimulation/include/world_map.h"
 #include "4xSimulation/include/units.h"
 #include "4xSimulation/include/city.h"
+#include "4xSimulation/include/player.h"
 
 #include <glm/vec3.hpp>
 
@@ -19,10 +20,13 @@ namespace sim_interface {
 
   void join_player();
   void join_barbarian();
+  void initial_settle();
+  void settle();
 
   const world_map::TileMap& get_map();
   const std::vector<Unit>& get_units();
   const std::vector<City>& get_cities();
+  const std::vector<Player>& get_players();
 
   void synch();
 

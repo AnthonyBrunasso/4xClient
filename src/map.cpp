@@ -72,6 +72,12 @@ namespace map {
     else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
       sim_interface::join_barbarian();
     }
+    else if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+      sim_interface::initial_settle();
+    }
+    else if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+      sim_interface::settle();
+    }
   }
 
   void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
@@ -168,8 +174,15 @@ void map::draw() {
     mesh::draw(s_mesh);
   }
 
+  const std::vector<Player>& players = sim_interface::get_players();
   const std::vector<Unit>& units = sim_interface::get_units();
-  for (const auto& u : units) {
+  for (const auto& u : units) { 
+    bool is_barbarian = false;
+    for (const auto& p : players) {
+      if (p.m_ai_type == AI_TYPE::BARBARIAN) {
+        if (p.OwnsUnit(u.m_unique_id)) is_barbarian = true;
+      }
+    }
     pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
     Mesh* todraw;
@@ -191,14 +204,39 @@ void map::draw() {
       break;
     }
     mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
-    mesh::draw(todraw);
+
+    if (is_barbarian) {
+      glm::vec3 init_color = todraw->m_light_material[1]; // kd
+      // Color dem red.
+      todraw->m_light_material[1] = glm::vec3(0.8f, 0.3f, 0.3f);
+      mesh::draw(todraw);
+      todraw->m_light_material[1] = init_color;
+    }
+    else {
+      mesh::draw(todraw);
+    }
   }
 
   const std::vector<City>& cities = sim_interface::get_cities();
   for (const auto& c : cities) {
+    bool is_barbarian = false;
+    for (const auto& p : players) {
+      if (p.m_ai_type == AI_TYPE::BARBARIAN && c.m_owner_id == p.m_id) {
+        is_barbarian = true;
+      }
+    }
     pos = glm::ivec3(c.m_location.x, c.m_location.y, c.m_location.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
     mesh::set_position(s_hutmesh, glm::vec3(world.x, world.y, 0.0f));
-    mesh::draw(s_hutmesh);
+    if (is_barbarian) {
+      glm::vec3 init_color = s_hutmesh->m_light_material[1]; // kd
+      // Color dem red.
+      s_hutmesh->m_light_material[1] = glm::vec3(1.0f, 0.0f, 0.0f);
+      mesh::draw(s_hutmesh);
+      s_hutmesh->m_light_material[1] = init_color;
+    }
+    else {
+      mesh::draw(s_hutmesh);
+    }
   }
 }
