@@ -26,7 +26,7 @@ void initialize() {
     { GL_FRAGMENT_SHADER, "simple_texture.frag" }
   });
 
-  glm::vec3 pos(0.0, 0.0f, 10.0f);
+  glm::vec3 pos(0.0, 0.0f, 0.0f);
   light::add(pos);
 }
 

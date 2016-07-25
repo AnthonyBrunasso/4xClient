@@ -13,20 +13,25 @@ uniform vec3 ka = vec3(0.0, 0.0, 0.0);
 uniform vec3 kd = vec3(0.0, 0.0, 0.0);
 uniform vec3 ks = vec3(0.0, 0.0, 0.0);
 
-float sexp = 26.0; // Specular power
+float sexp = 27.0; // Specular power
 
 out vec4 frag_color;
 
+vec3 phong(vec3 n, vec3 lpos) {
+  // Notice lpos is not brought into view space. It is relative to the camera.
+  vec3 l = normalize(lpos - eye_pos);
+  vec3 v = normalize(-eye_pos);
+  vec3 h = normalize(l + v);
+  float costh = max(dot(eye_norm, h), 0.0);
+  float costi = max(dot(eye_norm, l), 0.0);
+  return (ka + (kd + ks * pow(costh, sexp))) * costi;
+}
+
 void main() {
   // Raise light position to eye space
+//  frag_color = vec4(phong(eye_norm, lpositions[0]), 1.0);
   for (int i = 0; i < lcount; ++i) {
-    vec3 l = normalize((view * vec4(lpositions[i], 1.0)).xyz - eye_pos);
-    vec3 v = normalize(-eye_pos);
-    vec3 h = normalize(l + v);
-    float costh = max(dot(eye_norm, h), 0.0);
-    float costi = max(dot(eye_norm, l), 0.0);
-
-    frag_color = vec4(ka + (kd + ks * pow(costh, sexp)) * costi, 1.0);
+    frag_color += vec4(phong(eye_norm, lpositions[i]), 1.0);
   }
 }
 

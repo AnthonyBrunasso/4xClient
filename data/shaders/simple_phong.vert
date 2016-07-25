@@ -8,7 +8,7 @@ out vec3 eye_pos, eye_norm;
 
 void main() {
   eye_pos = vec3(view * model * vec4(vertex_position, 1.0));
-  eye_norm = vec3(view * model * vec4(vertex_normal, 0.0));
+  eye_norm = normalize(vec3(view * model * vec4(vertex_normal, 0.0)));
   gl_Position = proj * vec4(eye_pos, 1.0);
 }
 
