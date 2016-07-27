@@ -6,8 +6,10 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory("glfw-3.2")
 add_subdirectory("4xSimulation")
+
 include_directories("./")
 include_directories("4xSimulation/include")
+
 find_package(OpenGL REQUIRED)
 
 add_executable(4xclient ${Sources})
