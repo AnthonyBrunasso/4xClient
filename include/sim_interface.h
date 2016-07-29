@@ -11,8 +11,14 @@
 
 #include <glm/vec3.hpp>
 
+enum class MULTIPLAYER {
+  NO = 0,
+  YES = 1,
+};
+
 namespace sim_interface {
-  void initialize();
+
+  void initialize(MULTIPLAYER multiplayer);
   void teardown();
 
   void move_unit(uint32_t id, const glm::ivec3& location);

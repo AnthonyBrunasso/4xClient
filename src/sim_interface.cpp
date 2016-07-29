@@ -4,6 +4,7 @@
 #include "simulation.h"
 #include "game_types.h"
 #include "network_types.h"
+#include "network.h"
 #include "selection.h"
 
 #include <thread>
@@ -12,12 +13,14 @@
 #include <iostream>
 #include <string>
 
+
 #define SIM_LOG_FILE "sim.log"
 
 namespace sim_interface {
-  std::thread s_thread;
+  std::thread s_input_thread;
+  std::thread s_consumer_thread;
   std::mutex s_simmutex;
-  std::atomic<bool> s_statechanged (false);
+  std::atomic<bool> s_statechanged (true);
   uint32_t s_currentplayer = 0;
   uint32_t s_playercount = 0;
 
@@ -27,50 +30,105 @@ namespace sim_interface {
   std::vector<Player> s_players;
 
   std::atomic<bool> s_killsim (false);
+  std::atomic<bool> s_multiplayer(false);
 
-  const size_t BUFFER_LEN = 256;
   char s_buffer[BUFFER_LEN];
 
   template<typename T>
   size_t simulate_step(const T& step) {
     std::lock_guard<std::mutex> lock(s_simmutex);
-    size_t bytes = serialize(s_buffer, BUFFER_LEN, step);
-    simulation::process_step(s_buffer, bytes);
-    s_statechanged = true;
-    std::cout << ">";
+    uint32_t bytes = serialize(s_buffer, BUFFER_LEN, step);
+
+    network::queue_message(s_buffer, bytes);
     return bytes;
   }
 
-  void run_sim() {
-    sim_interface::synch();
-
+  void run_network() {
+    s_multiplayer = true;
+    network::init_network("rufeooo.com", 4000);
     while (!s_killsim) {
-      std::string value;
+      // Hold the simulation mutex while we pump the network
+      std::lock_guard<std::mutex> lock(s_simmutex);
+      bool change = false;
+      do
+      {
+        bool message_ready = false;
+        char *buffer;
+        size_t buffer_len;
+        if (!network::read_socket(message_ready, buffer, buffer_len)) break;
+
+        if (message_ready)
+        {
+          simulation::process_step(buffer, buffer_len);
+          s_statechanged = true;
+        }
+      } while (true);
+
+      while (network::write_socket()) {
+      }
+    }
+  }
+
+  void run_local() {
+    s_multiplayer = false;
+    while (!s_killsim) {
+      std::lock_guard<std::mutex> lock(s_simmutex);
+      
+      bool message_ready = false;
+      char *buffer;
+      size_t buffer_len;
+      network::read_message(message_ready, buffer, buffer_len);
+
+      if (message_ready) {
+        simulation::process_step(buffer, buffer_len);
+        s_statechanged = true;
+      }
+    }
+  }
+
+  void run_sim() {
+    
+    while (!s_killsim) {
+      std::string input;
       std::cout << ">";
-      std::getline(std::cin, value);
+      std::getline(std::cin, input);
       if (!std::cin.good() || s_killsim) {
         break;
       }
 
-      {
+      std::vector<std::string> tokens = terminal::tokenize(input);
+      if (tokens.empty()) continue;
+
+      if (terminal::is_query(tokens)) {
         std::lock_guard<std::mutex> lock(s_simmutex);
-        // parse_input will return false when quit has been called
-        if (!terminal::parse_input(value)) {
-          break;
-        }
-        s_statechanged = true;
+        terminal::run_query(tokens);
+        continue;
       }
+
+      std::lock_guard<std::mutex> lock(s_simmutex);
+      size_t bytes = terminal::step_to_bytes(tokens, s_buffer, BUFFER_LEN);
+      if (!bytes) continue;
+      NETWORK_TYPE t = read_type(s_buffer, bytes);
+      s_killsim = t == NETWORK_TYPE::QUITSTEP;
+
+      network::queue_message(s_buffer, bytes);
     }
 
-    simulation::kill();
     terminal::kill();
+    simulation::kill();
   }
 }
 
-void sim_interface::initialize() {
+void sim_interface::initialize(MULTIPLAYER multiplayer) {
   simulation::start();
   terminal::initialize();
-  s_thread = std::thread(&run_sim);
+  s_input_thread = std::thread(&run_sim);
+  if (multiplayer == MULTIPLAYER::YES) {
+    s_consumer_thread = std::thread(&run_network);
+  }
+  else {
+    s_consumer_thread = std::thread(&run_local);
+  }
 }
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
@@ -135,7 +193,8 @@ void sim_interface::settle() {
 
 void sim_interface::teardown() {
   s_killsim = true;
-  s_thread.join();
+  s_consumer_thread.join();
+  s_input_thread.join();
 }
 
 const world_map::TileMap& sim_interface::get_map() {
