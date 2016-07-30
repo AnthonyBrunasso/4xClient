@@ -2,8 +2,6 @@
 #pragma once
 
 #include <cstdint>
-#include <cstddef>
-#include "network_types.h"
 
 const uint32_t WRITE_BUFFER_HEADER = sizeof(uint32_t);
 
