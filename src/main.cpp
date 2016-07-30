@@ -42,6 +42,11 @@ int main() {
   // Camera must be built before the map is initialized.
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
+  ImGui_ImplGlfwGL3_Init(window, true);
+  bool show_test_window = true;
+  bool show_another_window = false;
+  ImVec4 clear_color = ImColor(114, 144, 154);
+
   sim_interface::initialize();
   map::initialize();
 
@@ -50,6 +55,29 @@ int main() {
     double current_seconds = glfwGetTime();
     double delta_seconds = current_seconds - previous_seconds;
     previous_seconds = current_seconds;
+
+    ImGui_ImplGlfwGL3_NewFrame();
+
+    // 1. Show a simple window
+    // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
+    {
+      static float f = 0.0f;
+      ImGui::Text("Hello, world!");
+      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+      ImGui::ColorEdit3("clear color", (float*)&clear_color);
+      if (ImGui::Button("Test Window")) show_test_window ^= 1;
+      if (ImGui::Button("Another Window")) show_another_window ^= 1;
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    }
+
+    // 2. Show another simple window, this time using an explicit Begin/End pair
+    if (show_another_window)
+    {
+      ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
+      ImGui::Begin("Another Window", &show_another_window);
+      ImGui::Text("Hello");
+      ImGui::End();
+    }
 
     map::update(delta_seconds);
     camera.update(delta_seconds);
@@ -65,6 +93,7 @@ int main() {
 
     //mesh::draw(m);
     map::draw();
+    ImGui::Render();
 
     glfwPollEvents();
     glfwSwapBuffers(window);
@@ -82,6 +111,7 @@ int main() {
   // Don't commit if there is a gl error.
   assert(!glGetError());
 
+  ImGui_ImplGlfwGL3_Shutdown();
   glfwTerminate();
   //delete m;
   map::teardown();

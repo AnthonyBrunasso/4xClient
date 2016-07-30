@@ -97,7 +97,7 @@ void map::initialize() {
   geometry::get_hexagon(verts, norms, indcs);
 
   GLuint tex;
-  texloader::load("grass.png", GL_TEXTURE0, tex);
+  texloader::load("grass.png", GL_TEXTURE5, tex);
   texloader::load("water.png", GL_TEXTURE1, tex);
   texloader::load("desert.png", GL_TEXTURE2, tex);
   texloader::load("plains.png", GL_TEXTURE3, tex);
@@ -168,7 +168,7 @@ void map::draw() {
       s_texloc = 2;
       break;
     case TERRAIN_TYPE::GRASSLAND:
-      s_texloc = 0;
+      s_texloc = 5;
       break;
     case TERRAIN_TYPE::MOUNTAIN:
       s_texloc = 4;
