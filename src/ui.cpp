@@ -16,6 +16,7 @@ namespace ui {
     static float fps;
     fps = ImGui::GetIO().Framerate;
     s_framehistory.insert(fps);
+    ImGui::Begin("Debug");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 
       1000.0f / fps, fps);
 
@@ -34,8 +35,8 @@ namespace ui {
       0, 
       75.0f,
       ImVec2(0, 80));
-
-    ImGui::ShowTestWindow();
+    ImGui::End();
+    //ImGui::ShowTestWindow();
   }
 }
 
@@ -49,4 +50,6 @@ void ui::city(uint32_t id) {
 
 void ui::update() {
   if (s_debug) debug_ui();
+
+
 }

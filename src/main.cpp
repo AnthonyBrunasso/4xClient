@@ -53,33 +53,14 @@ int main() {
   map::initialize();
 
   while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+
     static double previous_seconds = glfwGetTime();
     double current_seconds = glfwGetTime();
     double delta_seconds = current_seconds - previous_seconds;
     previous_seconds = current_seconds;
 
     ImGui_ImplGlfwGL3_NewFrame();
-
-    /*{
-      static float f = 0.0f;
-      ImGui::Text("Hello, world!");
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-      ImGui::ColorEdit3("clear color", (float*)&clear_color);
-      if (ImGui::Button("Test Window")) show_test_window ^= 1;
-      if (ImGui::Button("Another Window")) show_another_window ^= 1;
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    }
-
-    // 2. Show another simple window, this time using an explicit Begin/End pair
-    if (show_another_window)
-    {
-      ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
-      ImGui::Begin("Another Window", &show_another_window);
-      ImGui::Text("Hello");
-      ImGui::End();
-    }*/
-
-    //ImGui::ShowTestWindow();
 
     ui::update();
     map::update(delta_seconds);
@@ -98,7 +79,6 @@ int main() {
     map::draw();
     ImGui::Render();
 
-    glfwPollEvents();
     glfwSwapBuffers(window);
 
     // Recompile shaders
