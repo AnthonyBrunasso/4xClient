@@ -5,4 +5,5 @@
 namespace logging {
   void restart(const std::string& filename);
   void write(const std::string& filename, const std::string& text);
+  std::string read(const std::string& filename);
 }

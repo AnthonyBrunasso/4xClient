@@ -31,3 +31,13 @@ void logging::write(const std::string& filename, const std::string& text) {
   file << text << std::endl;
   file.close();
 }
+
+std::string logging::read(const std::string& filename) {
+  std::ifstream file(filename);
+  std::string output; 
+  std::string str;
+  while (std::getline(file, str)) {
+    output += str + "\n";
+  }
+  return output;
+}
