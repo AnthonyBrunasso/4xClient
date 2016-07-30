@@ -88,7 +88,7 @@ int main() {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.2f, 0.2f, 0.75f, 1.0f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
     glViewport(0, 0, width, height);
 
     //mesh::draw(m);
