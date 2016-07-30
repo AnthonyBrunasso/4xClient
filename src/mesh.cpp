@@ -21,6 +21,8 @@ namespace mesh {
   static const uint32_t NORM_VBO_IDX = 1; 
   static const uint32_t INDX_VBO_IDX = 2; 
 
+  uint32_t s_vert_count = 0;
+
   void load_from_file(Mesh* m, const std::string& filename) {
     if (!m) return;
     std::string file = MESH_DIR;
@@ -185,6 +187,7 @@ Mesh* mesh::create(const std::string& filename, const std::vector<GLuint>& progr
   bind_vertex_data(mesh);
   setup_mvp(mesh);
   setup_material(mesh);
+  s_vert_count += mesh->m_vertices.size();
   return mesh;
 }
 
@@ -204,6 +207,7 @@ Mesh* mesh::create(const std::vector<GLfloat>& vertices
   bind_vertex_data(mesh);
   setup_mvp(mesh);
   setup_material(mesh);
+  s_vert_count += mesh->m_vertices.size();
   return mesh;
 }
 
@@ -349,3 +353,8 @@ void mesh::add_uniform(Mesh* m, const char* name, GLint* value) {
     }
   }
 }
+
+uint32_t mesh::get_vert_count() {
+  return s_vert_count;
+}
+

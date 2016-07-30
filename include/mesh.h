@@ -71,4 +71,7 @@ namespace mesh {
   // Add all floating uniforms before integer uniforms. 
   void add_uniform(Mesh* m, const char* name, GLenum type, GLfloat *value);
   void add_uniform(Mesh* m, const char* name, GLint *value);
+
+  // Get all the number of vertices that has been sent to the gpu, but not necessarily rendering. 
+  uint32_t get_vert_count();
 }

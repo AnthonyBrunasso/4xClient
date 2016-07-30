@@ -173,6 +173,22 @@ void sim_interface::synch() {
   };
   player::for_each_player(append_player);
   s_playercount = player::get_count();
+
+  // Sort all vectors by unique id for fast lookup.
+
+  // Players are sorted by id in 4xsim but lets not assume that and sort it here anyway. 
+  std::sort(s_players.begin(), s_players.end(), [](const Player& lhs, const Player& rhs) {
+    return rhs.m_id > lhs.m_id;
+  });
+
+  std::sort(s_cities.begin(), s_cities.end(), [](const City& lhs, const City& rhs) {
+    return rhs.m_id > lhs.m_id;
+  });
+
+  std::sort(s_units.begin(), s_units.end(), [](const Unit& lhs, const Unit& rhs) {
+    return rhs.m_unique_id > lhs.m_unique_id;
+  });
+
   s_statechanged = false;
 }
 

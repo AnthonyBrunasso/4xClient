@@ -17,6 +17,7 @@
 #include "sim_interface.h"
 #include "program.h"
 #include "light.h"
+#include "ui.h"
 
 void initialize() {
   program::build("phong", {
@@ -43,6 +44,7 @@ int main() {
   Camera camera(0.1f, 200.0f, 45.0f, static_cast<float>(width) / height);
 
   ImGui_ImplGlfwGL3_Init(window, true);
+  ui::debug(true);
   bool show_test_window = true;
   bool show_another_window = false;
   ImVec4 clear_color = ImColor(114, 144, 154);
@@ -58,9 +60,7 @@ int main() {
 
     ImGui_ImplGlfwGL3_NewFrame();
 
-    // 1. Show a simple window
-    // Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
-    {
+    /*{
       static float f = 0.0f;
       ImGui::Text("Hello, world!");
       ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
@@ -77,8 +77,11 @@ int main() {
       ImGui::Begin("Another Window", &show_another_window);
       ImGui::Text("Hello");
       ImGui::End();
-    }
+    }*/
 
+    //ImGui::ShowTestWindow();
+
+    ui::update();
     map::update(delta_seconds);
     camera.update(delta_seconds);
 
