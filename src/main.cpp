@@ -7,6 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui.h>
+#include "imgui_impl_glfw_gl3.h"
+
 #include "camera.h"
 #include "gl.h"
 #include "map.h"
@@ -18,12 +21,7 @@
 void initialize() {
   program::build("phong", {
     {GL_VERTEX_SHADER, "simple_phong.vert"},
-    {GL_FRAGMENT_SHADER, "simple_phong.frag"}
-  });
-
-  program::build("texture", {
-    { GL_VERTEX_SHADER, "simple_texture.vert" },
-    { GL_FRAGMENT_SHADER, "simple_texture.frag" }
+    {GL_FRAGMENT_SHADER, "simple_phong.frag"},
   });
 
   glm::vec3 pos(0.0, 0.0f, 0.0f);

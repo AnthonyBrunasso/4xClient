@@ -20,13 +20,15 @@
 
 namespace map {
   glm::ivec3 s_selected;
-  Mesh* s_mesh = nullptr;
+  Mesh* s_tile = nullptr;
   Mesh* s_pawnmesh = nullptr;
   Mesh* s_rookmesh = nullptr;
   Mesh* s_queenmesh = nullptr;
   Mesh* s_bishopmesh = nullptr;
   Mesh* s_hutmesh = nullptr;
   GLint s_texloc = 0;
+  GLint s_usetex = 1;
+  GLint s_dontusetex = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -101,8 +103,8 @@ void map::initialize() {
   texloader::load("plains.png", GL_TEXTURE3, tex);
   texloader::load("mountain.png", GL_TEXTURE4, tex);
 
-  s_mesh = mesh::create(std::move(verts), std::move(norms), std::move(indcs), {
-    program::get("texture")
+  s_tile = mesh::create(std::move(verts), std::move(norms), std::move(indcs), {
+    program::get("phong")
   });
 
   s_pawnmesh = mesh::create("pawn.obj", { program::get("phong") });
@@ -111,14 +113,23 @@ void map::initialize() {
   s_bishopmesh = mesh::create("bishop.obj", { program::get("phong") });
   s_hutmesh = mesh::create("hut.obj", { program::get("phong") });
 
+
   light::apply(s_pawnmesh);
   light::apply(s_rookmesh);
   light::apply(s_queenmesh);
   light::apply(s_bishopmesh);
   light::apply(s_hutmesh);
+  light::apply(s_tile);
 
-  mesh::bind_texture_data(s_mesh, geometry::get_hexagontexcoords());
-  mesh::add_uniform(s_mesh, "basic_texture", &s_texloc);
+  mesh::add_uniform(s_pawnmesh, "use_texture", &s_dontusetex);
+  mesh::add_uniform(s_rookmesh, "use_texture", &s_dontusetex);
+  mesh::add_uniform(s_queenmesh, "use_texture", &s_dontusetex);
+  mesh::add_uniform(s_bishopmesh, "use_texture", &s_dontusetex);
+  mesh::add_uniform(s_hutmesh, "use_texture", &s_dontusetex);
+
+  mesh::bind_texture_data(s_tile, geometry::get_hexagontexcoords());
+  mesh::add_uniform(s_tile, "tex_sampler", &s_texloc);
+  mesh::add_uniform(s_tile, "use_texture", &s_usetex);
 
   GLFWwindow* w = gl::get_current_window();
 
@@ -135,7 +146,7 @@ void map::teardown() {
   delete s_queenmesh;
   delete s_rookmesh;
   delete s_pawnmesh;
-  delete s_mesh;
+  delete s_tile;
 }
 
 void map::update(double delta) {
@@ -150,7 +161,7 @@ void map::draw() {
   for (const auto& t : tiles) {
     pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-    mesh::set_position(s_mesh, glm::vec3(world.x, world.y, 0.0f));
+    mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.0f));
     s_texloc = 0;
     switch (t.second.m_terrain_type) {
     case TERRAIN_TYPE::DESERT:
@@ -171,7 +182,7 @@ void map::draw() {
     case TERRAIN_TYPE::UNKNOWN:
       break;
     }
-    mesh::draw(s_mesh);
+    mesh::draw(s_tile);
   }
 
   const std::vector<Player>& players = sim_interface::get_players();

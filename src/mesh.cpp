@@ -137,6 +137,16 @@ namespace mesh {
       GLint kd = glGetUniformLocation(p.first, "kd");
       GLint ks = glGetUniformLocation(p.first, "ks");
 
+      // Set up some random light materials if they don't exist.
+      if (m->m_light_material.size() != 3) {
+        m->m_light_material.resize(3);
+        // Black ambient.
+        m->m_light_material[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+        // Gray diffuse and specular.
+        m->m_light_material[1] = glm::vec3(0.4f, 0.4f, 0.4f);
+        m->m_light_material[2] = glm::vec3(0.7f, 0.7f, 0.7f);
+      }
+
       if (ka != -1) {
         p.second.push_back(ka);
         m->m_uniform_fdata.push_back(
