@@ -1,12 +1,28 @@
 
 #include "network.h"
 #include "x_socket.h"
+#include "network_types.h"
 #include <cstring>
+#include <deque>
+
+struct ReadBuffer
+{
+  static const size_t LENGTH = largest_message() + WRITE_BUFFER_HEADER;
+  char buffer[LENGTH];
+  uint32_t read_offset = { 0 };
+};
+struct WriteBuffer
+{
+  char* buffer;
+  uint32_t buffer_len;
+  uint32_t write_offset = { 0 };
+};
 
 namespace network {
   ReadBuffer s_read_state;
   int s_socket;
   std::deque<WriteBuffer> s_send_queue;
+
 
   void queue_message(const char* buffer, size_t buffer_len) {
     WriteBuffer game_command;

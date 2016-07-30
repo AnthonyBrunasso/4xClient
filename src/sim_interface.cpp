@@ -32,6 +32,7 @@ namespace sim_interface {
   std::atomic<bool> s_killsim (false);
   std::atomic<bool> s_multiplayer(false);
 
+  const size_t BUFFER_LEN = largest_message();
   char s_buffer[BUFFER_LEN];
 
   template<typename T>
