@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <deque>
 
 const size_t BUFFER_LEN = 256;

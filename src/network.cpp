@@ -1,6 +1,7 @@
 
 #include "network.h"
 #include "x_socket.h"
+#include <cstring>
 
 namespace network {
   ReadBuffer s_read_state;
