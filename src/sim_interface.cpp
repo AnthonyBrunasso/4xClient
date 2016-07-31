@@ -97,14 +97,15 @@ namespace sim_interface {
 void sim_interface::initialize(MULTIPLAYER multiplayer) {
   simulation::start();
   terminal::initialize();
-  s_input_thread = std::thread(&run_sim);
 
   xmessaging::alloc_read_buffer(largest_message());
   s_multiplayer = multiplayer == MULTIPLAYER::YES;
   if (multiplayer == MULTIPLAYER::YES) {
     xmessaging::init_transport("rufeooo.com", 4000);
+    std::cout << "Client's protocol version is: " << get_checksum() << std::endl;
   }
   s_consumer_thread = std::thread(&run_messaging);
+  s_input_thread = std::thread(&run_sim);
 }
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
