@@ -4,6 +4,7 @@
 #include <cstring>
 #include <deque>
 
+const uint32_t WRITE_BUFFER_HEADER = { sizeof(uint32_t) };
 
 struct ReadBuffer
 {
@@ -23,33 +24,7 @@ namespace network {
   std::deque<WriteBuffer> s_send_queue;
 
 
-  void queue_message(const char* buffer, size_t buffer_len) {
-    WriteBuffer game_command;
-    game_command.buffer_len = buffer_len + WRITE_BUFFER_HEADER;
-    game_command.buffer = new char[game_command.buffer_len];
-    memcpy(game_command.buffer, &buffer_len, WRITE_BUFFER_HEADER);
-    memcpy(game_command.buffer + WRITE_BUFFER_HEADER, buffer, buffer_len);
-    s_send_queue.push_back(game_command);
-  }
-
-  void read_message(bool& message_read, char*& buffer, size_t& buffer_len)
-  {
-    size_t bytes = 0;
-    message_read = false;
-    if (s_send_queue.empty()) return;
-
-    message_read = true;
-    WriteBuffer command = s_send_queue.front();
-    s_send_queue.pop_front();
-
-    buffer_len = command.buffer_len - WRITE_BUFFER_HEADER;
-    buffer = s_read_state.buffer;
-    memcpy(s_read_state.buffer, command.buffer + WRITE_BUFFER_HEADER, buffer_len);
-
-    delete[] command.buffer;
-  }
-
-  int init_network(const char* host, short port)
+  int init_transport(const char* host, short port)
   {
     static int network_init = x_socket::init();
     if (!s_socket) {
@@ -57,11 +32,11 @@ namespace network {
       x_socket::connect(s_socket, host, port);
       x_socket::nonblocking(s_socket);
     }
-    
+
     return s_socket;
   }
 
-  void stop_network()
+  void stop_transport()
   {
     x_socket::destroy(s_socket);
     s_socket = 0;
@@ -132,5 +107,60 @@ namespace network {
     current.write_offset += write_buffered;
 
     return true;
+  }
+
+  void queue_message(const char* buffer, size_t buffer_len) {
+    WriteBuffer game_command;
+    game_command.buffer_len = buffer_len + WRITE_BUFFER_HEADER;
+    game_command.buffer = new char[game_command.buffer_len];
+    memcpy(game_command.buffer, &buffer_len, WRITE_BUFFER_HEADER);
+    memcpy(game_command.buffer + WRITE_BUFFER_HEADER, buffer, buffer_len);
+    s_send_queue.push_back(game_command);
+  }
+
+  bool read_from_transport(bool& message_read, char*& buffer, size_t& buffer_len)
+  {
+    while (network::write_socket()) {
+    }
+
+    while(network::read_socket(message_read, buffer, buffer_len)) {
+      if (message_read)
+      {
+        return true;
+      }
+    };
+
+    return false;
+  }
+
+  bool read_from_queue(bool& message_read, char*& buffer, size_t& buffer_len)
+  {
+    size_t bytes = 0;
+    message_read = false;
+    if (s_send_queue.empty()) return false;
+
+    message_read = true;
+    WriteBuffer command = s_send_queue.front();
+    s_send_queue.pop_front();
+
+    buffer_len = command.buffer_len - WRITE_BUFFER_HEADER;
+    buffer = s_read_state.buffer;
+    memcpy(s_read_state.buffer, command.buffer + WRITE_BUFFER_HEADER, buffer_len);
+
+    delete[] command.buffer;
+    return true;
+  }
+
+  bool update(bool& message_read, char*& buffer, size_t& buffer_len)
+  {
+    bool more_data;
+    if (s_socket) {
+      more_data = read_from_transport(message_read, buffer, buffer_len);
+    }
+    else {
+      more_data = read_from_queue(message_read, buffer, buffer_len);
+    }
+
+    return more_data;
   }
 }

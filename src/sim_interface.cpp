@@ -44,45 +44,17 @@ namespace sim_interface {
     return bytes;
   }
 
-  void run_network() {
-    s_multiplayer = true;
-    network::init_network("rufeooo.com", 4000);
+  void run_messaging() {
+    
     while (!s_killsim) {
       // Hold the simulation mutex while we pump the network
       std::lock_guard<std::mutex> lock(s_simmutex);
-      bool change = false;
-      do
-      {
-        bool message_ready = false;
-        char *buffer;
-        size_t buffer_len;
-        if (!network::read_socket(message_ready, buffer, buffer_len)) break;
-
-        if (message_ready)
-        {
-          simulation::process_step(buffer, buffer_len);
-          s_statechanged = true;
-        }
-      } while (true);
-
-      while (network::write_socket()) {
-      }
-    }
-
-    network::stop_network();
-  }
-
-  void run_local() {
-    s_multiplayer = false;
-    while (!s_killsim) {
-      std::lock_guard<std::mutex> lock(s_simmutex);
-      
-      bool message_ready = false;
+      bool message_read = false;
       char *buffer;
       size_t buffer_len;
-      network::read_message(message_ready, buffer, buffer_len);
-
-      if (message_ready) {
+      network::update(message_read, buffer, buffer_len);
+      if (message_read)
+      {
         simulation::process_step(buffer, buffer_len);
         s_statechanged = true;
       }
@@ -126,13 +98,13 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
   simulation::start();
   terminal::initialize();
   s_input_thread = std::thread(&run_sim);
+
   network::alloc_read_buffer(largest_message());
+  s_multiplayer = multiplayer == MULTIPLAYER::YES;
   if (multiplayer == MULTIPLAYER::YES) {
-    s_consumer_thread = std::thread(&run_network);
+    network::init_transport("rufeooo.com", 4000);
   }
-  else {
-    s_consumer_thread = std::thread(&run_local);
-  }
+  s_consumer_thread = std::thread(&run_messaging);
 }
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
@@ -197,6 +169,9 @@ void sim_interface::settle() {
 
 void sim_interface::teardown() {
   s_killsim = true;
+  if (s_multiplayer) {
+    network::stop_transport();
+  }
   network::dealloc_read_buffer();
   s_consumer_thread.join();
   s_input_thread.join();
