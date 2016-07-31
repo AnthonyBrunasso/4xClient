@@ -1,15 +1,13 @@
 
 #include "network.h"
 #include "x_socket.h"
-#include "network_types.h"
 #include <cstring>
 #include <deque>
 
 
 struct ReadBuffer
 {
-  static const size_t LENGTH = largest_message() + WRITE_BUFFER_HEADER;
-  char buffer[LENGTH];
+  char *buffer = { 0 };
   uint32_t read_offset = { 0 };
 };
 struct WriteBuffer
@@ -51,15 +49,35 @@ namespace network {
     delete[] command.buffer;
   }
 
-  int init_network(const char* host, short port) {
+  int init_network(const char* host, short port)
+  {
     static int network_init = x_socket::init();
-    if (!s_socket)
-    {
+    if (!s_socket) {
       s_socket = x_socket::create_tcp();
       x_socket::connect(s_socket, host, port);
       x_socket::nonblocking(s_socket);
     }
+    
     return s_socket;
+  }
+
+  void stop_network()
+  {
+    x_socket::destroy(s_socket);
+    s_socket = 0;
+  }
+
+  void alloc_read_buffer(size_t read_buffer_size)
+  {
+    if (!s_read_state.buffer)
+    {
+      s_read_state.buffer = new char[read_buffer_size + WRITE_BUFFER_HEADER];
+    }
+  }
+
+  void dealloc_read_buffer() {
+    delete[] s_read_state.buffer;
+    s_read_state.buffer = nullptr;
   }
 
   bool BufferSent(const WriteBuffer& buffer) {

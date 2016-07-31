@@ -68,6 +68,8 @@ namespace sim_interface {
       while (network::write_socket()) {
       }
     }
+
+    network::stop_network();
   }
 
   void run_local() {
@@ -124,6 +126,7 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
   simulation::start();
   terminal::initialize();
   s_input_thread = std::thread(&run_sim);
+  network::alloc_read_buffer(largest_message());
   if (multiplayer == MULTIPLAYER::YES) {
     s_consumer_thread = std::thread(&run_network);
   }
@@ -194,6 +197,7 @@ void sim_interface::settle() {
 
 void sim_interface::teardown() {
   s_killsim = true;
+  network::dealloc_read_buffer();
   s_consumer_thread.join();
   s_input_thread.join();
 }

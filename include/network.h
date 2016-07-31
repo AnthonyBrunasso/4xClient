@@ -13,6 +13,10 @@ namespace network {
   void read_message(bool& message_read, char*& buffer, size_t& buffer_len);
 
   int init_network(const char* host, short port);
+  void stop_network();
+  void alloc_read_buffer(size_t read_buffer_size);
+  void dealloc_read_buffer();
+
   bool read_socket(bool& message_read, char*& buffer, size_t& buffer_len);
   bool write_socket();
 }
