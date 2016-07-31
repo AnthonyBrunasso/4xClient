@@ -4,7 +4,7 @@
 #include "simulation.h"
 #include "game_types.h"
 #include "network_types.h"
-#include "network.h"
+#include "messaging.h"
 #include "selection.h"
 
 #include <thread>
@@ -40,7 +40,7 @@ namespace sim_interface {
     std::lock_guard<std::mutex> lock(s_simmutex);
     uint32_t bytes = serialize(s_buffer, BUFFER_LEN, step);
 
-    network::queue_message(s_buffer, bytes);
+    xmessaging::queue(s_buffer, bytes);
     return bytes;
   }
 
@@ -52,7 +52,7 @@ namespace sim_interface {
       bool message_read = false;
       char *buffer;
       size_t buffer_len;
-      network::update(message_read, buffer, buffer_len);
+      xmessaging::update(message_read, buffer, buffer_len);
       if (message_read)
       {
         simulation::process_step(buffer, buffer_len);
@@ -86,7 +86,7 @@ namespace sim_interface {
       NETWORK_TYPE t = read_type(s_buffer, bytes);
       s_killsim = t == NETWORK_TYPE::QUITSTEP;
 
-      network::queue_message(s_buffer, bytes);
+      xmessaging::queue(s_buffer, bytes);
     }
 
     terminal::kill();
@@ -99,10 +99,10 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
   terminal::initialize();
   s_input_thread = std::thread(&run_sim);
 
-  network::alloc_read_buffer(largest_message());
+  xmessaging::alloc_read_buffer(largest_message());
   s_multiplayer = multiplayer == MULTIPLAYER::YES;
   if (multiplayer == MULTIPLAYER::YES) {
-    network::init_transport("rufeooo.com", 4000);
+    xmessaging::init_transport("rufeooo.com", 4000);
   }
   s_consumer_thread = std::thread(&run_messaging);
 }
@@ -170,9 +170,9 @@ void sim_interface::settle() {
 void sim_interface::teardown() {
   s_killsim = true;
   if (s_multiplayer) {
-    network::stop_transport();
+    xmessaging::stop_transport();
   }
-  network::dealloc_read_buffer();
+  xmessaging::dealloc_read_buffer();
   s_consumer_thread.join();
   s_input_thread.join();
 }
