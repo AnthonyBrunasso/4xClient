@@ -12,6 +12,7 @@
 #include <atomic>
 #include <iostream>
 #include <string>
+#include <vector>
 
 
 #define SIM_LOG_FILE "sim.log"
@@ -33,14 +34,14 @@ namespace sim_interface {
   std::atomic<bool> s_multiplayer(false);
 
   const size_t BUFFER_LEN = largest_message();
-  char s_buffer[BUFFER_LEN];
+  std::vector<char> s_buffer(BUFFER_LEN);
 
   template<typename T>
   size_t simulate_step(const T& step) {
     std::lock_guard<std::mutex> lock(s_simmutex);
-    uint32_t bytes = serialize(s_buffer, BUFFER_LEN, step);
+    uint32_t bytes = serialize(s_buffer.data(), BUFFER_LEN, step);
 
-    xmessaging::queue(s_buffer, bytes);
+    xmessaging::queue(s_buffer.data(), bytes);
     return bytes;
   }
 
@@ -81,12 +82,12 @@ namespace sim_interface {
       }
 
       std::lock_guard<std::mutex> lock(s_simmutex);
-      size_t bytes = terminal::step_to_bytes(tokens, s_buffer, BUFFER_LEN);
+      size_t bytes = terminal::step_to_bytes(tokens, s_buffer.data(), BUFFER_LEN);
       if (!bytes) continue;
-      NETWORK_TYPE t = read_type(s_buffer, bytes);
+      NETWORK_TYPE t = read_type(s_buffer.data(), bytes);
       s_killsim = t == NETWORK_TYPE::QUITSTEP;
 
-      xmessaging::queue(s_buffer, bytes);
+      xmessaging::queue(s_buffer.data(), bytes);
     }
 
     terminal::kill();

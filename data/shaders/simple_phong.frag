@@ -28,11 +28,11 @@ void apply_phong(vec3 n, vec3 lpos) {
   vec3 h = normalize(l + v);
   float costh = max(dot(n, h), 0.0);
   float costi = max(dot(n, l), 0.0);
-  frag_color += vec4((ka + (kd + ks * pow(costh, sexp))) * costi, 1.0);
+  frag_color = vec4((ka + (kd + ks * pow(costh, sexp))) * costi, 1.0);
 }
 
 void apply_texture() {
-  frag_color += texture(tex_sampler, tex_coords); 
+  frag_color = texture(tex_sampler, tex_coords); 
 }
 
 void main() {

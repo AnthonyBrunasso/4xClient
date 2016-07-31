@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include <functional>
+#include <string>
 
 #include <cstdint>
 
@@ -41,6 +42,8 @@ public:
  
   // Order is ka, kd, ks. 
   std::vector<glm::vec3> m_light_material;
+
+  std::string m_name;
 };
 
 namespace mesh {

@@ -188,6 +188,8 @@ Mesh* mesh::create(const std::string& filename, const std::vector<GLuint>& progr
   setup_mvp(mesh);
   setup_material(mesh);
   s_vert_count += mesh->m_vertices.size();
+  mesh->m_name = filename;
+  logging::write(MESH_LOG_FILE, "Building: " + mesh->m_name);
   return mesh;
 }
 
@@ -208,6 +210,8 @@ Mesh* mesh::create(const std::vector<GLfloat>& vertices
   setup_mvp(mesh);
   setup_material(mesh);
   s_vert_count += mesh->m_vertices.size();
+  mesh->m_name = "Undefined";
+  logging::write(MESH_LOG_FILE, "Building: " + mesh->m_name);
   return mesh;
 }
 
