@@ -7,6 +7,7 @@
 #include "messaging.h"
 #include "selection.h"
 
+#include <chrono>
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -48,6 +49,7 @@ namespace sim_interface {
   void run_messaging() {
     
     while (!s_killsim) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(16));
       // Hold the simulation mutex while we pump the network
       std::lock_guard<std::mutex> lock(s_simmutex);
       bool message_read = false;
