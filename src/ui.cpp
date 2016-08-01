@@ -119,6 +119,23 @@ void ui::update() {
       ImGui::Text("No current production");
     }
 
+    if (construction && construction->Queue().size() > 1) {
+      ImGui::Text("Queue");
+      ImGui::Columns(2, "mycolumns"); // 4-ways, with border
+      ImGui::Separator();
+      ImGui::Text("Construction"); ImGui::NextColumn();
+      ImGui::Text("Production"); ImGui::NextColumn();
+      ImGui::Separator();
+
+      for (uint32_t i = 1; i < construction->Queue().size(); ++i) {
+        ImGui::Text("%s", get_construction_name(construction->Queue()[i])); ImGui::NextColumn();
+        ImGui::Text("%.2f", production::required(construction->Queue()[i])); ImGui::NextColumn();
+      }
+
+      ImGui::Columns(1);
+      ImGui::Separator();
+    }
+
     ImGui::Text("Pick Construction");
     ImGui::Columns(3, "mycolumns"); // 4-ways, with border
     ImGui::Separator();

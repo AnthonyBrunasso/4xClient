@@ -20,8 +20,8 @@ void selection::lclick(const glm::ivec3& location) {
   const std::vector<Unit>& units = sim_interface::get_units();
   for (const auto& u : units) {
     if (u.m_location.x == location.x &&
-        u.m_location.x == location.x &&
-        u.m_location.x == location.x) {
+        u.m_location.y == location.y &&
+        u.m_location.z == location.z) {
       has_unit = true;
     }
   }
@@ -32,8 +32,8 @@ void selection::lclick(const glm::ivec3& location) {
   const std::vector<City>& cities = sim_interface::get_cities();
   for (const auto& c : cities) {
     if (c.m_location.x == location.x &&
-        c.m_location.x == location.x &&
-        c.m_location.x == location.x) {
+        c.m_location.y == location.y &&
+        c.m_location.z == location.z) {
       ui::city(c.m_id);
     }
   }
