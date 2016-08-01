@@ -1,6 +1,7 @@
 #include "selection.h"
 
 #include "sim_interface.h"
+#include "ui.h"
 
 #include <iostream>
 
@@ -14,6 +15,28 @@ const glm::ivec3& selection::get() {
 
 void selection::lclick(const glm::ivec3& location) {
   s_selected = location;
+
+  bool has_unit = false;
+  const std::vector<Unit>& units = sim_interface::get_units();
+  for (const auto& u : units) {
+    if (u.m_location.x == location.x &&
+        u.m_location.x == location.x &&
+        u.m_location.x == location.x) {
+      has_unit = true;
+    }
+  }
+
+  if (has_unit) return;
+
+  // Check if there is a city a the location to open the ui for it.
+  const std::vector<City>& cities = sim_interface::get_cities();
+  for (const auto& c : cities) {
+    if (c.m_location.x == location.x &&
+        c.m_location.x == location.x &&
+        c.m_location.x == location.x) {
+      ui::city(c.m_id);
+    }
+  }
 }
 
 void selection::rclick(const glm::ivec3& location) {

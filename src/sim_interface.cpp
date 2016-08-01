@@ -124,6 +124,14 @@ void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
   }
 }
 
+void sim_interface::construct(uint32_t city_id, CONSTRUCTION_TYPE type) {
+  ConstructionStep construction;
+  construction.set_city_id(city_id);
+  construction.set_production_id(static_cast<uint32_t>(type));
+  construction.set_player(s_currentplayer);
+  simulate_step(construction);
+}
+
 void sim_interface::end_turn() {
   EndTurnStep step;
   step.set_player(s_currentplayer);

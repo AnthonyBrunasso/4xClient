@@ -806,7 +806,7 @@ void ImGui::ShowTestWindow(bool* p_open)
         }
 
         // Typically we would use ImVec2(-1.0f,0.0f) to use all available width, or ImVec2(width,0.0f) for a specified width. ImVec2(0.0f,0.0f) uses ItemWidth.
-        ImGui::ProgressBar(progress, ImVec2(0.0f,0.0f));
+        ImGui::ProgressBar(progress, ImVec2(0.0f, 10.0f));
         ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
         ImGui::Text("Progress Bar");
 

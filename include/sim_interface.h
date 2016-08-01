@@ -22,6 +22,7 @@ namespace sim_interface {
   void teardown();
 
   void move_unit(uint32_t id, const glm::ivec3& location);
+  void construct(uint32_t city_id, CONSTRUCTION_TYPE type);
   void end_turn();
 
   void join_player();
