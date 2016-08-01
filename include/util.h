@@ -11,7 +11,7 @@ namespace util {
     size_t mid;
     size_t min = 0;
     size_t max = size;
-    while (min < max) {
+    while (min <= max) {
       mid = (max - min) / 2;
       if (d[mid].m_id == id) {
         return &d[mid];
