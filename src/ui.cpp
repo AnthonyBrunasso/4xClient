@@ -80,7 +80,7 @@ namespace ui {
     if (show_mesh_logs) debug_log("Mesh Logs", mesh_logs, show_mesh_logs);
     if (show_image_logs) debug_log("Image Logs", image_logs, show_image_logs);
 
-    ImGui::ShowTestWindow();
+    //ImGui::ShowTestWindow();
   }
 }
 
