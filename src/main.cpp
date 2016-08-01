@@ -25,7 +25,7 @@ void initialize() {
     {GL_FRAGMENT_SHADER, "simple_phong.frag"},
   });
 
-  glm::vec3 pos(0.0, 0.0f, 0.0f);
+  glm::vec3 pos(0.0, 30.0f, 0.0f);
   light::add(pos);
 }
 

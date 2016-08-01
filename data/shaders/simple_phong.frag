@@ -17,34 +17,34 @@ in vec2 tex_coords;
 uniform sampler2D tex_sampler;
 uniform int use_texture = 0;
 
-float sexp = 27.0; // Specular power
+float sexp = 2007.0; // Specular power
 
 out vec4 frag_color;
 
-void apply_phong(vec3 n, vec3 lpos) {
+void get_phong(vec3 n, vec3 lpos, out vec3 amb_diff, out vec3 spec) {
   // Notice lpos is not brought into view space. It is relative to the camera.
   vec3 l = normalize(lpos - eye_pos);
   vec3 v = normalize(-eye_pos);
   vec3 h = normalize(l + v);
   float costh = max(dot(n, h), 0.0);
   float costi = max(dot(n, l), 0.0);
-  frag_color = vec4((ka + (kd + ks * pow(costh, sexp))) * costi, 1.0);
-}
-
-void apply_texture() {
-  frag_color = texture(tex_sampler, tex_coords); 
+  amb_diff = ka + kd * costi;
+  spec = ks * pow(costh, sexp);
 }
 
 void main() {
   // TODO: Clean this up.
+  vec4 tex = vec4(1.0, 1.0, 1.0, 1.0);
   if (use_texture > 0) {
-    apply_texture();
+    tex = texture(tex_sampler, tex_coords); 
   }
 
-  if (use_texture == 0) {
-    for (int i = 0; i < lcount; ++i) {
-      apply_phong(eye_norm, lpositions[i]);
-    }
+  vec3 amb_diff = vec3(0.2, 0.2, 0.2);
+  vec3 spec = vec3(0.2, 0.2, 0.2);
+  for (int i = 0; i < lcount; ++i) {
+    get_phong(eye_norm, lpositions[i], amb_diff, spec);
   }
+
+  frag_color = vec4(amb_diff, 1.0) * tex + vec4(spec, 1.0);
 }
 

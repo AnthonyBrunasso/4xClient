@@ -107,6 +107,11 @@ void map::initialize() {
     program::get("phong")
   });
 
+  // Give the tile some light.
+  s_tile->m_light_material[0] = glm::vec3(0.4f, 0.4f, 0.4f);
+  s_tile->m_light_material[1] = glm::vec3(0.5f, 0.5f, 0.5f);
+  s_tile->m_light_material[2] = glm::vec3(0.3f, 0.35f, 0.3f);
+
   s_pawnmesh = mesh::create("pawn.obj", { program::get("phong") });
   s_rookmesh = mesh::create("rook.obj", { program::get("phong") });
   s_queenmesh = mesh::create("queen.obj", { program::get("phong") });
