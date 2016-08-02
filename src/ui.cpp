@@ -82,6 +82,39 @@ namespace ui {
 
     //ImGui::ShowTestWindow();
   }
+
+  void render_construction(ConstructionQueueFIFO* cq) {
+    if (!cq) return;
+    if (cq->m_queue.size() == 0) {
+      ImGui::Text("No current production");
+      return;
+    }
+    
+    ConstructionOrder* co = cq->m_queue.front();
+    ImGui::Text("Constructing: %s", production::name(co));
+    ImGui::ProgressBar(production::current(co) / production::required(co), ImVec2(0.0f, 0.0f));
+      
+    if (cq->m_queue.size() == 1) return;
+    
+    ImGui::Separator();
+
+    ImGui::Text("Full Queue");
+    ImGui::Columns(2, "mycolumns"); // 4-ways, with border
+    ImGui::Text("Name"); ImGui::NextColumn();
+    ImGui::Text("Turns"); ImGui::NextColumn();
+    ImGui::Separator();
+
+    ConstructionList::const_iterator cit = cq->m_queue.begin();
+    float turns = 0.0;
+    
+    for (auto co : cq->m_queue) {
+      turns += production::turns(co);
+      ImGui::Text("%s", production::name(co)); ImGui::NextColumn();
+      ImGui::Text("%.1f", turns); ImGui::NextColumn();
+    }
+
+    ImGui::Columns(1);
+  }
 }
 
 void ui::debug(bool on) {
@@ -110,31 +143,9 @@ void ui::update() {
     ImGui::Begin("City");
     ImGui::Text("Production");
     ImGui::Separator();
-    ConstructionQueueFIFO* construction = city->GetConstruction();
-    if (construction && !construction->Queue().empty()) {
-      ImGui::Text("Constructing: %s", get_construction_name(construction->Queue().front()));
-      ImGui::ProgressBar(construction->m_queue.front()->m_production / production::required(construction->Queue().front()), ImVec2(0.0f, 0.0f));
-    }
-    else {
-      ImGui::Text("No current production");
-    }
 
-    if (construction && construction->Queue().size() > 1) {
-      ImGui::Text("Queue");
-      ImGui::Columns(2, "mycolumns"); // 4-ways, with border
-      ImGui::Separator();
-      ImGui::Text("Construction"); ImGui::NextColumn();
-      ImGui::Text("Production"); ImGui::NextColumn();
-      ImGui::Separator();
-
-      for (uint32_t i = 1; i < construction->Queue().size(); ++i) {
-        ImGui::Text("%s", get_construction_name(construction->Queue()[i])); ImGui::NextColumn();
-        ImGui::Text("%.2f", production::required(construction->Queue()[i])); ImGui::NextColumn();
-      }
-
-      ImGui::Columns(1);
-      ImGui::Separator();
-    }
+    render_construction(city->GetConstruction());
+    ImGui::Separator();
 
     ImGui::Text("Pick Construction");
     ImGui::Columns(3, "mycolumns"); // 4-ways, with border
