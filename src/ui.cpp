@@ -9,7 +9,7 @@
 #include "sim_interface.h"
 #include "mesh.h"
 #include "log.h"
-#include "util.h"
+#include "client_util.h"
 
 namespace ui {
   // Cities to render ui for.
