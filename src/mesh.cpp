@@ -283,6 +283,20 @@ void mesh::draw(Mesh* m) {
   }
 }
 
+// Draw the mesh without considering any of its internal shader programs or properties, only its vao.
+void mesh::raw_draw(Mesh* m) {
+  glBindVertexArray(m->m_vao);
+  // Use indices if the exist.
+  if (m->m_indices.size()) {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m->m_indices.size()), GL_UNSIGNED_INT, 0);
+  }
+  // Otherwise draw the verts as triangles.
+  else {
+    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m->m_vertices.size()) / 3);
+  }
+  glBindVertexArray(0);
+}
+
 void mesh::bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords) {
   if (!m) return;
   glBindVertexArray(m->m_vao);

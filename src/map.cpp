@@ -31,6 +31,9 @@ namespace map {
   GLint s_dontusetex = 0;
   glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
+  GLuint s_outlineshader;
+  std::vector<GLint> s_outlineuniforms;
+
   void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     double xpos, ypos;
     glfwGetCursorPos(window, &xpos, &ypos);
@@ -91,6 +94,18 @@ namespace map {
 
 void map::initialize() {
   Camera* c = camera::get_current();
+
+  program::build("outline", {
+    {GL_VERTEX_SHADER, "simple_phong.vert"},
+    {GL_FRAGMENT_SHADER, "outline.frag"},
+  });
+
+  s_outlineshader = program::get("outline"); 
+
+  s_outlineuniforms.resize(3);
+  s_outlineuniforms[0] = glGetUniformLocation(s_outlineshader, "view");
+  s_outlineuniforms[1] = glGetUniformLocation(s_outlineshader, "proj");
+  s_outlineuniforms[2] = glGetUniformLocation(s_outlineshader, "model");
 
   std::vector<GLfloat> verts, norms;
   std::vector<GLuint> indcs;
@@ -163,6 +178,12 @@ void map::update(double delta) {
 void map::draw() {
   glm::ivec3 pos;
   const world_map::TileMap& tiles = sim_interface::get_map();
+
+  glEnable(GL_STENCIL_TEST);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glStencilMask(0x00); // Make sure we don't update the stencil buffer while drawing the floor
+
   for (const auto& t : tiles) {
     pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
@@ -202,6 +223,10 @@ void map::draw() {
     pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
     glm::vec2 world = glm_hex::cube_to_world(pos, 3);
     Mesh* todraw;
+
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+
     switch (u.m_unit_type) {
     case UNIT_TYPE::PHALANX:
       todraw = s_rookmesh;
@@ -219,6 +244,7 @@ void map::draw() {
       todraw = s_pawnmesh;
       break;
     }
+    mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
     mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
 
     if (is_barbarian) {
@@ -230,6 +256,37 @@ void map::draw() {
     }
     else {
       mesh::draw(todraw);
+    }
+
+    if (s_selected == pos) {
+      Camera* c = camera::get_current();
+      assert(c);
+
+      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      glStencilMask(0x00);
+      glDisable(GL_DEPTH_TEST);
+
+      glUseProgram(s_outlineshader);
+
+      // Move the mesh towards the camera.
+      glm::vec3 old_position = todraw->m_position;
+      glm::vec3 towards_camera = glm::normalize(c->m_position - old_position);
+      mesh::set_position(todraw, old_position + (3.0f * towards_camera));
+      mesh::update_transform(todraw);
+
+      glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
+      glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
+      glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
+
+      mesh::raw_draw(todraw);
+
+      // Set back to its original scale.
+      mesh::set_position(todraw, old_position);
+      //mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+      mesh::update_transform(todraw);
+
+      glStencilMask(0xFF);
+      glEnable(GL_DEPTH_TEST);
     }
   }
 

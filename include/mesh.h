@@ -61,6 +61,8 @@ namespace mesh {
     , const std::vector<GLuint>& programs);
 
   void draw(Mesh* m);
+  // Draw the mesh without considering any of its internal shader programs or properties.
+  void raw_draw(Mesh* m);
 
   // Textures are not initialized on creation. Bind it seperately.
   void bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords);
