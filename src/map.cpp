@@ -32,14 +32,13 @@ namespace map {
   GLint s_texloc = 0;
   GLint s_usetex = 1;
   GLint s_dontusetex = 0;
-  glm::vec4 s_color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   GLuint s_outlineshader;
   std::vector<GLint> s_outlineuniforms;
 
   glm::vec3 s_selectcolor = glm::vec3(0.0f, 0.8f, 0.3f);
-  glm::vec3 s_hovercolor = glm::vec3(255.0f, 0.549f, 0.3f);
-  glm::vec3 s_enemycolor = glm::vec3(255.0f, 0.549f, 0.3f);
+  glm::vec3 s_hovercolor = glm::vec3(1.0f, 0.549f, 0.0f);
+  glm::vec3 s_enemycolor = glm::vec3(0.0f, 0.549f, 0.3f);
 
   void set_selected(glm::ivec3& selected) {
     glm::vec3 from;
@@ -110,10 +109,11 @@ void map::initialize() {
 
   s_outlineshader = program::get("outline"); 
 
-  s_outlineuniforms.resize(3);
+  s_outlineuniforms.resize(4);
   s_outlineuniforms[0] = glGetUniformLocation(s_outlineshader, "view");
   s_outlineuniforms[1] = glGetUniformLocation(s_outlineshader, "proj");
   s_outlineuniforms[2] = glGetUniformLocation(s_outlineshader, "model");
+  s_outlineuniforms[3] = glGetUniformLocation(s_outlineshader, "h_color");
 
   std::vector<GLfloat> verts, norms;
   std::vector<GLuint> indcs;
@@ -180,6 +180,7 @@ void map::teardown() {
 void map::update(double delta) {
   GLFWwindow* w = gl::get_current_window();
   glfwGetCursorPos(w, &s_xpos, &s_ypos);
+  set_selected(s_hover);
 
   if (sim_interface::poll()) {
     sim_interface::synch();
@@ -223,6 +224,7 @@ void map::draw() {
 
   const std::vector<Player>& players = sim_interface::get_players();
   const std::vector<Unit>& units = sim_interface::get_units();
+  bool needs_highlight = false;
   for (const auto& u : units) { 
     bool is_barbarian = false;
     for (const auto& p : players) {
@@ -268,15 +270,59 @@ void map::draw() {
       mesh::draw(todraw);
     }
 
-    if (s_selected == pos) {
+    // If one of the units has been selected or is being hovered over it should be highlighted.
+    if (s_selected == pos || s_hover == pos) {
+      needs_highlight = true;
+    }
+  }
+
+  if (needs_highlight) {
+    // Setup stencil for outline.
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+
+    for (const auto& u : units) { 
+      bool is_barbarian = false;
+      for (const auto& p : players) {
+        if (p.m_ai_type == AI_TYPE::BARBARIAN) {
+          if (p.OwnsUnit(u.m_unique_id)) is_barbarian = true;
+        }
+      }
+
+      pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
+      // Don't draw the guys that don't need highlighting.
+      if (pos != s_hover && pos != s_selected) continue;
+      glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+      Mesh* todraw;
+
+      switch (u.m_unit_type) {
+      case UNIT_TYPE::PHALANX:
+        todraw = s_rookmesh;
+        break;
+      case UNIT_TYPE::SCOUT:
+        todraw = s_pawnmesh;
+        break;
+      case UNIT_TYPE::WORKER:
+        todraw = s_queenmesh;
+        break;
+      case UNIT_TYPE::ARCHER:
+        todraw = s_bishopmesh;
+        break;
+      case UNIT_TYPE::UNKNOWN:
+        todraw = s_pawnmesh;
+        break;
+      }
+      mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+      mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
+
+
+      needs_highlight = true;
       Camera* c = camera::get_current();
       assert(c);
 
-      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-      glStencilMask(0x00);
       glUseProgram(s_outlineshader);
 
-      // Move the mesh towards the camera.
       glm::vec3 old_position = todraw->m_position;
       mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
       mesh::set_scale(todraw, glm::vec3(1.1f, 1.1f, 1.1f));
@@ -286,16 +332,23 @@ void map::draw() {
       glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
       glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
 
+      if (s_selected == pos) {
+        glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor)); 
+      }
+
+      else if (s_hover == pos) {
+        glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
+      }
+
       mesh::raw_draw(todraw);
 
       // Set back to its original scale.
       mesh::set_position(todraw, old_position);
       mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
       mesh::update_transform(todraw);
-
-      glStencilMask(0xFF);
-      glDisable(GL_STENCIL_TEST);
     }
+    glStencilMask(0xFF);
+    glDisable(GL_STENCIL_TEST);
   }
 
   const std::vector<City>& cities = sim_interface::get_cities();
