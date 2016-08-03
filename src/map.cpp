@@ -270,8 +270,8 @@ void map::draw() {
 
       // Move the mesh towards the camera.
       glm::vec3 old_position = todraw->m_position;
-      glm::vec3 towards_camera = glm::normalize(c->m_position - old_position);
-      mesh::set_position(todraw, old_position + (3.0f * towards_camera));
+      mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
+      mesh::set_scale(todraw, glm::vec3(1.1f, 1.1f, 1.1f));
       mesh::update_transform(todraw);
 
       glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
@@ -282,7 +282,7 @@ void map::draw() {
 
       // Set back to its original scale.
       mesh::set_position(todraw, old_position);
-      //mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+      mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
       mesh::update_transform(todraw);
 
       glStencilMask(0xFF);

@@ -342,7 +342,7 @@ void mesh::update_transform(Mesh* m) {
   // Rotations are expensive, don't do them if they can be avoided.
   if (!m->m_update_matrix) return;
   m->m_matrix = glm::translate(glm::mat4(), m->m_position);
-  m->m_matrix = glm::rotate(m->m_matrix, m->m_degree, m->m_rotate_axis);
+  //m->m_matrix = glm::rotate(m->m_matrix, m->m_degree, m->m_rotate_axis);
   m->m_matrix = glm::scale(m->m_matrix, m->m_scale);
   m->m_update_matrix = false;
 }
