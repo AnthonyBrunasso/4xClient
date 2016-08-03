@@ -19,7 +19,10 @@
 #include <iostream>
 
 namespace map {
+  // Mouse positions.
+  double s_xpos, s_ypos;
   glm::ivec3 s_selected;
+  glm::ivec3 s_hover;
   Mesh* s_tile = nullptr;
   Mesh* s_pawnmesh = nullptr;
   Mesh* s_rookmesh = nullptr;
@@ -34,12 +37,13 @@ namespace map {
   GLuint s_outlineshader;
   std::vector<GLint> s_outlineuniforms;
 
-  void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
+  glm::vec3 s_selectcolor = glm::vec3(0.0f, 0.8f, 0.3f);
+  glm::vec3 s_hovercolor = glm::vec3(255.0f, 0.549f, 0.3f);
+  glm::vec3 s_enemycolor = glm::vec3(255.0f, 0.549f, 0.3f);
 
+  void set_selected(glm::ivec3& selected) {
     glm::vec3 from;
-    glm::vec3 r = ray::from_mouseclick(xpos, ypos);
+    glm::vec3 r = ray::from_mouse(s_xpos, s_ypos);
 
     Camera* c = camera::get_current();
     if (!c) return;
@@ -57,7 +61,11 @@ namespace map {
     // The intersected point is the defined by p = camera_position + ray * distance.
     glm::vec3 position = c->m_position + r * distance;
     glm::ivec3 cube = glm_hex::world_to_cube(glm::vec2(position.x, position.y), 3);
-    s_selected = cube;
+    selected = cube;
+  }
+
+  void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    set_selected(s_selected);
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
       selection::lclick(s_selected);
@@ -170,6 +178,9 @@ void map::teardown() {
 }
 
 void map::update(double delta) {
+  GLFWwindow* w = gl::get_current_window();
+  glfwGetCursorPos(w, &s_xpos, &s_ypos);
+
   if (sim_interface::poll()) {
     sim_interface::synch();
   }
@@ -181,7 +192,6 @@ void map::draw() {
 
   glEnable(GL_STENCIL_TEST);
   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   glStencilMask(0x00); // Make sure we don't update the stencil buffer while drawing the floor
 
   for (const auto& t : tiles) {
@@ -264,8 +274,6 @@ void map::draw() {
 
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
       glStencilMask(0x00);
-      glDisable(GL_DEPTH_TEST);
-
       glUseProgram(s_outlineshader);
 
       // Move the mesh towards the camera.
@@ -286,7 +294,7 @@ void map::draw() {
       mesh::update_transform(todraw);
 
       glStencilMask(0xFF);
-      glEnable(GL_DEPTH_TEST);
+      glDisable(GL_STENCIL_TEST);
     }
   }
 

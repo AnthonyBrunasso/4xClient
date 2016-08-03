@@ -17,7 +17,7 @@ in vec2 tex_coords;
 uniform sampler2D tex_sampler;
 uniform int use_texture = 0;
 
-float sexp = 2007.0; // Specular power
+float sexp = 200.0; // Specular power
 
 out vec4 frag_color;
 

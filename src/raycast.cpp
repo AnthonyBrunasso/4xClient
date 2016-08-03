@@ -9,7 +9,7 @@
 #include "gl.h"
 #include "camera.h"
 
-glm::vec3 ray::from_mouseclick(double mx, double my) {
+glm::vec3 ray::from_mouse(double mx, double my) {
   // Require the current window for frame buffer dimensions.
   GLFWwindow* window = gl::get_current_window();
   if (!window) return glm::vec3(0.0f, 0.0f, 0.0f);
