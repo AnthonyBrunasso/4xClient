@@ -93,8 +93,6 @@ namespace ui {
     ConstructionOrder* co = cq->m_queue.front();
     ImGui::Text("Constructing: %s", production::name(co));
     ImGui::ProgressBar(production::current(co) / production::required(co), ImVec2(0.0f, 0.0f));
-      
-    if (cq->m_queue.size() == 1) return;
     
     ImGui::Separator();
 
@@ -144,7 +142,7 @@ void ui::update() {
     ImGui::Text("Production");
     ImGui::Separator();
 
-    render_construction(city->GetConstruction());
+    render_construction(city->GetProductionQueue());
     ImGui::Separator();
 
     ImGui::Text("Pick Construction");
