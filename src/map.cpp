@@ -97,6 +97,199 @@ namespace map {
     if (!c) return;
     c->zoom(static_cast<float>(yoffset));
   }
+
+  void render_terrain() {
+    glm::ivec3 pos;
+    const world_map::TileMap& tiles = sim_interface::get_map();
+
+    for (const auto& t : tiles) {
+      pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
+      glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+      mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.0f));
+      s_texloc = 0;
+      switch (t.second.m_terrain_type) {
+      case TERRAIN_TYPE::DESERT:
+        s_texloc = 2;
+        break;
+      case TERRAIN_TYPE::GRASSLAND:
+        s_texloc = 5;
+        break;
+      case TERRAIN_TYPE::MOUNTAIN:
+        s_texloc = 4;
+        break;
+      case TERRAIN_TYPE::PLAINS:
+        s_texloc = 3;
+        break;
+      case TERRAIN_TYPE::WATER:
+        s_texloc = 1;
+        break;
+      case TERRAIN_TYPE::UNKNOWN:
+        break;
+      }
+      mesh::draw(s_tile);
+    }
+  }
+
+  void render_units() {
+    glm::ivec3 pos;
+    const std::vector<Player>& players = sim_interface::get_players();
+    const std::vector<Unit>& units = sim_interface::get_units();
+
+    bool needs_highlight = false;
+    for (const auto& u : units) {
+      bool is_barbarian = false;
+      for (const auto& p : players) {
+        if (p.m_ai_type == AI_TYPE::BARBARIAN) {
+          if (p.OwnsUnit(u.m_id)) is_barbarian = true;
+        }
+      }
+      pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
+      glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+      Mesh* todraw;
+
+      glStencilFunc(GL_ALWAYS, 1, 0xFF);
+      glStencilMask(0xFF);
+
+      switch (u.m_unit_type) {
+      case UNIT_TYPE::PHALANX:
+        todraw = s_rookmesh;
+        break;
+      case UNIT_TYPE::SCOUT:
+        todraw = s_pawnmesh;
+        break;
+      case UNIT_TYPE::WORKER:
+        todraw = s_queenmesh;
+        break;
+      case UNIT_TYPE::ARCHER:
+        todraw = s_bishopmesh;
+        break;
+      case UNIT_TYPE::UNKNOWN:
+        todraw = s_pawnmesh;
+        break;
+      }
+      mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+      mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
+
+      if (is_barbarian) {
+        glm::vec3 init_color = todraw->m_light_material[1]; // kd
+                                                            // Color dem red.
+        todraw->m_light_material[1] = glm::vec3(0.8f, 0.3f, 0.3f);
+        mesh::draw(todraw);
+        todraw->m_light_material[1] = init_color;
+      }
+      else {
+        mesh::draw(todraw);
+      }
+
+      // If one of the units has been selected or is being hovered over it should be highlighted.
+      if (s_selected == pos || s_hover == pos) {
+        needs_highlight = true;
+      }
+    }
+
+    if (needs_highlight) {
+      // Setup stencil for outline.
+      glEnable(GL_STENCIL_TEST);
+      glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      glStencilMask(0x00);
+
+      for (const auto& u : units) {
+        bool is_barbarian = false;
+        for (const auto& p : players) {
+          if (p.m_ai_type == AI_TYPE::BARBARIAN) {
+            if (p.OwnsUnit(u.m_id)) is_barbarian = true;
+          }
+        }
+
+        pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
+        // Don't draw the guys that don't need highlighting.
+        if (pos != s_hover && pos != s_selected) continue;
+        glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+        Mesh* todraw;
+
+        switch (u.m_unit_type) {
+        case UNIT_TYPE::PHALANX:
+          todraw = s_rookmesh;
+          break;
+        case UNIT_TYPE::SCOUT:
+          todraw = s_pawnmesh;
+          break;
+        case UNIT_TYPE::WORKER:
+          todraw = s_queenmesh;
+          break;
+        case UNIT_TYPE::ARCHER:
+          todraw = s_bishopmesh;
+          break;
+        case UNIT_TYPE::UNKNOWN:
+          todraw = s_pawnmesh;
+          break;
+        }
+        mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+        mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
+
+
+        needs_highlight = true;
+        Camera* c = camera::get_current();
+        assert(c);
+
+        glUseProgram(s_outlineshader);
+
+        glm::vec3 old_position = todraw->m_position;
+        mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
+        mesh::set_scale(todraw, glm::vec3(1.1f, 1.1f, 1.1f));
+        mesh::update_transform(todraw);
+
+        glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
+        glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
+        glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
+
+        if (s_selected == pos) {
+          glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor));
+        }
+
+        else if (s_hover == pos) {
+          glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
+        }
+
+        mesh::raw_draw(todraw);
+
+        // Set back to its original scale.
+        mesh::set_position(todraw, old_position);
+        mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
+        mesh::update_transform(todraw);
+      }
+      glStencilMask(0xFF);
+      glDisable(GL_STENCIL_TEST);
+    }
+  }
+
+  void render_cities() {
+    glm::vec3 pos;
+    const std::vector<City>& cities = sim_interface::get_cities();
+    const std::vector<Player>& players = sim_interface::get_players();
+
+    for (const auto& c : cities) {
+      bool is_barbarian = false;
+      for (const auto& p : players) {
+        if (p.m_ai_type == AI_TYPE::BARBARIAN && c.m_owner_id == p.m_id) {
+          is_barbarian = true;
+        }
+      }
+      pos = glm::ivec3(c.m_location.x, c.m_location.y, c.m_location.z);
+      glm::vec2 world = glm_hex::cube_to_world(pos, 3);
+      mesh::set_position(s_hutmesh, glm::vec3(world.x, world.y, 0.0f));
+      if (is_barbarian) {
+        glm::vec3 init_color = s_hutmesh->m_light_material[1]; // kd
+                                                               // Color dem red.
+        s_hutmesh->m_light_material[1] = glm::vec3(1.0f, 0.0f, 0.0f);
+        mesh::draw(s_hutmesh);
+        s_hutmesh->m_light_material[1] = init_color;
+      }
+      else {
+        mesh::draw(s_hutmesh);
+      }
+    }
+  }
 }
 
 void map::initialize() {
@@ -188,189 +381,11 @@ void map::update(double delta) {
 }
 
 void map::draw() {
-  glm::ivec3 pos;
-  const world_map::TileMap& tiles = sim_interface::get_map();
-
   glEnable(GL_STENCIL_TEST);
   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
   glStencilMask(0x00); // Make sure we don't update the stencil buffer while drawing the floor
 
-  for (const auto& t : tiles) {
-    pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
-    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-    mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.0f));
-    s_texloc = 0;
-    switch (t.second.m_terrain_type) {
-    case TERRAIN_TYPE::DESERT:
-      s_texloc = 2;
-      break;
-    case TERRAIN_TYPE::GRASSLAND:
-      s_texloc = 5;
-      break;
-    case TERRAIN_TYPE::MOUNTAIN:
-      s_texloc = 4;
-      break;
-    case TERRAIN_TYPE::PLAINS:
-      s_texloc = 3;
-      break;
-    case TERRAIN_TYPE::WATER:
-      s_texloc = 1;
-      break;
-    case TERRAIN_TYPE::UNKNOWN:
-      break;
-    }
-    mesh::draw(s_tile);
-  }
-
-  const std::vector<Player>& players = sim_interface::get_players();
-  const std::vector<Unit>& units = sim_interface::get_units();
-  bool needs_highlight = false;
-  for (const auto& u : units) { 
-    bool is_barbarian = false;
-    for (const auto& p : players) {
-      if (p.m_ai_type == AI_TYPE::BARBARIAN) {
-        if (p.OwnsUnit(u.m_id)) is_barbarian = true;
-      }
-    }
-    pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
-    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-    Mesh* todraw;
-
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
-
-    switch (u.m_unit_type) {
-    case UNIT_TYPE::PHALANX:
-      todraw = s_rookmesh;
-      break;
-    case UNIT_TYPE::SCOUT:
-      todraw = s_pawnmesh;
-      break;
-    case UNIT_TYPE::WORKER:
-      todraw = s_queenmesh;
-      break;
-    case UNIT_TYPE::ARCHER:
-      todraw = s_bishopmesh;
-      break;
-    case UNIT_TYPE::UNKNOWN:
-      todraw = s_pawnmesh;
-      break;
-    }
-    mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
-    mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
-
-    if (is_barbarian) {
-      glm::vec3 init_color = todraw->m_light_material[1]; // kd
-      // Color dem red.
-      todraw->m_light_material[1] = glm::vec3(0.8f, 0.3f, 0.3f);
-      mesh::draw(todraw);
-      todraw->m_light_material[1] = init_color;
-    }
-    else {
-      mesh::draw(todraw);
-    }
-
-    // If one of the units has been selected or is being hovered over it should be highlighted.
-    if (s_selected == pos || s_hover == pos) {
-      needs_highlight = true;
-    }
-  }
-
-  if (needs_highlight) {
-    // Setup stencil for outline.
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00);
-
-    for (const auto& u : units) { 
-      bool is_barbarian = false;
-      for (const auto& p : players) {
-        if (p.m_ai_type == AI_TYPE::BARBARIAN) {
-          if (p.OwnsUnit(u.m_id)) is_barbarian = true;
-        }
-      }
-
-      pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
-      // Don't draw the guys that don't need highlighting.
-      if (pos != s_hover && pos != s_selected) continue;
-      glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-      Mesh* todraw;
-
-      switch (u.m_unit_type) {
-      case UNIT_TYPE::PHALANX:
-        todraw = s_rookmesh;
-        break;
-      case UNIT_TYPE::SCOUT:
-        todraw = s_pawnmesh;
-        break;
-      case UNIT_TYPE::WORKER:
-        todraw = s_queenmesh;
-        break;
-      case UNIT_TYPE::ARCHER:
-        todraw = s_bishopmesh;
-        break;
-      case UNIT_TYPE::UNKNOWN:
-        todraw = s_pawnmesh;
-        break;
-      }
-      mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
-      mesh::set_position(todraw, glm::vec3(world.x, world.y, 0.0f));
-
-
-      needs_highlight = true;
-      Camera* c = camera::get_current();
-      assert(c);
-
-      glUseProgram(s_outlineshader);
-
-      glm::vec3 old_position = todraw->m_position;
-      mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
-      mesh::set_scale(todraw, glm::vec3(1.1f, 1.1f, 1.1f));
-      mesh::update_transform(todraw);
-
-      glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
-      glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
-      glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
-
-      if (s_selected == pos) {
-        glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor)); 
-      }
-
-      else if (s_hover == pos) {
-        glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
-      }
-
-      mesh::raw_draw(todraw);
-
-      // Set back to its original scale.
-      mesh::set_position(todraw, old_position);
-      mesh::set_scale(todraw, glm::vec3(1.0f, 1.0f, 1.0f));
-      mesh::update_transform(todraw);
-    }
-    glStencilMask(0xFF);
-    glDisable(GL_STENCIL_TEST);
-  }
-
-  const std::vector<City>& cities = sim_interface::get_cities();
-  for (const auto& c : cities) {
-    bool is_barbarian = false;
-    for (const auto& p : players) {
-      if (p.m_ai_type == AI_TYPE::BARBARIAN && c.m_owner_id == p.m_id) {
-        is_barbarian = true;
-      }
-    }
-    pos = glm::ivec3(c.m_location.x, c.m_location.y, c.m_location.z);
-    glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-    mesh::set_position(s_hutmesh, glm::vec3(world.x, world.y, 0.0f));
-    if (is_barbarian) {
-      glm::vec3 init_color = s_hutmesh->m_light_material[1]; // kd
-      // Color dem red.
-      s_hutmesh->m_light_material[1] = glm::vec3(1.0f, 0.0f, 0.0f);
-      mesh::draw(s_hutmesh);
-      s_hutmesh->m_light_material[1] = init_color;
-    }
-    else {
-      mesh::draw(s_hutmesh);
-    }
-  }
+  render_terrain();
+  render_units();
+  render_cities();
 }
