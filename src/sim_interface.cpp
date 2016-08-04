@@ -115,7 +115,7 @@ void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
   // Find unit with the id.
   for (const auto& u : s_units) {
     // Move it.
-    if (u.m_unique_id == id) {
+    if (u.m_id == id) {
       MoveStep m;
       m.set_unit_id(id);
       m.set_destination(sf::Vector3i(location.x, location.y, location.z));
@@ -212,7 +212,7 @@ void sim_interface::synch() {
   auto append_unit = [](const Unit& unit) {
     s_units.push_back(unit);
   };
-  units::for_each_unit(append_unit);
+  unit::for_each_unit(append_unit);
   s_cities.clear();
   auto append_city = [](const City& city) {
     s_cities.push_back(city);
@@ -237,7 +237,7 @@ void sim_interface::synch() {
   });
 
   std::sort(s_units.begin(), s_units.end(), [](const Unit& lhs, const Unit& rhs) {
-    return rhs.m_unique_id > lhs.m_unique_id;
+    return rhs.m_id > lhs.m_id;
   });
 
   s_statechanged = false;

@@ -229,7 +229,7 @@ void map::draw() {
     bool is_barbarian = false;
     for (const auto& p : players) {
       if (p.m_ai_type == AI_TYPE::BARBARIAN) {
-        if (p.OwnsUnit(u.m_unique_id)) is_barbarian = true;
+        if (p.OwnsUnit(u.m_id)) is_barbarian = true;
       }
     }
     pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
@@ -286,7 +286,7 @@ void map::draw() {
       bool is_barbarian = false;
       for (const auto& p : players) {
         if (p.m_ai_type == AI_TYPE::BARBARIAN) {
-          if (p.OwnsUnit(u.m_unique_id)) is_barbarian = true;
+          if (p.OwnsUnit(u.m_id)) is_barbarian = true;
         }
       }
 
