@@ -6,6 +6,7 @@
 #include "network_types.h"
 #include "messaging.h"
 #include "selection.h"
+#include "client_util.h"
 
 #include <chrono>
 #include <thread>
@@ -113,17 +114,14 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
   // Find unit with the id.
-  for (const auto& u : s_units) {
-    // Move it.
-    if (u.m_id == id) {
-      MoveStep m;
-      m.set_unit_id(id);
-      m.set_destination(sf::Vector3i(location.x, location.y, location.z));
-      m.set_player(u.m_owner_id);
-      m.set_immediate(true);
-      simulate_step(m);
-    }
-  }
+  const Unit* unit = util::id_binsearch(s_units.data(), s_units.size(), id);
+  if (!unit) return;
+  MoveStep m;
+  m.set_unit_id(id);
+  m.set_destination(sf::Vector3i(location.x, location.y, location.z));
+  m.set_player(unit->m_owner_id);
+  m.set_immediate(true);
+  simulate_step(m);
 }
 
 void sim_interface::construct(uint32_t city_id, CONSTRUCTION_TYPE type) {
@@ -228,17 +226,9 @@ void sim_interface::synch() {
   // Sort all vectors by unique id for fast lookup.
 
   // Players are sorted by id in 4xsim but lets not assume that and sort it here anyway. 
-  std::sort(s_players.begin(), s_players.end(), [](const Player& lhs, const Player& rhs) {
-    return rhs.m_id > lhs.m_id;
-  });
-
-  std::sort(s_cities.begin(), s_cities.end(), [](const City& lhs, const City& rhs) {
-    return rhs.m_id > lhs.m_id;
-  });
-
-  std::sort(s_units.begin(), s_units.end(), [](const Unit& lhs, const Unit& rhs) {
-    return rhs.m_id > lhs.m_id;
-  });
+  std::sort(s_players.begin(), s_players.end(), util::id_comparand<Player>);
+  std::sort(s_cities.begin(), s_cities.end(), util::id_comparand<City>);
+  std::sort(s_units.begin(), s_units.end(), util::id_comparand<Unit>);
 
   s_statechanged = false;
 }

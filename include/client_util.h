@@ -4,29 +4,29 @@
 
 
 namespace util {
-  // std binary search doesn't give me an iterator to an item.
-  // It is forcing me to write this.
-  template<class type, class compare>
-  const type* id_binsearch(const type* d, size_t size, uint32_t id, compare comp) {
+  template<class type>
+  bool id_comparand(const type& lhs, const type& rhs) {
+    return rhs.m_id > lhs.m_id;
+  }
+
+  template<class type>
+  const type* id_binsearch(const type* d, size_t size, uint32_t id) {
     size_t mid;
     size_t min = 0;
     size_t max = size;
     while (min <= max) {
-      mid = (max - min) / 2;
+      mid = min + (max - min) / 2;
       if (d[mid].m_id == id) {
         return &d[mid];
       }
 
-      // value is greater than.
-      if (comp(id, d[mid])) {
+      if (d[mid].m_id < id) {
         min = mid + 1;
       }
-      // value is less than.
       else {
         max = mid - 1;
       }
     }
-
     return nullptr;
   }
 }

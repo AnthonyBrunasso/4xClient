@@ -129,14 +129,11 @@ void ui::city(uint32_t id) {
 
 void ui::update() {
   if (s_debug) debug_ui();
-  auto city_compare = [](uint32_t id, const City& rhs) {
-    return id > rhs.m_id;
-  };
   const std::vector<City>& cities = sim_interface::get_cities(); 
   std::vector<uint32_t> cities_to_close;
   // Show city ui for selected cities.
   for (auto id : s_cities) {
-    const City* city = util::id_binsearch(cities.data(), cities.size(), id, city_compare);
+    const City* city = util::id_binsearch(cities.data(), cities.size(), id);
     if (!city) continue;
     ImGui::Begin("City");
     ImGui::Text("Production");
