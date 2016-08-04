@@ -31,6 +31,7 @@ namespace sim_interface {
   std::vector<Unit> s_units;
   std::vector<City> s_cities;
   std::vector<Player> s_players;
+  std::vector<std::function<void()> > s_subs;
 
   std::atomic<bool> s_killsim (false);
   std::atomic<bool> s_multiplayer(false);
@@ -230,7 +231,14 @@ void sim_interface::synch() {
   std::sort(s_cities.begin(), s_cities.end(), util::id_comparand<City>);
   std::sort(s_units.begin(), s_units.end(), util::id_comparand<Unit>);
 
+  // Notify subscribers the sim has been synched.
+  for (const auto& s : s_subs) s();
+
   s_statechanged = false;
+}
+
+void sim_interface::sub_synch(std::function<void()> sub) {
+  s_subs.push_back(sub);
 }
 
 bool sim_interface::poll() {

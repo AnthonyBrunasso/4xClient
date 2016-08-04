@@ -4,6 +4,12 @@
 
 
 namespace util {
+  // Because simulation uses a different vector than client.
+  template<class vec31, class vec32>
+  bool vec_eq(const vec31& lhs, const vec32& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+  }
+
   template<class type>
   bool id_comparand(const type& lhs, const type& rhs) {
     return rhs.m_id > lhs.m_id;

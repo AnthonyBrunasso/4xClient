@@ -11,6 +11,7 @@
 #include "texloader.h"
 #include "selection.h"
 #include "light.h"
+#include "client_util.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -182,12 +183,14 @@ namespace map {
       }
 
       // If one of the units has been selected or is being hovered over it should be highlighted.
-      if (s_selected == pos || s_hover == pos) {
+      if (s_hover == pos) {
         needs_highlight = true;
       }
     }
 
-    if (needs_highlight) {
+    const Selection& s = selection::get_selection();
+
+    if (needs_highlight || s.m_selection == SELECTION_TYPE::UNIT) {
       // Setup stencil for outline.
       glEnable(GL_STENCIL_TEST);
       glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -203,7 +206,8 @@ namespace map {
 
         pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
         // Don't draw the guys that don't need highlighting.
-        if (pos != s_hover && pos != s_selected) continue;
+        if (pos != s_hover && s.m_selection != SELECTION_TYPE::UNIT) continue;
+        if (pos != s_hover && s.m_unit.m_id != u.m_id) continue;
         glm::vec2 world = glm_hex::cube_to_world(pos, 3);
         Mesh* todraw;
 
@@ -243,7 +247,7 @@ namespace map {
         glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
         glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
 
-        if (s_selected == pos) {
+        if (s.m_selection == SELECTION_TYPE::UNIT && util::vec_eq(s.m_unit.m_location, pos)) {
           glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor));
         }
 
@@ -293,6 +297,8 @@ namespace map {
 }
 
 void map::initialize() {
+  selection::initialize();
+
   Camera* c = camera::get_current();
 
   program::build("outline", {

@@ -10,6 +10,7 @@
 #include "4xSimulation/include/player.h"
 
 #include <glm/vec3.hpp>
+#include <functional>
 
 enum class MULTIPLAYER {
   NO = 0,
@@ -36,6 +37,7 @@ namespace sim_interface {
   const std::vector<Player>& get_players();
 
   void synch();
+  void sub_synch(std::function<void()> sub);
 
   // Poll for changes to simulation.
   bool poll();
