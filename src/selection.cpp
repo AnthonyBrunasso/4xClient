@@ -15,28 +15,13 @@ const glm::ivec3& selection::get() {
 
 void selection::lclick(const glm::ivec3& location) {
   s_selected = location;
+  sf::Vector3i loc(location.x, location.y, location.z);
 
-  bool has_unit = false;
-  const std::vector<Unit>& units = sim_interface::get_units();
-  for (const auto& u : units) {
-    if (u.m_location.x == location.x &&
-        u.m_location.y == location.y &&
-        u.m_location.z == location.z) {
-      has_unit = true;
-    }
-  }
-
-  if (has_unit) return;
-
+  const world_map::TileMap& map = sim_interface::get_map();
+  const auto& t = map.find(loc);
+  if (t == map.end() || !t->second.m_unit_ids.empty()) return;
   // Check if there is a city a the location to open the ui for it.
-  const std::vector<City>& cities = sim_interface::get_cities();
-  for (const auto& c : cities) {
-    if (c.m_location.x == location.x &&
-        c.m_location.y == location.y &&
-        c.m_location.z == location.z) {
-      ui::city(c.m_id);
-    }
-  }
+  if (t->second.m_city_id) ui::city(t->second.m_city_id);
 }
 
 void selection::rclick(const glm::ivec3& location) {
@@ -44,10 +29,7 @@ void selection::rclick(const glm::ivec3& location) {
   const world_map::TileMap& tiles = sim_interface::get_map();
   sf::Vector3i sfvec(s_selected.x, s_selected.y, s_selected.z);
   const auto& t = tiles.find(sfvec);
-  if (t == tiles.end()) {
-    return;
-  }
-
+  if (t == tiles.end()) return;
   if (t->second.m_unit_ids.empty()) return;
   // Otherwise try to move the first unit in the list to the selected location.
   sim_interface::move_unit(t->second.m_unit_ids.at(0), location);
