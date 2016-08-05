@@ -10,6 +10,8 @@
 #include "mesh.h"
 #include "log.h"
 #include "client_util.h"
+#include "selection.h"
+#include "unit_definitions.h"
 
 namespace ui {
   // Cities to render ui for.
@@ -113,6 +115,36 @@ namespace ui {
 
     ImGui::Columns(1);
   }
+
+  void render_unit_selection() {
+    const Selection& s = selection::get_selection();
+    float max_health = unit_definitions::get(s.m_unit.m_unit_type)->m_health;
+    float progress = s.m_unit.m_combat_stats.m_health / max_health;
+    char buf[32];
+    sprintf(buf, "%.2f/%.2f", progress * max_health, max_health);
+    ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), buf);
+    ImGui::SameLine();
+    ImGui::Text("Health");
+    ImGui::Text("Type: %s", get_unit_name(s.m_unit.m_unit_type));
+    ImGui::Text("Actions: %d", s.m_unit.m_action_points);
+    ImGui::Text("Attack: %.2f", s.m_unit.m_combat_stats.m_attack);
+  }
+
+  void render_selection() {
+    ImGui::Begin("Selection");
+    ImGui::SetWindowPos("Selection", ImVec2(0, 0));
+    const Selection& s = selection::get_selection(); 
+    switch (s.m_selection) {
+      case SELECTION_TYPE::UNIT:
+        render_unit_selection();
+        break;
+      case SELECTION_TYPE::CITY:
+      case SELECTION_TYPE::INACTIVE:
+        ImGui::Text("Nothing selected.");
+        break;
+    }
+    ImGui::End();
+  }
 }
 
 void ui::debug(bool on) {
@@ -184,4 +216,6 @@ void ui::update() {
         return cid == id; 
     }), s_cities.end());
   }
+
+  render_selection();
 }
