@@ -52,7 +52,10 @@ void selection::lclick(const glm::ivec3& location) {
 
   const world_map::TileMap& map = sim_interface::get_map();
   const auto& t = map.find(loc);
-  if (t == map.end() || !t->second.m_unit_ids.empty()) {
+
+  if (t == map.end()) return;
+
+  if (!t->second.m_unit_ids.empty()) {
     const std::vector<Unit>& units = sim_interface::get_units();
     const Unit* u = util::id_binsearch(units.data(), units.size(), t->second.m_unit_ids.front());
     if (!u) return;
