@@ -188,6 +188,14 @@ void sim_interface::teardown() {
   s_input_thread.join();
 }
 
+void sim_interface::attack(uint32_t from_id, uint32_t to_id) {
+  AttackStep attack_step;
+  attack_step.set_attacker_id(from_id);
+  attack_step.set_defender_id(to_id);
+  attack_step.set_player(s_currentplayer);
+  simulate_step(attack_step);
+}
+
 const world_map::TileMap& sim_interface::get_map() {
   return s_tiles;
 }

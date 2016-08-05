@@ -22,6 +22,7 @@ namespace sim_interface {
   void initialize(MULTIPLAYER multiplayer);
   void teardown();
 
+  void attack(uint32_t from_id, uint32_t to_id);
   void move_unit(uint32_t id, const glm::ivec3& location);
   void construct(uint32_t city_id, CONSTRUCTION_TYPE type);
   void end_turn();

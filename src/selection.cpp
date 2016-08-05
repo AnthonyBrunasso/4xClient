@@ -11,6 +11,8 @@ namespace selection {
   glm::ivec3 s_selected;
   Selection s_selection;
 
+  void rclick_unit(const glm::ivec3& loc);
+
   void synch_unit_selection() {
     const std::vector<Unit>& units = sim_interface::get_units();
     const Unit* u = util::id_binsearch(units.data(), units.size(), s_selection.m_unit.m_id);
@@ -65,11 +67,37 @@ void selection::lclick(const glm::ivec3& location) {
   if (t->second.m_city_id) ui::city(t->second.m_city_id);
 }
 
+void selection::rclick_unit(const glm::ivec3& loc) {
+  // Check if the target has an enemy on it.
+  const world_map::TileMap& map = sim_interface::get_map();
+  const std::vector<Unit>& units = sim_interface::get_units();
+
+  sf::Vector3i sloc(loc.x, loc.y, loc.z);
+  const auto& t = map.find(sloc);
+  if (t == map.end()) return;
+
+  if (!t->second.m_unit_ids.empty()) {
+    // Loop through and see if an enemy unit can be found.
+    for (const auto& u : t->second.m_unit_ids) {
+      const Unit* target = util::id_binsearch(units.data(), units.size(), u);
+      if (!target) continue;
+      if (target->m_owner_id != s_selection.m_unit.m_owner_id) {
+        // Try to attack the unit, simulation will fail if the unit is out of range.
+        sim_interface::attack(s_selection.m_unit.m_id, u);
+        return;
+      }
+    }
+  }
+
+  // Otherwise move it to the tile.
+  sim_interface::move_unit(s_selection.m_unit.m_id, loc);
+}
+
 // rclick should only act on the current selection
 void selection::rclick(const glm::ivec3& location) {
   switch (s_selection.m_selection) {
     case SELECTION_TYPE::UNIT:
-      sim_interface::move_unit(s_selection.m_unit.m_id, location);
+      rclick_unit(location);
       break;
     case SELECTION_TYPE::CITY:
     case SELECTION_TYPE::INACTIVE:
