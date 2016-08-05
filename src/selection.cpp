@@ -30,6 +30,7 @@ namespace selection {
     switch (s_selection.m_selection) {
       case SELECTION_TYPE::UNIT:
         synch_unit_selection();
+        break;
       case SELECTION_TYPE::CITY:
       case SELECTION_TYPE::INACTIVE:
         break;
