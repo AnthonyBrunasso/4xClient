@@ -154,6 +154,9 @@ GLFWwindow* gl::initialize(const char* title, bool fullscreen, int width, int he
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
 
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   logging::write(GL_LOG_FILE, ss.str());
   log_gl_params();
 

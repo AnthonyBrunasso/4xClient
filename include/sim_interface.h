@@ -3,11 +3,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "4xSimulation/include/tile.h"
-#include "4xSimulation/include/world_map.h"
-#include "4xSimulation/include/unit.h"
-#include "4xSimulation/include/city.h"
-#include "4xSimulation/include/player.h"
+#include "tile.h"
+#include "world_map.h"
+#include "unit.h"
+#include "city.h"
+#include "player.h"
+#include "notification.h"
 
 #include <glm/vec3.hpp>
 #include <functional>
@@ -25,6 +26,7 @@ namespace sim_interface {
   void attack(uint32_t from_id, uint32_t to_id);
   void move_unit(uint32_t id, const glm::ivec3& location);
   void construct(uint32_t city_id, CONSTRUCTION_TYPE type);
+  void specialize(uint32_t city_id, TERRAIN_TYPE type);
   void end_turn();
 
   void join_player();
@@ -36,6 +38,9 @@ namespace sim_interface {
   const std::vector<Unit>& get_units();
   const std::vector<City>& get_cities();
   const std::vector<Player>& get_players();
+  const NotificationVector& get_player_notifications(uint32_t player_id);
+
+  uint32_t get_currentplayer();
 
   void synch();
   void sub_synch(std::function<void()> sub);

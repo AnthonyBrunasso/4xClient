@@ -12,6 +12,8 @@
 #include "client_util.h"
 #include "selection.h"
 #include "unit_definitions.h"
+#include "notification.h"
+#include "terrain_yield.h"
 
 namespace ui {
   // Cities to render ui for.
@@ -82,7 +84,7 @@ namespace ui {
     if (show_mesh_logs) debug_log("Mesh Logs", mesh_logs, show_mesh_logs);
     if (show_image_logs) debug_log("Image Logs", image_logs, show_image_logs);
 
-    //ImGui::ShowTestWindow();
+    ImGui::ShowTestWindow();
   }
 
   void render_construction(ConstructionQueueFIFO* cq) {
@@ -133,6 +135,7 @@ namespace ui {
   void render_selection() {
     ImGui::Begin("Selection");
     ImGui::SetWindowPos("Selection", ImVec2(0, 0));
+    ImGui::Text("Current Player: %d", sim_interface::get_currentplayer());
     const Selection& s = selection::get_selection(); 
     switch (s.m_selection) {
       case SELECTION_TYPE::UNIT:
@@ -144,6 +147,116 @@ namespace ui {
         break;
     }
     ImGui::End();
+  }
+
+  void render_cities() {
+    const std::vector<City>& cities = sim_interface::get_cities(); 
+    std::vector<uint32_t> cities_to_close;
+    // Show city ui for selected cities.
+    for (auto id : s_cities) {
+      const City* city = util::id_binsearch(cities.data(), cities.size(), id);
+      if (!city) continue;
+      ImGui::Begin("City");
+      ImGui::Text("Production");
+      ImGui::Separator();
+
+      render_construction(city->GetProductionQueue());
+      ImGui::Separator();
+
+      ImGui::Text("Pick Construction");
+      ImGui::Columns(3, "mycolumns"); // 4-ways, with border
+      ImGui::Separator();
+      ImGui::Text("Construction"); ImGui::NextColumn();
+      ImGui::Text("Production"); ImGui::NextColumn();
+      ImGui::Text("Lore"); ImGui::NextColumn();
+      ImGui::Separator();
+      static int selected = -1;
+      static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
+      int i = 0;
+      for_each_construction_type([&i](CONSTRUCTION_TYPE type) {
+        if (type == CONSTRUCTION_TYPE::UNKNOWN) return;
+        char label[32];
+        sprintf(label, "%s", get_construction_name(type));
+        if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
+          selected = i;
+          construct = type;
+        }
+        ImGui::NextColumn();
+        ImGui::Text("%.2f", production::required(type)); ImGui::NextColumn();
+        ImGui::Text("%s", "None"); ImGui::NextColumn();
+        ++i;
+      });
+
+      if (construct != CONSTRUCTION_TYPE::UNKNOWN) {
+        sim_interface::construct(id, construct);
+        construct = CONSTRUCTION_TYPE::UNKNOWN;
+      }
+
+      ImGui::Columns(1);
+      ImGui::Separator();
+      
+      if (city->CanSpecialize()) {
+        TERRAIN_TYPE type = city->m_specialization;
+        // Give player specialization picker
+        if (type == TERRAIN_TYPE::UNKNOWN) {
+          static const char** tnames = get_terrain_names();
+          int begin = 0, item = 0;
+
+          for (int i = 0; i < get_terrain_count(); ++i) {
+            if (get_terrain_name(type) == tnames[i]) {
+              begin = item = i;
+            }
+          }
+
+          ImGui::Combo("Specialization", &item, &tnames[0], get_terrain_count());
+          if (begin != item) {
+            sim_interface::specialize(city->m_id, get_terrain_type(tnames[item]));
+          }
+        }
+        // Otherwise show specialization
+        else {
+          ImGui::Text("Spec: %s ( ", get_terrain_name(type));
+          TerrainYield y = terrain_yield::get_specialization_yield(type);
+          ImGui::SameLine();
+          if (y.m_food > 0.0f) {
+            ImGui::Text("Food: +%.1f ", y.m_food);
+            ImGui::SameLine();
+          }
+          if (y.m_science > 0.0f) {
+            ImGui::Text("Science: +%.1f ", y.m_science);
+            ImGui::SameLine();
+          }
+          if (y.m_production > 0.0f) {
+            ImGui::Text("Production: +%.1f ", y.m_production);
+            ImGui::SameLine();
+          }
+          if (y.m_gold > 0.0f) {
+            ImGui::Text("Gold: +%.1f ", y.m_gold);
+            ImGui::SameLine();
+          }
+          if (y.m_experience > 0.0f) {
+            ImGui::Text("Xp: +%.1f ", y.m_experience);
+            ImGui::SameLine();
+          }
+          if (y.m_magic > 0.0f) {
+            ImGui::Text("Magic: +%.1f ", y.m_magic);
+            ImGui::SameLine();
+          }
+          ImGui::Text(")");
+        }
+      }
+       
+
+      if (ImGui::Button("Close")) cities_to_close.push_back(id);
+      ImGui::End();
+    }
+
+    for (auto id : cities_to_close) {
+      s_cities.erase(std::remove_if(s_cities.begin(), s_cities.end(), 
+        [id](uint32_t cid) { 
+          return cid == id; 
+      }), s_cities.end());
+    }
   }
 }
 
@@ -161,61 +274,7 @@ void ui::city(uint32_t id) {
 
 void ui::update() {
   if (s_debug) debug_ui();
-  const std::vector<City>& cities = sim_interface::get_cities(); 
-  std::vector<uint32_t> cities_to_close;
-  // Show city ui for selected cities.
-  for (auto id : s_cities) {
-    const City* city = util::id_binsearch(cities.data(), cities.size(), id);
-    if (!city) continue;
-    ImGui::Begin("City");
-    ImGui::Text("Production");
-    ImGui::Separator();
-
-    render_construction(city->GetProductionQueue());
-    ImGui::Separator();
-
-    ImGui::Text("Pick Construction");
-    ImGui::Columns(3, "mycolumns"); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Construction"); ImGui::NextColumn();
-    ImGui::Text("Production"); ImGui::NextColumn();
-    ImGui::Text("Lore"); ImGui::NextColumn();
-    ImGui::Separator();
-    static int selected = -1;
-    static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
-    int i = 0;
-    for_each_construction_type([&i](CONSTRUCTION_TYPE type) {
-      if (type == CONSTRUCTION_TYPE::UNKNOWN) return;
-      char label[32];
-      sprintf(label, "%s", get_construction_name(type));
-      if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
-        selected = i;
-        construct = type;
-      }
-      ImGui::NextColumn();
-      ImGui::Text("%.2f", production::required(type)); ImGui::NextColumn();
-      ImGui::Text("%s", "None"); ImGui::NextColumn();
-      ++i;
-    });
-
-    if (construct != CONSTRUCTION_TYPE::UNKNOWN) {
-      sim_interface::construct(id, construct);
-      construct = CONSTRUCTION_TYPE::UNKNOWN;
-    }
-
-    ImGui::Columns(1);
-    ImGui::Separator();
-
-    if (ImGui::Button("Close")) cities_to_close.push_back(id);
-    ImGui::End();
-  }
-
-  for (auto id : cities_to_close) {
-    s_cities.erase(std::remove_if(s_cities.begin(), s_cities.end(), 
-      [id](uint32_t cid) { 
-        return cid == id; 
-    }), s_cities.end());
-  }
-
+  
+  render_cities();
   render_selection();
 }

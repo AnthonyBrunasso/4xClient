@@ -31,6 +31,7 @@ namespace sim_interface {
   std::vector<Unit> s_units;
   std::vector<City> s_cities;
   std::vector<Player> s_players;
+  std::unordered_map<uint32_t, NotificationVector > s_notifications;
   std::vector<std::function<void()> > s_subs;
 
   std::atomic<bool> s_killsim (false);
@@ -133,6 +134,14 @@ void sim_interface::construct(uint32_t city_id, CONSTRUCTION_TYPE type) {
   simulate_step(construction);
 }
 
+void sim_interface::specialize(uint32_t city_id, TERRAIN_TYPE type) {
+  SpecializeStep s;
+  s.set_player(s_currentplayer);
+  s.set_city_id(city_id);
+  s.set_terrain_type(static_cast<uint32_t>(type));
+  simulate_step(s);
+} 
+
 void sim_interface::end_turn() {
   EndTurnStep step;
   step.set_player(s_currentplayer);
@@ -212,6 +221,10 @@ const std::vector<Player>& sim_interface::get_players() {
   return s_players;
 }
 
+const NotificationVector& sim_interface::get_player_notifications(uint32_t player_id) {
+  return s_notifications[player_id];
+}
+
 void sim_interface::synch() {
   std::lock_guard<std::mutex> lock(s_simmutex);
   s_tiles = world_map::get_map();
@@ -231,6 +244,10 @@ void sim_interface::synch() {
   };
   player::for_each_player(append_player);
   s_playercount = player::get_count();
+
+  for (uint32_t i = 0; i < s_playercount; ++i) {
+    s_notifications[i] = notification::get_player_notifications(i);
+  }
 
   // Sort all vectors by unique id for fast lookup.
 
@@ -252,3 +269,8 @@ void sim_interface::sub_synch(std::function<void()> sub) {
 bool sim_interface::poll() {
   return s_statechanged;
 }
+
+uint32_t sim_interface::get_currentplayer() {
+  return s_currentplayer;
+}
+

@@ -37,9 +37,9 @@ namespace map {
   GLuint s_outlineshader;
   std::vector<GLint> s_outlineuniforms;
 
-  glm::vec3 s_selectcolor = glm::vec3(0.0f, 0.8f, 0.3f);
-  glm::vec3 s_hovercolor = glm::vec3(1.0f, 0.549f, 0.0f);
-  glm::vec3 s_enemycolor = glm::vec3(0.0f, 0.549f, 0.3f);
+  glm::vec4 s_selectcolor = glm::vec4(0.0f, 0.8f, 0.3f, 0.5f);
+  glm::vec4 s_hovercolor = glm::vec4(1.0f, 0.549f, 0.0f, 0.5f);
+  glm::vec4 s_enemycolor = glm::vec4(0.0f, 0.549f, 0.3f, 0.5f);
 
   void set_selected(glm::ivec3& selected) {
     glm::vec3 from;
@@ -103,6 +103,7 @@ namespace map {
     glm::ivec3 pos;
     const world_map::TileMap& tiles = sim_interface::get_map();
 
+
     for (const auto& t : tiles) {
       pos = glm::ivec3(t.first.x, t.first.y, t.first.z);
       glm::vec2 world = glm_hex::cube_to_world(pos, 3);
@@ -129,6 +130,32 @@ namespace map {
       }
       mesh::draw(s_tile);
     }
+
+
+    glm::vec2 world = glm_hex::cube_to_world(s_hover, 3);
+    // Draw a fancy mesh.
+    mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.1f));
+    static float rot = 0.0f;
+    rot += 0.015f;
+    mesh::set_rotate(s_tile, rot, glm::vec3(0.0f, 0.0f, 1.0f));
+    mesh::set_scale(s_tile, glm::vec3(0.6f, 0.6f, 0.6f));
+    mesh::update_transform(s_tile);
+
+    glUseProgram(s_outlineshader);
+
+    Camera* c = camera::get_current();
+    if (!c) return;
+
+    glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
+    glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
+    glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(s_tile->m_matrix));
+    glUniform4fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
+
+    glDisable(GL_DEPTH_TEST);
+    mesh::raw_draw(s_tile);
+    glEnable(GL_DEPTH_TEST);
+    mesh::set_scale(s_tile, glm::vec3(1.0f, 1.0f, 1.0f));
+    mesh::set_rotate(s_tile, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
   }
 
   void render_units() {
@@ -240,7 +267,7 @@ namespace map {
 
         glm::vec3 old_position = todraw->m_position;
         mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
-        mesh::set_scale(todraw, glm::vec3(1.1f, 1.1f, 1.1f));
+        mesh::set_scale(todraw, glm::vec3(1.2f, 1.2f, 1.2f));
         mesh::update_transform(todraw);
 
         glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
@@ -248,11 +275,11 @@ namespace map {
         glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(todraw->m_matrix));
 
         if (s.m_selection == SELECTION_TYPE::UNIT && util::vec_eq(s.m_unit.m_location, pos)) {
-          glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor));
+          glUniform4fv(s_outlineuniforms[3], 1, glm::value_ptr(s_selectcolor));
         }
 
         else if (s_hover == pos) {
-          glUniform3fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
+          glUniform4fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
         }
 
         mesh::raw_draw(todraw);

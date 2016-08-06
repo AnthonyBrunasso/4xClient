@@ -75,7 +75,6 @@ int main() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, 1.0f);
     glViewport(0, 0, width, height);
 
-    //mesh::draw(m);
     map::draw();
     ImGui::Render();
 
