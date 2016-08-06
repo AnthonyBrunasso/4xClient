@@ -19,7 +19,8 @@
 
 namespace ui {
   // Cities to render ui for.
-  std::vector<uint32_t> s_cities;
+  uint32_t s_city = 0;
+  bool s_city_open = false;
   CBuffer<float> s_framehistory(1000);
   bool s_debug = false;
 
@@ -192,119 +193,113 @@ namespace ui {
   }
 
   void render_cities() {
+    if (!s_city || !s_city_open) return;
     const std::vector<City>& cities = sim_interface::get_cities(); 
     std::vector<uint32_t> cities_to_close;
     // Show city ui for selected cities.
-    for (auto id : s_cities) {
-      const City* city = util::id_binsearch(cities.data(), cities.size(), id);
-      if (!city) continue;
-      ImGui::Begin("City");
-      ImGui::Text("Production");
-      ImGui::Separator();
+    const City* city = util::id_binsearch(cities.data(), cities.size(), s_city);
+    if (!city) return;
+    ImGui::Begin("City", &s_city_open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysUseWindowPadding);
+    ImGui::Text("Population: %.1f Turns To Grow: %.1f Food: %.1f Experience: %.1f", city->GetPopulation(), city->GetTurnsForGrowth(), city->m_food, city->m_experience);
+    ImGui::Text("Production");
+    ImGui::Separator();
 
-      render_construction(city->GetProductionQueue());
-      ImGui::Separator();
+    render_construction(city->GetProductionQueue());
+    ImGui::Separator();
 
-      ImGui::Text("Pick Construction");
-      ImGui::Columns(3, "mycolumns"); // 4-ways, with border
-      ImGui::Separator();
-      ImGui::Text("Construction"); ImGui::NextColumn();
-      ImGui::Text("Production"); ImGui::NextColumn();
-      ImGui::Text("Lore"); ImGui::NextColumn();
-      ImGui::Separator();
-      static int selected = -1;
-      static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
-      int i = 0;
-      for_each_construction_type([&i](CONSTRUCTION_TYPE type) {
-        if (type == CONSTRUCTION_TYPE::UNKNOWN) return;
-        char label[32];
-        sprintf(label, "%s", get_construction_name(type));
-        if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
-          selected = i;
-          construct = type;
+    ImGui::Text("Pick Construction");
+    ImGui::Columns(3, "mycolumns"); // 4-ways, with border
+    ImGui::Separator();
+    ImGui::Text("Construction"); ImGui::NextColumn();
+    ImGui::Text("Production"); ImGui::NextColumn();
+    ImGui::Text("Lore"); ImGui::NextColumn();
+    ImGui::Separator();
+    static int selected = -1;
+    static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
+    int i = 0;
+    for_each_construction_type([&i](CONSTRUCTION_TYPE type) {
+      if (type == CONSTRUCTION_TYPE::UNKNOWN) return;
+      char label[32];
+      sprintf(label, "%s", get_construction_name(type));
+      if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
+        selected = i;
+        construct = type;
+      }
+      ImGui::NextColumn();
+      ImGui::Text("%.2f", production::required(type)); ImGui::NextColumn();
+      ImGui::Text("%s", "None"); ImGui::NextColumn();
+      ++i;
+    });
+
+    if (construct != CONSTRUCTION_TYPE::UNKNOWN) {
+      sim_interface::construct(s_city, construct);
+      construct = CONSTRUCTION_TYPE::UNKNOWN;
+    }
+
+    ImGui::Columns(1);
+    ImGui::Separator();
+    
+    if (city->CanSpecialize()) {
+      TERRAIN_TYPE type = city->m_specialization;
+      // Give player specialization picker
+      if (type == TERRAIN_TYPE::UNKNOWN) {
+        static const char** tnames = get_terrain_names();
+        int begin = 0, item = 0;
+
+        for (int i = 0; i < get_terrain_count(); ++i) {
+          if (get_terrain_name(type) == tnames[i]) {
+            begin = item = i;
+          }
         }
-        ImGui::NextColumn();
-        ImGui::Text("%.2f", production::required(type)); ImGui::NextColumn();
-        ImGui::Text("%s", "None"); ImGui::NextColumn();
-        ++i;
-      });
 
-      if (construct != CONSTRUCTION_TYPE::UNKNOWN) {
-        sim_interface::construct(id, construct);
-        construct = CONSTRUCTION_TYPE::UNKNOWN;
+        ImGui::Combo("Specialization", &item, &tnames[0], get_terrain_count());
+        if (begin != item) {
+          sim_interface::specialize(city->m_id, get_terrain_type(tnames[item]));
+        }
+      }
+      // Otherwise show specialization
+      else {
+        ImGui::Text("Spec: %s ( ", get_terrain_name(type));
+        TerrainYield y = terrain_yield::get_specialization_yield(type);
+        ImGui::SameLine();
+        render_yield(y);
+        ImGui::Text(")");
+      }
+    }
+
+    if (city->GetPopulation()) {
+      if (city->GetHarvestCount()) {
+        ImGui::Columns(2, "harvestColumns");
+        ImGui::Separator();
+        ImGui::Text("Type"); ImGui::NextColumn();
+        ImGui::Text("Yield"); ImGui::NextColumn();
+        ImGui::Separator();
+      }
+
+      for (size_t i = 0; i < city->GetHarvestCount(); ++i) {
+        const std::vector<sf::Vector3i>& ys = city->m_yield_tiles;
+        glm::ivec3 loc(ys[i].x, ys[i].y, ys[i].z);
+        const world_map::TileMap& wm = sim_interface::get_map();
+        const auto& ti = wm.find(ys[i]);
+        if (ti == wm.end()) continue;
+        TerrainYield yield = terrain_yield::get_base_yield(ti->second.m_terrain_type);
+        ImGui::Text("%s", get_terrain_name(ti->second.m_terrain_type)); ImGui::NextColumn();
+        render_yield(yield); ImGui::NextColumn();
+        // Add rotating hexagon to show the tile is being harvested.
+        prop::spinagon(loc);
       }
 
       ImGui::Columns(1);
       ImGui::Separator();
-      
-      if (city->CanSpecialize()) {
-        TERRAIN_TYPE type = city->m_specialization;
-        // Give player specialization picker
-        if (type == TERRAIN_TYPE::UNKNOWN) {
-          static const char** tnames = get_terrain_names();
-          int begin = 0, item = 0;
-
-          for (int i = 0; i < get_terrain_count(); ++i) {
-            if (get_terrain_name(type) == tnames[i]) {
-              begin = item = i;
-            }
-          }
-
-          ImGui::Combo("Specialization", &item, &tnames[0], get_terrain_count());
-          if (begin != item) {
-            sim_interface::specialize(city->m_id, get_terrain_type(tnames[item]));
-          }
-        }
-        // Otherwise show specialization
-        else {
-          ImGui::Text("Spec: %s ( ", get_terrain_name(type));
-          TerrainYield y = terrain_yield::get_specialization_yield(type);
-          ImGui::SameLine();
-          render_yield(y);
-          ImGui::Text(")");
-        }
-      }
-
-      if (city->GetPopulation()) {
-        if (ImGui::Button("Harvest")) selection::set_selection(SELECTION_TYPE::HARVEST);
-
-        if (city->GetHarvestCount()) {
-          ImGui::Columns(2, "harvestColumns");
-          ImGui::Separator();
-          ImGui::Text("Type"); ImGui::NextColumn();
-          ImGui::Text("Yield"); ImGui::NextColumn();
-          ImGui::Separator();
-        }
-
-        for (size_t i = 0; i < city->GetHarvestCount(); ++i) {
-          const std::vector<sf::Vector3i>& ys = city->m_yield_tiles;
-          glm::ivec3 loc(ys[i].x, ys[i].y, ys[i].z);
-          const world_map::TileMap& wm = sim_interface::get_map();
-          const auto& ti = wm.find(ys[i]);
-          if (ti == wm.end()) continue;
-          TerrainYield yield = terrain_yield::get_base_yield(ti->second.m_terrain_type);
-          ImGui::Text("%s", get_terrain_name(ti->second.m_terrain_type)); ImGui::NextColumn();
-          render_yield(yield); ImGui::NextColumn();
-          // Add rotating hexagon to show the tile is being harvested.
-          prop::spinagon(loc);
-        }
-
-        ImGui::Columns(1);
-        ImGui::Separator();
-      }
-      
-       
-
-      if (ImGui::Button("Close")) cities_to_close.push_back(id);
-      ImGui::End();
     }
-
-    for (auto id : cities_to_close) {
-      s_cities.erase(std::remove_if(s_cities.begin(), s_cities.end(), 
-        [id](uint32_t cid) { 
-          return cid == id; 
-      }), s_cities.end());
+   
+    if (city->GetPopulation()) {
+      if (ImGui::Button("Harvest")) selection::set_selection(SELECTION_TYPE::HARVEST);
+      ImGui::SameLine();
+      ImGui::Text("Available: %.1f", city->IdleWorkers());
     }
+   
+    ImGui::End();
   }
 }
 
@@ -314,10 +309,8 @@ void ui::debug(bool on) {
 
 void ui::city(uint32_t id) {
   // Don't open this multiple times.
-  for (auto cid : s_cities) {
-    if (cid == id) return;
-  }
-  s_cities.push_back(id);
+  s_city = id;
+  s_city_open = true;
 }
 
 void ui::update() {
