@@ -14,6 +14,8 @@
 #include "unit_definitions.h"
 #include "notification.h"
 #include "terrain_yield.h"
+#include "prop.h"
+#include "map.h"
 
 namespace ui {
   // Cities to render ui for.
@@ -84,7 +86,7 @@ namespace ui {
     if (show_mesh_logs) debug_log("Mesh Logs", mesh_logs, show_mesh_logs);
     if (show_image_logs) debug_log("Image Logs", image_logs, show_image_logs);
 
-    ImGui::ShowTestWindow();
+    //ImGui::ShowTestWindow();
   }
 
   void render_construction(ConstructionQueueFIFO* cq) {
@@ -132,8 +134,16 @@ namespace ui {
     ImGui::Text("Attack: %.2f", s.m_unit.m_combat_stats.m_attack);
   }
 
+  void render_harvest_selection() {
+    const Selection& s = selection::get_selection();
+    prop::spinagon(map::get_hover());
+    ImGui::Text("Right-click a tile to harvest.");
+  }
+
   void render_selection() {
-    ImGui::Begin("Selection");
+    static bool open = true;
+    open = true;
+    ImGui::Begin("Selection", &open, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SetWindowPos("Selection", ImVec2(0, 0));
     ImGui::Text("Current Player: %d", sim_interface::get_currentplayer());
     const Selection& s = selection::get_selection(); 
@@ -142,11 +152,43 @@ namespace ui {
         render_unit_selection();
         break;
       case SELECTION_TYPE::CITY:
+        //render_city_selection();
+        break;
+      case SELECTION_TYPE::HARVEST:
+        render_harvest_selection();
+        break;
       case SELECTION_TYPE::INACTIVE:
         ImGui::Text("Nothing selected.");
         break;
     }
     ImGui::End();
+  }
+
+  void render_yield(const TerrainYield& y) {
+    if (y.m_food > 0.0f) {
+      ImGui::Text("Food: +%.1f ", y.m_food);
+      ImGui::SameLine();
+    }
+    if (y.m_science > 0.0f) {
+      ImGui::Text("Science: +%.1f ", y.m_science);
+      ImGui::SameLine();
+    }
+    if (y.m_production > 0.0f) {
+      ImGui::Text("Production: +%.1f ", y.m_production);
+      ImGui::SameLine();
+    }
+    if (y.m_gold > 0.0f) {
+      ImGui::Text("Gold: +%.1f ", y.m_gold);
+      ImGui::SameLine();
+    }
+    if (y.m_experience > 0.0f) {
+      ImGui::Text("Xp: +%.1f ", y.m_experience);
+      ImGui::SameLine();
+    }
+    if (y.m_magic > 0.0f) {
+      ImGui::Text("Magic: +%.1f ", y.m_magic);
+      ImGui::SameLine();
+    }
   }
 
   void render_cities() {
@@ -218,33 +260,39 @@ namespace ui {
           ImGui::Text("Spec: %s ( ", get_terrain_name(type));
           TerrainYield y = terrain_yield::get_specialization_yield(type);
           ImGui::SameLine();
-          if (y.m_food > 0.0f) {
-            ImGui::Text("Food: +%.1f ", y.m_food);
-            ImGui::SameLine();
-          }
-          if (y.m_science > 0.0f) {
-            ImGui::Text("Science: +%.1f ", y.m_science);
-            ImGui::SameLine();
-          }
-          if (y.m_production > 0.0f) {
-            ImGui::Text("Production: +%.1f ", y.m_production);
-            ImGui::SameLine();
-          }
-          if (y.m_gold > 0.0f) {
-            ImGui::Text("Gold: +%.1f ", y.m_gold);
-            ImGui::SameLine();
-          }
-          if (y.m_experience > 0.0f) {
-            ImGui::Text("Xp: +%.1f ", y.m_experience);
-            ImGui::SameLine();
-          }
-          if (y.m_magic > 0.0f) {
-            ImGui::Text("Magic: +%.1f ", y.m_magic);
-            ImGui::SameLine();
-          }
+          render_yield(y);
           ImGui::Text(")");
         }
       }
+
+      if (city->GetPopulation()) {
+        if (ImGui::Button("Harvest")) selection::set_selection(SELECTION_TYPE::HARVEST);
+
+        if (city->GetHarvestCount()) {
+          ImGui::Columns(2, "harvestColumns");
+          ImGui::Separator();
+          ImGui::Text("Type"); ImGui::NextColumn();
+          ImGui::Text("Yield"); ImGui::NextColumn();
+          ImGui::Separator();
+        }
+
+        for (size_t i = 0; i < city->GetHarvestCount(); ++i) {
+          const std::vector<sf::Vector3i>& ys = city->m_yield_tiles;
+          glm::ivec3 loc(ys[i].x, ys[i].y, ys[i].z);
+          const world_map::TileMap& wm = sim_interface::get_map();
+          const auto& ti = wm.find(ys[i]);
+          if (ti == wm.end()) continue;
+          TerrainYield yield = terrain_yield::get_base_yield(ti->second.m_terrain_type);
+          ImGui::Text("%s", get_terrain_name(ti->second.m_terrain_type)); ImGui::NextColumn();
+          render_yield(yield); ImGui::NextColumn();
+          // Add rotating hexagon to show the tile is being harvested.
+          prop::spinagon(loc);
+        }
+
+        ImGui::Columns(1);
+        ImGui::Separator();
+      }
+      
        
 
       if (ImGui::Button("Close")) cities_to_close.push_back(id);

@@ -18,11 +18,17 @@
 #include "program.h"
 #include "light.h"
 #include "ui.h"
+#include "prop.h"
 
 void initialize() {
   program::build("phong", {
     {GL_VERTEX_SHADER, "simple_phong.vert"},
     {GL_FRAGMENT_SHADER, "simple_phong.frag"},
+  });
+
+  program::build("outline", {
+    {GL_VERTEX_SHADER, "simple_phong.vert"},
+    {GL_FRAGMENT_SHADER, "outline.frag"},
   });
 
   glm::vec3 pos(0.0, 30.0f, 0.0f);
@@ -51,6 +57,7 @@ int main() {
 
   sim_interface::initialize(MULTIPLAYER::NO);
   map::initialize();
+  prop::initialize();
 
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -76,6 +83,7 @@ int main() {
     glViewport(0, 0, width, height);
 
     map::draw();
+    prop::render();
     ImGui::Render();
 
     glfwSwapBuffers(window);

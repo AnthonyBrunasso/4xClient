@@ -12,6 +12,7 @@
 #include "selection.h"
 #include "light.h"
 #include "client_util.h"
+#include "prop.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -130,32 +131,6 @@ namespace map {
       }
       mesh::draw(s_tile);
     }
-
-
-    glm::vec2 world = glm_hex::cube_to_world(s_hover, 3);
-    // Draw a fancy mesh.
-    mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.1f));
-    static float rot = 0.0f;
-    rot += 0.015f;
-    mesh::set_rotate(s_tile, rot, glm::vec3(0.0f, 0.0f, 1.0f));
-    mesh::set_scale(s_tile, glm::vec3(0.6f, 0.6f, 0.6f));
-    mesh::update_transform(s_tile);
-
-    glUseProgram(s_outlineshader);
-
-    Camera* c = camera::get_current();
-    if (!c) return;
-
-    glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
-    glUniformMatrix4fv(s_outlineuniforms[1], 1, GL_FALSE, glm::value_ptr(c->m_projection));
-    glUniformMatrix4fv(s_outlineuniforms[2], 1, GL_FALSE, glm::value_ptr(s_tile->m_matrix));
-    glUniform4fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
-
-    glDisable(GL_DEPTH_TEST);
-    mesh::raw_draw(s_tile);
-    glEnable(GL_DEPTH_TEST);
-    mesh::set_scale(s_tile, glm::vec3(1.0f, 1.0f, 1.0f));
-    mesh::set_rotate(s_tile, 0.0f, glm::vec3(0.0f, 0.0f, 1.0f));
   }
 
   void render_units() {
@@ -266,8 +241,6 @@ namespace map {
         glUseProgram(s_outlineshader);
 
         glm::vec3 old_position = todraw->m_position;
-        mesh::set_position(todraw, old_position + glm::vec3(0.0f, 0.0f, -0.1f));
-        mesh::set_scale(todraw, glm::vec3(1.2f, 1.2f, 1.2f));
         mesh::update_transform(todraw);
 
         glUniformMatrix4fv(s_outlineuniforms[0], 1, GL_FALSE, glm::value_ptr(c->m_view));
@@ -282,7 +255,11 @@ namespace map {
           glUniform4fv(s_outlineuniforms[3], 1, glm::value_ptr(s_hovercolor));
         }
 
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         mesh::raw_draw(todraw);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // Set back to its original scale.
         mesh::set_position(todraw, old_position);
@@ -327,11 +304,6 @@ void map::initialize() {
   selection::initialize();
 
   Camera* c = camera::get_current();
-
-  program::build("outline", {
-    {GL_VERTEX_SHADER, "simple_phong.vert"},
-    {GL_FRAGMENT_SHADER, "outline.frag"},
-  });
 
   s_outlineshader = program::get("outline"); 
 
@@ -421,4 +393,12 @@ void map::draw() {
   render_terrain();
   render_units();
   render_cities();
+}
+
+Mesh* map::get_tile_mesh() {
+  return s_tile;
+}
+
+const glm::ivec3& map::get_hover() {
+  return s_hover;
 }

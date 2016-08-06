@@ -9,6 +9,7 @@
 enum SELECTION_TYPE {
   UNIT,
   CITY,
+  HARVEST,
   INACTIVE,
 };
 
@@ -32,5 +33,6 @@ namespace selection {
   const glm::ivec3& get();
   void lclick(const glm::ivec3& location);
   void rclick(const glm::ivec3& location);
+  void set_selection(SELECTION_TYPE type);
   const Selection& get_selection();
 }

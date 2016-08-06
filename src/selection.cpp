@@ -12,6 +12,7 @@ namespace selection {
   Selection s_selection;
 
   void rclick_unit(const glm::ivec3& loc);
+  void rclick_harvest(const glm::ivec3& loc);
 
   void synch_unit_selection() {
     const std::vector<Unit>& units = sim_interface::get_units();
@@ -26,12 +27,24 @@ namespace selection {
     s_selection.m_unit = *u;
   }
 
+  void synch_city_selection() {
+    const std::vector<City>& cities = sim_interface::get_cities();
+    const City* c = util::id_binsearch(cities.data(), cities.size(), s_selection.m_city.m_id);
+    if (!c) {
+      s_selection.clear();
+      return;
+    }
+    s_selection.m_city = *c;
+  }
+
   void synch() {
     switch (s_selection.m_selection) {
       case SELECTION_TYPE::UNIT:
         synch_unit_selection();
         break;
       case SELECTION_TYPE::CITY:
+        synch_city_selection();
+        break;
       case SELECTION_TYPE::INACTIVE:
         break;
     }
@@ -68,7 +81,15 @@ void selection::lclick(const glm::ivec3& location) {
   s_selection.clear();
 
   // Check if there is a city a the location to open the ui for it.
-  if (t->second.m_city_id) ui::city(t->second.m_city_id);
+  if (t->second.m_city_id) {
+    const std::vector<City>& cities = sim_interface::get_cities();
+    const City* c = util::id_binsearch(cities.data(), cities.size(), t->second.m_city_id);
+    if (!c) return;
+    s_selection.m_city = *c;
+    s_selection.m_selection = SELECTION_TYPE::CITY;
+    ui::city(t->second.m_city_id);
+    return;
+  }
 }
 
 void selection::rclick_unit(const glm::ivec3& loc) {
@@ -97,6 +118,17 @@ void selection::rclick_unit(const glm::ivec3& loc) {
   sim_interface::move_unit(s_selection.m_unit.m_id, loc);
 }
 
+void selection::rclick_harvest(const glm::ivec3& loc) {
+  const world_map::TileMap& map = sim_interface::get_map();
+  const std::vector<City>& cities = sim_interface::get_cities();
+
+  sf::Vector3i sloc(loc.x, loc.y, loc.z);
+  const auto& t = map.find(sloc);
+  if (t == map.end()) return;
+
+  sim_interface::harvest(loc);
+}
+
 // rclick should only act on the current selection
 void selection::rclick(const glm::ivec3& location) {
   switch (s_selection.m_selection) {
@@ -104,6 +136,10 @@ void selection::rclick(const glm::ivec3& location) {
       rclick_unit(location);
       break;
     case SELECTION_TYPE::CITY:
+      break;
+    case SELECTION_TYPE::HARVEST:
+      rclick_harvest(location);
+      break;
     case SELECTION_TYPE::INACTIVE:
       break;
   }
@@ -111,4 +147,8 @@ void selection::rclick(const glm::ivec3& location) {
 
 const Selection& selection::get_selection() {
   return s_selection;
+}
+
+void selection::set_selection(SELECTION_TYPE type) {
+  s_selection.m_selection = type;
 }

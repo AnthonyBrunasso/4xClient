@@ -205,6 +205,13 @@ void sim_interface::attack(uint32_t from_id, uint32_t to_id) {
   simulate_step(attack_step);
 }
 
+void sim_interface::harvest(const glm::ivec3& loc) {
+  HarvestStep h;
+  h.set_destination(sf::Vector3i(loc.x, loc.y, loc.z));
+  h.set_player(s_currentplayer);
+  simulate_step(h);
+}
+
 const world_map::TileMap& sim_interface::get_map() {
   return s_tiles;
 }
