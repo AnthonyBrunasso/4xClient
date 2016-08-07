@@ -108,18 +108,46 @@ namespace ui {
     ImGui::Separator();
 
     ImGui::Text("Full Queue");
-    ImGui::Columns(2, "mycolumns"); // 4-ways, with border
+    ImGui::Columns(3, "mycolumns"); // 4-ways, with border
     ImGui::Text("Name"); ImGui::NextColumn();
     ImGui::Text("Turns"); ImGui::NextColumn();
+    ImGui::Text("Mutate"); ImGui::NextColumn();
     ImGui::Separator();
 
     ConstructionList::const_iterator cit = cq->m_queue.begin();
     float turns = 0.0;
     
+    size_t i = 0;
     for (auto co : cq->m_queue) {
       turns += production::turns(co);
       ImGui::Text("%s", production::name(co)); ImGui::NextColumn();
       ImGui::Text("%.1f", turns); ImGui::NextColumn();
+      ImGui::PushID(static_cast<int>(i));
+      if (ImGui::Button("x")) {
+        production_queue::remove(cq, i);
+        ImGui::PopID();
+        break;
+      }
+
+      ImGui::SameLine();
+      if (ImGui::Button("+")) {
+        // Simulation happily deals with invalid indices, Thanks Alan!
+        production_queue::move(cq, i, i - 1);
+        ImGui::PopID();
+        break;
+      }
+
+      ImGui::SameLine();
+      if (ImGui::Button("-")) {
+        // Simulation happily deals with invalid indices, Thanks Alan!
+        production_queue::move(cq, i, i + 1);
+        ImGui::PopID();
+        break;
+      }
+      ImGui::NextColumn();
+
+      ImGui::PopID();
+      ++i;
     }
 
     ImGui::Columns(1);
