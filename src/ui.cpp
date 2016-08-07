@@ -123,14 +123,14 @@ namespace ui {
       ImGui::Text("%s", production::name(co)); ImGui::NextColumn();
       ImGui::Text("%.1f", turns); ImGui::NextColumn();
       ImGui::PushID(static_cast<int>(i));
-      if (ImGui::Button("x")) {
+      if (ImGui::SmallButton("x")) {
         production_queue::remove(cq, i);
         ImGui::PopID();
         break;
       }
 
       ImGui::SameLine();
-      if (ImGui::Button("+")) {
+      if (ImGui::SmallButton("+")) {
         // Simulation happily deals with invalid indices, Thanks Alan!
         production_queue::move(cq, i, i - 1);
         ImGui::PopID();
@@ -138,14 +138,14 @@ namespace ui {
       }
 
       ImGui::SameLine();
-      if (ImGui::Button("-")) {
+      if (ImGui::SmallButton("-")) {
         // Simulation happily deals with invalid indices, Thanks Alan!
         production_queue::move(cq, i, i + 1);
         ImGui::PopID();
         break;
       }
-      ImGui::NextColumn();
 
+      ImGui::NextColumn();
       ImGui::PopID();
       ++i;
     }
@@ -253,20 +253,24 @@ namespace ui {
     ImGui::Separator();
     static int selected = -1;
     static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
+
+    std::vector<CONSTRUCTION_TYPE> constructions = production_queue::incomplete(city->GetProductionQueue());
     int i = 0;
-    for_each_construction_type([&i](CONSTRUCTION_TYPE type) {
-      if (type == CONSTRUCTION_TYPE::UNKNOWN) return;
+
+    for (auto c : constructions) {
+      if (c == CONSTRUCTION_TYPE::UNKNOWN) continue;
       char label[32];
-      sprintf(label, "%s", get_construction_name(type));
+      sprintf(label, "%s", get_construction_name(c));
       if (ImGui::Selectable(label, selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
         selected = i;
-        construct = type;
+        construct = c;
       }
       ImGui::NextColumn();
-      ImGui::Text("%.2f", production::required(type)); ImGui::NextColumn();
+      ImGui::Text("%.2f", production::required(c)); ImGui::NextColumn();
       ImGui::Text("%s", "None"); ImGui::NextColumn();
       ++i;
-    });
+
+    }
 
     if (construct != CONSTRUCTION_TYPE::UNKNOWN) {
       sim_interface::construct(s_city, construct);
@@ -356,7 +360,6 @@ void ui::city(uint32_t id) {
 
 void ui::update() {
   if (s_debug) debug_ui();
-  
   render_cities();
   render_selection();
 }
