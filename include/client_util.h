@@ -17,6 +17,7 @@ namespace util {
 
   template<class type>
   const type* id_binsearch(const type* d, size_t size, uint32_t id) {
+    if (!size) return nullptr;
     size_t mid;
     size_t min = 0;
     size_t max = size;

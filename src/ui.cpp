@@ -345,6 +345,19 @@ namespace ui {
    
     ImGui::End();
   }
+
+  void render_empire_stats() {
+    const std::vector<Player>& players = sim_interface::get_players();
+    uint32_t current = sim_interface::get_currentplayer();
+    const Player* p = util::id_binsearch(players.data(), players.size(), current);
+    if (!p) return;
+
+    ImGui::Begin("Empire", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ShowBorders);
+    ImGui::SetWindowPos("Empire", ImVec2(0, 0));
+    ImGui::Text("Player %d", current);
+    ImGui::Text("Gold: %.1f Science: %.1f Magic: %.1f", p->m_gold, p->m_science, p->m_magic);
+    ImGui::End();
+  }
 }
 
 void ui::debug(bool on) {
@@ -362,4 +375,5 @@ void ui::update() {
   if (s_debug) debug_ui();
   render_cities();
   render_selection();
+  render_empire_stats();
 }
