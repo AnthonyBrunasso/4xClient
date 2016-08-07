@@ -358,6 +358,7 @@ void map::initialize() {
   mesh::add_uniform(s_hutmesh, "use_texture", &s_dontusetex);
 
   mesh::bind_texture_data(s_tile, geometry::get_hexagontexcoords());
+  mesh::bind_tangent_data(s_tile, geometry::get_hexagontangents());
   mesh::add_uniform(s_tile, "tex_sampler", &s_texloc);
   mesh::add_uniform(s_tile, "use_texture", &s_usetex);
 

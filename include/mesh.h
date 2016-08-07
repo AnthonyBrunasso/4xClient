@@ -35,6 +35,9 @@ public:
   // If texcoords is empty the mesh does not use a texture.
   std::vector<GLfloat> m_texcoords;
 
+  // If tangets exist, the mesh is likely using bump mapping.
+  std::vector<GLfloat> m_tangents;
+
   GLuint m_vao;
 
   bool m_update_matrix;
@@ -66,6 +69,9 @@ namespace mesh {
 
   // Textures are not initialized on creation. Bind it seperately.
   void bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords);
+
+  // Bind the tanget data.
+  void bind_tangent_data(Mesh* m, const std::vector<GLfloat>& tangents);
 
   // Set property of mesh and update its transform matrix.
   void set_position(Mesh* m, const glm::vec3& position);

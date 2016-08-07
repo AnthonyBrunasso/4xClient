@@ -317,6 +317,25 @@ void mesh::bind_texture_data(Mesh* m, const std::vector<GLfloat>& texcoords) {
   glBindVertexArray(0);
 }
 
+void mesh::bind_tangent_data(Mesh* m, const std::vector<GLfloat>& tangents) {
+  if (!m) return;
+  glBindVertexArray(m->m_vao);
+
+  m->m_tangents = tangents;
+  GLuint& vbo = m->m_vbos.back();
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER,
+    m->m_tangents.size() * sizeof(GLfloat),
+    m->m_tangents.data(),
+    GL_STATIC_DRAW);
+
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(3);
+
+  glBindVertexArray(0);
+}
+
 // Set property of mesh and update its transform matrix.
 void mesh::set_position(Mesh* m, const glm::vec3& position) {
   if (!m) return;

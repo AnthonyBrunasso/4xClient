@@ -19,4 +19,5 @@ namespace geometry {
     , std::vector<GLuint>& indices);
 
   std::vector<GLfloat> get_hexagontexcoords();
+  std::vector<GLfloat> get_hexagontangents();
 }

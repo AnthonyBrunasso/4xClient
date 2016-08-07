@@ -183,3 +183,13 @@ std::vector<GLfloat> geometry::get_hexagontexcoords() {
 
   return texcoords;
 }
+
+std::vector<GLfloat> geometry::get_hexagontangents() {
+  std::vector<GLfloat> tangents;
+  for (uint32_t i = 0; i < 18; ++i) {
+    tangents.push_back(1.0f);
+    tangents.push_back(0.0f);
+    tangents.push_back(0.0f);
+  }
+  return tangents;
+}
