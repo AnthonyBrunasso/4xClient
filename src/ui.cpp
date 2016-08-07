@@ -4,6 +4,9 @@
 #include <iostream>
 #include <algorithm>
 
+#include <GL/gl3w.h>
+#include <GLFW/glfw3.h>
+
 #include "circular_buffer.h"
 #include "production.h"
 #include "sim_interface.h"
@@ -16,6 +19,7 @@
 #include "terrain_yield.h"
 #include "prop.h"
 #include "map.h"
+#include "gl.h"
 
 namespace ui {
   // Cities to render ui for.
@@ -142,11 +146,14 @@ namespace ui {
   }
 
   void render_selection() {
-    static bool open = true;
-    open = true;
-    ImGui::Begin("Selection", &open, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SetWindowPos("Selection", ImVec2(0, 0));
-    ImGui::Text("Current Player: %d", sim_interface::get_currentplayer());
+    GLFWwindow* w = gl::get_current_window();
+    if (!w) return;
+
+    int width, height;
+    glfwGetFramebufferSize(w, &width, &height);
+
+    ImGui::Begin("Selection", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ShowBorders);
+    ImGui::SetWindowPos("Selection", ImVec2(0, height - ImGui::GetWindowHeight()));
     const Selection& s = selection::get_selection(); 
     switch (s.m_selection) {
       case SELECTION_TYPE::UNIT:
