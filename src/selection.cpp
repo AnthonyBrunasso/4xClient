@@ -72,6 +72,8 @@ void selection::lclick(const glm::ivec3& location) {
     const std::vector<Unit>& units = sim_interface::get_units();
     const Unit* u = util::id_binsearch(units.data(), units.size(), t->second.m_unit_ids.front());
     if (!u) return;
+    // Close city ui if it's open.
+    ui::city(0);
     s_selection.m_unit = *u;
     s_selection.m_selection = SELECTION_TYPE::UNIT;
     return;
@@ -79,6 +81,7 @@ void selection::lclick(const glm::ivec3& location) {
 
   // Clear the selection if a unit wasn't clicked on
   s_selection.clear();
+  ui::city(0);
 
   // Check if there is a city a the location to open the ui for it.
   if (t->second.m_city_id) {

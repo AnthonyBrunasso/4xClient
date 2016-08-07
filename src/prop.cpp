@@ -15,7 +15,7 @@ namespace prop {
   Mesh* s_tile;
   std::vector<GLint> s_outlineuniforms;
 
-  glm::vec4 s_spinagoncolor = glm::vec4(0.48f, 0.5f, 0.98f, 0.45f);
+  glm::vec4 s_spinagoncolor = glm::vec4(0.48f, 0.6f, 0.98f, 0.55f);
 }
 
 void prop::initialize() {
@@ -35,15 +35,15 @@ void prop::spinagon(const glm::ivec3& cube) {
 }
 
 void prop::render() {
+  static float rot = 0.0f;
+  rot += 0.015f;
 
   for (const auto& loc : s_spinagons) {
     glm::vec2 world = glm_hex::cube_to_world(loc, 3);
     // Draw a fancy mesh.
     mesh::set_position(s_tile, glm::vec3(world.x, world.y, 0.1f));
-    static float rot = 0.0f;
-    rot += 0.015f;
     mesh::set_rotate(s_tile, rot, glm::vec3(0.0f, 0.0f, 1.0f));
-    mesh::set_scale(s_tile, glm::vec3(0.6f, 0.6f, 0.6f));
+    mesh::set_scale(s_tile, glm::vec3(0.5f, 0.5f, 0.5f));
     mesh::update_transform(s_tile);
 
     glUseProgram(s_outlineshader);

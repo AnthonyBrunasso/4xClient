@@ -19,6 +19,7 @@
 #include <glm/gtx/intersect.hpp>
 #include <vector>
 #include <iostream>
+#include <imgui.h>
 
 namespace map {
   // Mouse positions.
@@ -66,6 +67,9 @@ namespace map {
   }
 
   void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    // Don't go through the ui.
+    if (ImGui::IsMouseHoveringAnyWindow()) return;
+
     set_selected(s_selected);
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {

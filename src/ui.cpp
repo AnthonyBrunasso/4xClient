@@ -199,6 +199,8 @@ namespace ui {
     // Show city ui for selected cities.
     const City* city = util::id_binsearch(cities.data(), cities.size(), s_city);
     if (!city) return;
+
+
     ImGui::Begin("City", &s_city_open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysUseWindowPadding);
     ImGui::Text("Population: %.1f Turns To Grow: %.1f Food: %.1f Experience: %.1f", city->GetPopulation(), city->GetTurnsForGrowth(), city->m_food, city->m_experience);
     ImGui::Text("Production");
@@ -268,6 +270,7 @@ namespace ui {
     }
 
     if (city->GetPopulation()) {
+      selection::set_selection(SELECTION_TYPE::HARVEST);
       if (city->GetHarvestCount()) {
         ImGui::Columns(2, "harvestColumns");
         ImGui::Separator();
@@ -294,10 +297,12 @@ namespace ui {
     }
    
     if (city->GetPopulation()) {
-      if (ImGui::Button("Harvest")) selection::set_selection(SELECTION_TYPE::HARVEST);
-      ImGui::SameLine();
-      ImGui::Text("Available: %.1f", city->IdleWorkers());
+      ImGui::Text("Available Harvest: %.1f", city->IdleWorkers());
     }
+
+    ImGui::Text("Total Yields");
+    TerrainYield yield = city->DumpYields();
+    render_yield(yield);
    
     ImGui::End();
   }
@@ -308,9 +313,10 @@ void ui::debug(bool on) {
 }
 
 void ui::city(uint32_t id) {
-  // Don't open this multiple times.
   s_city = id;
   s_city_open = true;
+  // If id is 0 the city is closed.
+  if (!s_city) s_city_open = false;
 }
 
 void ui::update() {
