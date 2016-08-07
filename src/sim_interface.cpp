@@ -205,6 +205,14 @@ void sim_interface::attack(uint32_t from_id, uint32_t to_id) {
   simulate_step(attack_step);
 }
 
+void sim_interface::cast(const glm::ivec3& loc, MAGIC_TYPE type) {
+  MagicStep m;
+  m.set_type(type);
+  m.set_location(sf::Vector3i(loc.x, loc.y, loc.z));
+  m.set_player(s_currentplayer);
+  simulate_step(m);
+}
+
 void sim_interface::harvest(const glm::ivec3& loc) {
   HarvestStep h;
   h.set_destination(sf::Vector3i(loc.x, loc.y, loc.z));

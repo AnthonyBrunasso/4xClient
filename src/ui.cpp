@@ -173,6 +173,12 @@ namespace ui {
     ImGui::Text("Right-click a tile to harvest.");
   }
 
+  void render_casting_selection() {
+    const Selection& s = selection::get_selection();
+    prop::spinagon(map::get_hover());
+    ImGui::Text("Right-click a tile to cast.");
+  }
+
   void render_selection() {
     GLFWwindow* w = gl::get_current_window();
     if (!w) return;
@@ -192,6 +198,9 @@ namespace ui {
         break;
       case SELECTION_TYPE::HARVEST:
         render_harvest_selection();
+        break;
+      case SELECTION_TYPE::CASTING:
+        render_casting_selection();
         break;
       case SELECTION_TYPE::INACTIVE:
         ImGui::Text("Nothing selected.");
@@ -356,6 +365,18 @@ namespace ui {
     ImGui::SetWindowPos("Empire", ImVec2(0, 0));
     ImGui::Text("Player %d", current);
     ImGui::Text("Gold: %.1f Science: %.1f Magic: %.1f", p->m_gold, p->m_science, p->m_magic);
+    int item = 0;
+    
+    Selection& s = selection::get_selection();
+    if (s.m_selection == CASTING) {
+      item = static_cast<int>(s.m_magic);
+    }
+    static const char** mnames = get_magic_names();
+    ImGui::Combo("Magic", &item, &mnames[0], get_magic_count());
+    if (item != 0) {
+      selection::set_selection(SELECTION_TYPE::CASTING);
+      s.m_magic = static_cast<MAGIC_TYPE>(item);
+    }
     ImGui::End();
   }
 }

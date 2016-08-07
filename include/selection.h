@@ -10,6 +10,7 @@ enum SELECTION_TYPE {
   UNIT,
   CITY,
   HARVEST,
+  CASTING,
   INACTIVE,
 };
 
@@ -18,12 +19,14 @@ struct Selection {
   Player m_player;
   Unit m_unit;
   City m_city;
+  MAGIC_TYPE m_magic;
   SELECTION_TYPE m_selection;
 
   void clear() {
     m_player.m_id = 0;
     m_unit.m_id = 0;
     m_city.m_id = 0;
+    m_magic = MAGIC_TYPE::UNKNOWN;
     m_selection = SELECTION_TYPE::INACTIVE;
   }
 };
@@ -34,5 +37,5 @@ namespace selection {
   void lclick(const glm::ivec3& location);
   void rclick(const glm::ivec3& location);
   void set_selection(SELECTION_TYPE type);
-  const Selection& get_selection();
+  Selection& get_selection();
 }

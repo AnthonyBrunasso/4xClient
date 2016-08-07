@@ -13,6 +13,7 @@ namespace selection {
 
   void rclick_unit(const glm::ivec3& loc);
   void rclick_harvest(const glm::ivec3& loc);
+  void rclick_casting(const glm::ivec3& loc);
 
   void synch_unit_selection() {
     const std::vector<Unit>& units = sim_interface::get_units();
@@ -132,6 +133,15 @@ void selection::rclick_harvest(const glm::ivec3& loc) {
   sim_interface::harvest(loc);
 }
 
+void selection::rclick_casting(const glm::ivec3& loc) {
+  const world_map::TileMap& map = sim_interface::get_map();
+  sf::Vector3i sloc(loc.x, loc.y, loc.z);
+  const auto& t = map.find(sloc);
+  if (t == map.end()) return;
+  
+  sim_interface::cast(loc, s_selection.m_magic);
+}
+
 // rclick should only act on the current selection
 void selection::rclick(const glm::ivec3& location) {
   switch (s_selection.m_selection) {
@@ -143,12 +153,15 @@ void selection::rclick(const glm::ivec3& location) {
     case SELECTION_TYPE::HARVEST:
       rclick_harvest(location);
       break;
+    case SELECTION_TYPE::CASTING:
+      rclick_casting(location);
+      break;
     case SELECTION_TYPE::INACTIVE:
       break;
   }
 }
 
-const Selection& selection::get_selection() {
+Selection& selection::get_selection() {
   return s_selection;
 }
 
