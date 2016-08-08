@@ -124,7 +124,7 @@ namespace ui {
       ImGui::Text("%.1f", turns); ImGui::NextColumn();
       ImGui::PushID(static_cast<int>(i));
       if (ImGui::SmallButton("x")) {
-        production_queue::remove(cq, i);
+        sim_interface::abort_production(cq->m_city_id, i);
         ImGui::PopID();
         break;
       }

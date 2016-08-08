@@ -35,6 +35,7 @@ namespace sim_interface {
   void join_barbarian();
   void initial_settle();
   void settle();
+  void abort_production(uint32_t city, uint32_t index);
 
   const world_map::TileMap& get_map();
   const std::vector<Unit>& get_units();

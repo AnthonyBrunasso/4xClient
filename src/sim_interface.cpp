@@ -187,6 +187,15 @@ void sim_interface::settle() {
   simulate_step(colonize);
 }
 
+void sim_interface::abort_production(uint32_t city, uint32_t index)
+{
+  AbortStep abort;
+  abort.set_player(s_currentplayer);
+  abort.set_city(city);
+  abort.set_index(index);
+  simulate_step(abort);
+}
+
 void sim_interface::teardown() {
   s_killsim = true;
   if (s_multiplayer) {
