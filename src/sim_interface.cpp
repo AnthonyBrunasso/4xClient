@@ -26,6 +26,8 @@ namespace sim_interface {
   std::atomic<bool> s_statechanged (true);
   uint32_t s_currentplayer = 0;
   uint32_t s_playercount = 0;
+  uint32_t s_localplayer = -1;
+  std::vector<uint32_t> s_barbarians;
 
   world_map::TileMap s_tiles;
   std::vector<Unit> s_units;
@@ -47,6 +49,15 @@ namespace sim_interface {
 
     xmessaging::queue(s_buffer, bytes);
     return bytes;
+  }
+
+  template<typename T>
+  size_t initiate_step(const T& step) {
+    if (!is_me(step.get_player())) {
+      std::cout << "Cannot initiate a step on another player's behalf. Local player: " << s_localplayer << ". Step requested player: " << step.get_player() << std::endl;
+      return 0;
+    }
+    return simulate_step(step);
   }
 
   void run_messaging() {
@@ -106,9 +117,9 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
 
   xmessaging::alloc_read_buffer(largest_message());
   s_multiplayer = multiplayer == MULTIPLAYER::YES;
+  std::cout << "Client's protocol version is: " << get_checksum() << std::endl;
   if (multiplayer == MULTIPLAYER::YES) {
     xmessaging::init_transport("rufeooo.com", 4000);
-    std::cout << "Client's protocol version is: " << get_checksum() << std::endl;
   }
   s_consumer_thread = std::thread(&run_messaging);
   s_input_thread = std::thread(&run_sim);
@@ -123,7 +134,7 @@ void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
   m.set_destination(sf::Vector3i(location.x, location.y, location.z));
   m.set_player(unit->m_owner_id);
   m.set_immediate(true);
-  simulate_step(m);
+  initiate_step(m);
 }
 
 void sim_interface::construct(uint32_t city_id, CONSTRUCTION_TYPE type) {
@@ -131,7 +142,7 @@ void sim_interface::construct(uint32_t city_id, CONSTRUCTION_TYPE type) {
   construction.set_city_id(city_id);
   construction.set_production_id(static_cast<uint32_t>(type));
   construction.set_player(s_currentplayer);
-  simulate_step(construction);
+  initiate_step(construction);
 }
 
 void sim_interface::specialize(uint32_t city_id, TERRAIN_TYPE type) {
@@ -139,11 +150,15 @@ void sim_interface::specialize(uint32_t city_id, TERRAIN_TYPE type) {
   s.set_player(s_currentplayer);
   s.set_city_id(city_id);
   s.set_terrain_type(static_cast<uint32_t>(type));
-  simulate_step(s);
+  initiate_step(s);
 } 
 
 void sim_interface::end_turn() {
   EndTurnStep step;
+
+  auto findIt = std::find(s_barbarians.begin(), s_barbarians.end(), s_currentplayer);
+  if (findIt == s_barbarians.end() && !is_me(s_currentplayer)) return;
+
   step.set_player(s_currentplayer);
   ++s_currentplayer;
   // Cycle
@@ -155,7 +170,10 @@ void sim_interface::end_turn() {
 }
 
 void sim_interface::join_player() {
+  if (s_localplayer != -1) return;
+
   AddPlayerStep player;
+  s_localplayer = s_playercount;
   std::cout << "Joining player " << std::to_string(s_playercount) << std::endl;
   player.set_name("player" + std::to_string(s_playercount));
   player.set_ai_type(AI_TYPE::HUMAN);
@@ -164,9 +182,15 @@ void sim_interface::join_player() {
 
 void sim_interface::join_barbarian() {
   AddPlayerStep barbarian;
+  s_barbarians.push_back(s_playercount);
   barbarian.set_name("barbarian" + std::to_string(s_playercount));
   barbarian.set_ai_type(AI_TYPE::BARBARIAN);
   simulate_step(barbarian);
+}
+
+bool sim_interface::is_me(uint32_t player) {
+  if (s_localplayer == -1) return false;
+  return player == s_localplayer;
 }
 
 void sim_interface::initial_settle() {
@@ -175,7 +199,7 @@ void sim_interface::initial_settle() {
   spawn.set_player(s_currentplayer);
   const glm::vec3& l = selection::get();
   spawn.set_location(sf::Vector3i(l.x, l.y, l.z));
-  simulate_step(spawn);
+  initiate_step(spawn);
   settle();
 }
 
@@ -184,7 +208,7 @@ void sim_interface::settle() {
   colonize.set_player(s_currentplayer);
   const glm::vec3& l = selection::get();
   colonize.set_location(sf::Vector3i(l.x, l.y, l.z));
-  simulate_step(colonize);
+  initiate_step(colonize);
 }
 
 void sim_interface::production_abort(uint32_t city, uint32_t index) {
@@ -192,7 +216,7 @@ void sim_interface::production_abort(uint32_t city, uint32_t index) {
   abort.set_player(s_currentplayer);
   abort.set_city(city);
   abort.set_index(index);
-  simulate_step(abort);
+  initiate_step(abort);
 }
 
 void sim_interface::production_move(uint32_t city, uint32_t source, uint32_t dest) {
@@ -201,7 +225,7 @@ void sim_interface::production_move(uint32_t city, uint32_t source, uint32_t des
   move.set_city(city);
   move.set_source_index(source);
   move.set_destination_index(dest);
-  simulate_step(move);
+  initiate_step(move);
 }
 
 void sim_interface::teardown() {
@@ -219,7 +243,7 @@ void sim_interface::attack(uint32_t from_id, uint32_t to_id) {
   attack_step.set_attacker_id(from_id);
   attack_step.set_defender_id(to_id);
   attack_step.set_player(s_currentplayer);
-  simulate_step(attack_step);
+  initiate_step(attack_step);
 }
 
 void sim_interface::cast(const glm::ivec3& loc, MAGIC_TYPE type) {
@@ -227,14 +251,14 @@ void sim_interface::cast(const glm::ivec3& loc, MAGIC_TYPE type) {
   m.set_type(type);
   m.set_location(sf::Vector3i(loc.x, loc.y, loc.z));
   m.set_player(s_currentplayer);
-  simulate_step(m);
+  initiate_step(m);
 }
 
 void sim_interface::harvest(const glm::ivec3& loc) {
   HarvestStep h;
   h.set_destination(sf::Vector3i(loc.x, loc.y, loc.z));
   h.set_player(s_currentplayer);
-  simulate_step(h);
+  initiate_step(h);
 }
 
 const world_map::TileMap& sim_interface::get_map() {
@@ -259,6 +283,20 @@ const NotificationVector& sim_interface::get_player_notifications(uint32_t playe
 
 void sim_interface::synch() {
   std::lock_guard<std::mutex> lock(s_simmutex);
+  
+  s_currentplayer = 0;
+  while (true) {
+    Player* p = player::get_player(s_currentplayer);
+    if (!p) break;
+    if (p->m_turn_state == TURN_TYPE::TURNACTIVE) break;
+    ++s_currentplayer;
+    // Cycle
+    if (s_currentplayer >= s_playercount) {
+      s_currentplayer = 0;
+    }
+  };
+  
+  
   s_tiles = world_map::get_map();
   s_units.clear();
   auto append_unit = [](const Unit& unit) {

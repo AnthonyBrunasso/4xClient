@@ -33,6 +33,7 @@ namespace sim_interface {
 
   void join_player();
   void join_barbarian();
+  bool is_me(uint32_t player);
   void initial_settle();
   void settle();
   void production_abort(uint32_t city, uint32_t index);
