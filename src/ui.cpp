@@ -247,6 +247,7 @@ namespace ui {
 
     ImGui::Begin("City", &s_city_open, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_AlwaysUseWindowPadding);
     ImGui::Text("Population: %.1f Turns To Grow: %.1f Food: %.1f Experience: %.1f", city->GetPopulation(), city->GetTurnsForGrowth(), city->m_food, city->m_experience);
+    ImGui::Text("Damage: %.1f/%.1f Defense Used: %d", city->m_damage, city->MaxHealth(), city->m_defenses_used);
     ImGui::Text("Production");
     ImGui::Separator();
 

@@ -105,6 +105,17 @@ void selection::rclick_unit(const glm::ivec3& loc) {
   const auto& t = map.find(sloc);
   if (t == map.end()) return;
 
+  // Prioritize hitting a city.
+  if (t->second.m_city_id) {
+    // Get the current player, make sure they don't own the city.
+    const Player* player = sim_interface::get_currentplayerptr();
+    if (!player->OwnsCity(t->second.m_city_id)) {
+      sim_interface::siege(s_selection.m_unit.m_id, t->second.m_city_id);
+      return;
+    }
+  }
+
+  // Otherwise try to attack a unit.
   if (!t->second.m_unit_ids.empty()) {
     // Loop through and see if an enemy unit can be found.
     for (const auto& u : t->second.m_unit_ids) {
@@ -118,7 +129,7 @@ void selection::rclick_unit(const glm::ivec3& loc) {
     }
   }
 
-  // Otherwise move it to the tile.
+  // Finally, move to a tile if a unit or city can't be attacked.
   sim_interface::move_unit(s_selection.m_unit.m_id, loc);
 }
 

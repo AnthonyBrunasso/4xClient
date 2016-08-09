@@ -251,6 +251,14 @@ void sim_interface::attack(uint32_t from_id, uint32_t to_id) {
   initiate_step(attack_step);
 }
 
+void sim_interface::siege(uint32_t unit_id, uint32_t city_id) {
+  SiegeStep s;
+  s.set_city(city_id);
+  s.set_unit(unit_id);
+  s.set_player(s_currentplayer);
+  initiate_step(s);
+}
+
 void sim_interface::cast(const glm::ivec3& loc, MAGIC_TYPE type) {
   MagicStep m;
   m.set_type(type);
@@ -356,3 +364,10 @@ uint32_t sim_interface::get_currentplayer() {
   return s_currentplayer;
 }
 
+const Player* sim_interface::get_currentplayerptr() {
+  if (s_players.size() - 1 < s_currentplayer) {
+    return nullptr;
+  }
+
+  return &s_players[s_currentplayer];
+}
