@@ -263,7 +263,7 @@ namespace ui {
     static int selected = -1;
     static CONSTRUCTION_TYPE construct = CONSTRUCTION_TYPE::UNKNOWN;
 
-    std::vector<CONSTRUCTION_TYPE> constructions = production_queue::incomplete(city->GetProductionQueue());
+    std::vector<CONSTRUCTION_TYPE> constructions = production_queue::available(city->GetProductionQueue());
     int i = 0;
 
     for (auto c : constructions) {
