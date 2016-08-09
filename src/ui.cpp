@@ -124,7 +124,7 @@ namespace ui {
       ImGui::Text("%.1f", turns); ImGui::NextColumn();
       ImGui::PushID(static_cast<int>(i));
       if (ImGui::SmallButton("x")) {
-        sim_interface::abort_production(cq->m_city_id, i);
+        sim_interface::production_abort(cq->m_city_id, i);
         ImGui::PopID();
         break;
       }
@@ -132,7 +132,7 @@ namespace ui {
       ImGui::SameLine();
       if (ImGui::SmallButton("+")) {
         // Simulation happily deals with invalid indices, Thanks Alan!
-        production_queue::move(cq, i, i - 1);
+        sim_interface::production_move(cq->m_city_id, i, i - 1);
         ImGui::PopID();
         break;
       }
@@ -140,7 +140,7 @@ namespace ui {
       ImGui::SameLine();
       if (ImGui::SmallButton("-")) {
         // Simulation happily deals with invalid indices, Thanks Alan!
-        production_queue::move(cq, i, i + 1);
+        sim_interface::production_move(cq->m_city_id, i, i + 1);
         ImGui::PopID();
         break;
       }

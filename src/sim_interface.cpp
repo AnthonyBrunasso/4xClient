@@ -187,13 +187,21 @@ void sim_interface::settle() {
   simulate_step(colonize);
 }
 
-void sim_interface::abort_production(uint32_t city, uint32_t index)
-{
-  AbortStep abort;
+void sim_interface::production_abort(uint32_t city, uint32_t index) {
+  ProductionAbortStep abort;
   abort.set_player(s_currentplayer);
   abort.set_city(city);
   abort.set_index(index);
   simulate_step(abort);
+}
+
+void sim_interface::production_move(uint32_t city, uint32_t source, uint32_t dest) {
+  ProductionMoveStep move;
+  move.set_player(s_currentplayer);
+  move.set_city(city);
+  move.set_source_index(source);
+  move.set_destination_index(dest);
+  simulate_step(move);
 }
 
 void sim_interface::teardown() {
