@@ -96,6 +96,9 @@ namespace map {
     else if (key == GLFW_KEY_T && action == GLFW_PRESS) {
       sim_interface::settle();
     }
+    else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+      sim_interface::resume_player();
+    }
   }
 
   void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {

@@ -180,9 +180,14 @@ void sim_interface::join_player() {
   simulate_step(player);
 }
 
+void sim_interface::resume_player() {
+  if (s_localplayer != -1) return;
+
+  s_localplayer = s_currentplayer;
+}
+
 void sim_interface::join_barbarian() {
   AddPlayerStep barbarian;
-  s_barbarians.push_back(s_playercount);
   barbarian.set_name("barbarian" + std::to_string(s_playercount));
   barbarian.set_ai_type(AI_TYPE::BARBARIAN);
   simulate_step(barbarian);
@@ -296,6 +301,13 @@ void sim_interface::synch() {
     }
   };
   
+  std::vector<uint32_t> barbarians;
+  player::for_each_player([&barbarians](const Player& p) {
+    if (p.m_ai_type == AI_TYPE::BARBARIAN) {
+      barbarians.push_back(p.m_id);
+    }
+  });
+  s_barbarians.swap(barbarians);
   
   s_tiles = world_map::get_map();
   s_units.clear();

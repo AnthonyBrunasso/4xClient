@@ -32,6 +32,9 @@ namespace sim_interface {
   void end_turn();
 
   void join_player();
+  // Take the active player as your own
+  // Useful for resuming a game or shared control scenarios
+  void resume_player();
   void join_barbarian();
   bool is_me(uint32_t player);
   void initial_settle();
