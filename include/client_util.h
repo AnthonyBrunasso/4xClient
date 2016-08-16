@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-
+#include <cstdlib>
 
 namespace util {
   // Because simulation uses a different vector than client.
@@ -10,30 +10,20 @@ namespace util {
     return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
   }
 
-  template<class type>
-  bool id_comparand(const type& lhs, const type& rhs) {
-    return rhs.m_id > lhs.m_id;
+  template <class T>
+  int c_comparand(const void* lhs, const void* rhs) {
+    const T* lhu = (const T*)lhs;
+    const T* rhu = (const T*)rhs;
+    return lhu->m_id - rhu->m_id;
   }
 
-  template<class type>
-  const type* id_binsearch(const type* d, size_t size, uint32_t id) {
-    if (!size) return nullptr;
-    size_t mid;
-    size_t min = 0;
-    size_t max = size;
-    while (min <= max) {
-      mid = min + (max - min) / 2;
-      if (d[mid].m_id == id) {
-        return &d[mid];
-      }
+  template <class T>
+  const T* c_binsearch(const T* key, const T* ptr_array, size_t count) {
+    return reinterpret_cast<const T*>(std::bsearch(key, ptr_array, count, sizeof(T), c_comparand<T>));
+  }
 
-      if (d[mid].m_id < id) {
-        min = mid + 1;
-      }
-      else {
-        max = mid - 1;
-      }
-    }
-    return nullptr;
+  template <class T>
+  void c_qsort(T* ptr_array, size_t count) {
+    std::qsort(ptr_array, count, sizeof(T), c_comparand<T>);
   }
 }

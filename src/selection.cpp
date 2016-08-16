@@ -17,7 +17,7 @@ namespace selection {
 
   void synch_unit_selection() {
     const std::vector<Unit>& units = sim_interface::get_units();
-    const Unit* u = util::id_binsearch(units.data(), units.size(), s_selection.m_unit.m_id);
+    const Unit* u = util::c_binsearch(&s_selection.m_unit, units.data(), units.size());
     // Remove the selected unit. It was likely killed during the last simulation step.
     if (!u) {
       s_selection.clear();
@@ -30,7 +30,7 @@ namespace selection {
 
   void synch_city_selection() {
     const std::vector<City>& cities = sim_interface::get_cities();
-    const City* c = util::id_binsearch(cities.data(), cities.size(), s_selection.m_city.m_id);
+    const City* c = util::c_binsearch(&s_selection.m_city, cities.data(), cities.size());
     if (!c) {
       s_selection.clear();
       return;
@@ -71,7 +71,8 @@ void selection::lclick(const glm::ivec3& location) {
 
   if (!t->second.m_unit_ids.empty()) {
     const std::vector<Unit>& units = sim_interface::get_units();
-    const Unit* u = util::id_binsearch(units.data(), units.size(), t->second.m_unit_ids.front());
+    Unit searchTarget(t->second.m_unit_ids.front());
+    const Unit* u = util::c_binsearch(&searchTarget, units.data(), units.size());
     if (!u) return;
     // Close city ui if it's open.
     ui::city(0);
@@ -87,7 +88,8 @@ void selection::lclick(const glm::ivec3& location) {
   // Check if there is a city a the location to open the ui for it.
   if (t->second.m_city_id) {
     const std::vector<City>& cities = sim_interface::get_cities();
-    const City* c = util::id_binsearch(cities.data(), cities.size(), t->second.m_city_id);
+    City searchTarget(t->second.m_city_id);
+    const City* c = util::c_binsearch(&searchTarget, cities.data(), cities.size());
     if (!c) return;
     s_selection.m_city = *c;
     s_selection.m_selection = SELECTION_TYPE::CITY;
@@ -119,7 +121,8 @@ void selection::rclick_unit(const glm::ivec3& loc) {
   if (!t->second.m_unit_ids.empty()) {
     // Loop through and see if an enemy unit can be found.
     for (const auto& u : t->second.m_unit_ids) {
-      const Unit* target = util::id_binsearch(units.data(), units.size(), u);
+      Unit searchTarget(u);
+      const Unit* target = util::c_binsearch(&searchTarget, units.data(), units.size());
       if (!target) continue;
       if (target->m_owner_id != s_selection.m_unit.m_owner_id) {
         // Try to attack the unit, simulation will fail if the unit is out of range.

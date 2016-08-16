@@ -15,7 +15,7 @@ enum SELECTION_TYPE {
 };
 
 struct Selection {
-  Selection() : m_player(0, "", 0, AI_TYPE::UNKNOWN), m_unit(0, UNIT_TYPE::UNKNOWN), m_city(0), m_selection(SELECTION_TYPE::INACTIVE) {};
+  Selection() : m_player(0), m_unit(0), m_city(0), m_selection(SELECTION_TYPE::INACTIVE) {};
   Player m_player;
   Unit m_unit;
   City m_city;

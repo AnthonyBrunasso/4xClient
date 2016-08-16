@@ -127,7 +127,8 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
 
 void sim_interface::move_unit(uint32_t id, const glm::ivec3& location) {
   // Find unit with the id.
-  const Unit* unit = util::id_binsearch(s_units.data(), s_units.size(), id);
+  Unit searchTarget(id);
+  const Unit* unit = util::c_binsearch(&searchTarget, s_units.data(), s_units.size());
   if (!unit) return;
   MoveStep m;
   m.set_unit_id(id);
@@ -342,9 +343,9 @@ void sim_interface::synch() {
   // Sort all vectors by unique id for fast lookup.
 
   // Players are sorted by id in 4xsim but lets not assume that and sort it here anyway. 
-  std::sort(s_players.begin(), s_players.end(), util::id_comparand<Player>);
-  std::sort(s_cities.begin(), s_cities.end(), util::id_comparand<City>);
-  std::sort(s_units.begin(), s_units.end(), util::id_comparand<Unit>);
+  util::c_qsort(s_players.data(), s_players.size());
+  util::c_qsort(s_cities.data(), s_cities.size());
+  util::c_qsort(s_units.data(), s_units.size());
 
   // Notify subscribers the sim has been synched.
   for (const auto& s : s_subs) s();

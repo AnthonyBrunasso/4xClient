@@ -241,7 +241,8 @@ namespace ui {
     const std::vector<City>& cities = sim_interface::get_cities(); 
     std::vector<uint32_t> cities_to_close;
     // Show city ui for selected cities.
-    const City* city = util::id_binsearch(cities.data(), cities.size(), s_city);
+    City searchTarget(s_city);
+    const City* city = util::c_binsearch(&searchTarget, cities.data(), cities.size());
     if (!city) return;
 
 
@@ -359,7 +360,9 @@ namespace ui {
   void render_empire_stats() {
     const std::vector<Player>& players = sim_interface::get_players();
     uint32_t current = sim_interface::get_currentplayer();
-    const Player* p = util::id_binsearch(players.data(), players.size(), current);
+    Player searchTarget(current);
+
+    const Player* p = util::c_binsearch(&searchTarget, players.data(), players.size());
     if (!p) return;
 
     ImGui::Begin("Empire", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ShowBorders);
