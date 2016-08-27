@@ -119,7 +119,7 @@ void sim_interface::initialize(MULTIPLAYER multiplayer) {
   s_multiplayer = multiplayer == MULTIPLAYER::YES;
   std::cout << "Client's protocol version is: " << get_checksum() << std::endl;
   if (multiplayer == MULTIPLAYER::YES) {
-    xmessaging::init_transport("rufeooo.com", 4000);
+    xmessaging::init_transport("192.168.0.108", 4000);
   }
   s_consumer_thread = std::thread(&run_messaging);
   s_input_thread = std::thread(&run_sim);
