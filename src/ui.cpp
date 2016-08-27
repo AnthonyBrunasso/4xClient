@@ -155,14 +155,14 @@ namespace ui {
 
   void render_unit_selection() {
     const Selection& s = selection::get_selection();
-    float max_health = unit_definitions::get(s.m_unit.m_unit_type)->m_health;
+    float max_health = unit_definitions::get(s.m_unit.m_type)->m_health;
     float progress = s.m_unit.m_combat_stats.m_health / max_health;
     char buf[32];
     sprintf(buf, "%.2f/%.2f", progress * max_health, max_health);
     ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), buf);
     ImGui::SameLine();
     ImGui::Text("Health");
-    ImGui::Text("Type: %s", get_unit_name(s.m_unit.m_unit_type));
+    ImGui::Text("Type: %s", get_unit_name(s.m_unit.m_type));
     ImGui::Text("Actions: %d", s.m_unit.m_action_points);
     ImGui::Text("Attack: %.2f", s.m_unit.m_combat_stats.m_attack);
   }

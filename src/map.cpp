@@ -160,7 +160,7 @@ namespace map {
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
       glStencilMask(0xFF);
 
-      switch (u.m_unit_type) {
+      switch (u.m_type) {
       case UNIT_TYPE::PHALANX:
         todraw = s_rookmesh;
         break;
@@ -220,7 +220,7 @@ namespace map {
         glm::vec2 world = glm_hex::cube_to_world(pos, 3);
         Mesh* todraw;
 
-        switch (u.m_unit_type) {
+        switch (u.m_type) {
         case UNIT_TYPE::PHALANX:
           todraw = s_rookmesh;
           break;
