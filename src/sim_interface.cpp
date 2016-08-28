@@ -28,6 +28,7 @@ namespace sim_interface {
   uint32_t s_playercount = 0;
   uint32_t s_localplayer = -1;
   std::vector<uint32_t> s_barbarians;
+  std::vector<uint32_t> s_monsters;
 
   world_map::TileMap s_tiles;
   std::vector<Unit> s_units;
@@ -157,8 +158,9 @@ void sim_interface::specialize(uint32_t city_id, TERRAIN_TYPE type) {
 void sim_interface::end_turn() {
   EndTurnStep step;
 
-  auto findIt = std::find(s_barbarians.begin(), s_barbarians.end(), s_currentplayer);
-  if (findIt == s_barbarians.end() && !is_me(s_currentplayer)) return;
+  auto findbarb = std::find(s_barbarians.begin(), s_barbarians.end(), s_currentplayer);
+  auto findmonster = std::find(s_monsters.begin(), s_monsters.end(), s_currentplayer);
+  if (findbarb == s_barbarians.end() && findmonster == s_monsters.end() && !is_me(s_currentplayer)) return;
 
   step.set_player(s_currentplayer);
   ++s_currentplayer;
@@ -310,13 +312,22 @@ void sim_interface::synch() {
     }
   };
   
-  std::vector<uint32_t> barbarians;
-  player::for_each_player([&barbarians](const Player& p) {
-    if (p.m_ai_type == AI_TYPE::BARBARIAN) {
-      barbarians.push_back(p.m_id);
+  std::vector<uint32_t> barbarians, monsters;
+  player::for_each_player([&barbarians, &monsters](const Player& p) {
+    switch (p.m_ai_type) {
+      case AI_TYPE::BARBARIAN:
+        barbarians.push_back(p.m_id);
+        break;
+      case AI_TYPE::MONSTER:
+        monsters.push_back(p.m_id);
+        break;
+      case AI_TYPE::HUMAN:
+      default:
+        break;
     }
   });
   s_barbarians.swap(barbarians);
+  s_monsters.swap(monsters);
   
   s_tiles = world_map::get_map();
   s_units.clear();

@@ -55,7 +55,7 @@ int main() {
   bool show_another_window = false;
   ImVec4 clear_color = ImColor(114, 144, 154);
 
-  sim_interface::initialize(MULTIPLAYER::YES);
+  sim_interface::initialize(MULTIPLAYER::NO);
   map::initialize();
   prop::initialize();
 
