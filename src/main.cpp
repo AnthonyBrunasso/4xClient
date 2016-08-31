@@ -31,7 +31,9 @@ void initialize() {
     {GL_FRAGMENT_SHADER, "outline.frag"},
   });
 
-  glm::vec3 pos(0.0, 30.0f, 0.0f);
+  glm::vec3 pos(0.0, 30.0f, 10.0f);
+  light::add(pos);
+  pos = glm::vec3(0.0, -30.0f, 10.0f);
   light::add(pos);
 }
 
