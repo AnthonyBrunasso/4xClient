@@ -39,6 +39,7 @@ void get_phong(vec3 n, vec3 lpos, out vec3 amb_diff, out vec3 spec) {
 void main() {
   // TODO: Clean this up.
   vec4 tex = vec4(1.0, 1.0, 1.0, 1.0);
+  frag_color = vec4(0.0, 0.0, 0.0, 0.0);
 
   if (use_texture > 0) {
     tex = texture(tex_sampler, tex_coords); 
