@@ -367,7 +367,7 @@ namespace ui {
 
     ImGui::Begin("Empire", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_ShowBorders);
     ImGui::SetWindowPos("Empire", ImVec2(0, 0));
-    ImGui::Text("Player %d", current);
+    ImGui::Text("Player: %d Turn: %d", current, sim_interface::get_currentturn());
     ImGui::Text("Gold: %.1f Science: %.1f Magic: %.1f", p->m_gold, p->m_science, p->m_magic);
     int item = 0;
     

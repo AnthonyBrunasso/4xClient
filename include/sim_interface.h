@@ -50,6 +50,7 @@ namespace sim_interface {
   const NotificationVector& get_player_notifications(uint32_t player_id);
 
   uint32_t get_currentplayer();
+  uint32_t get_currentturn();
   const Player* get_currentplayerptr();
 
   void synch();

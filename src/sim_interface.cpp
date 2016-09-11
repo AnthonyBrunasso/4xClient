@@ -27,6 +27,7 @@ namespace sim_interface {
   uint32_t s_currentplayer = 0;
   uint32_t s_playercount = 0;
   uint32_t s_localplayer = -1;
+  uint32_t s_currentturn = 0;
   std::vector<uint32_t> s_barbarians;
   std::vector<uint32_t> s_monsters;
 
@@ -346,6 +347,7 @@ void sim_interface::synch() {
   };
   player::for_each_player(append_player);
   s_playercount = player::get_count();
+  s_currentturn = simulation::get_turn();
 
   for (uint32_t i = 0; i < s_playercount; ++i) {
     s_notifications[i] = notification::get_player_notifications(i);
@@ -374,6 +376,10 @@ bool sim_interface::poll() {
 
 uint32_t sim_interface::get_currentplayer() {
   return s_currentplayer;
+}
+
+uint32_t sim_interface::get_currentturn() {
+  return s_currentturn;
 }
 
 const Player* sim_interface::get_currentplayerptr() {
