@@ -3,7 +3,7 @@
 #include "sim_interface.h"
 #include "ui.h"
 
-#include "client_util.h"
+#include "e4x/include/client_util.h"
 
 #include <iostream>
 

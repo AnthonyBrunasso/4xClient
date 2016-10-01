@@ -1,10 +1,7 @@
 #pragma once
 
-namespace e4x {
-  class Mesh;
-}
-
-#include <glm/vec3.hpp>
+#include "e4x/include/glm/vec3.hpp"
+#include "e4x/include/mesh.h"
 
 namespace map {
   void initialize();

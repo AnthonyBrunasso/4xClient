@@ -1,25 +1,27 @@
 #include "map.h"
 
 #include "sim_interface.h"
-#include "mesh.h"
-#include "camera.h"
-#include "geometry.h"
-#include "glm_hex.h"
-#include "gl.h"
-#include "raycast.h"
-#include "program.h"
-#include "texloader.h"
+#include "e4x/include/mesh.h"
+#include "e4x/include/camera.h"
+#include "e4x/include/geometry.h"
+#include "e4x/include/glm_hex.h"
+#include "e4x/include/gl.h"
+#include "e4x/include/raycast.h"
+#include "e4x/include/program.h"
+#include "e4x/include/texloader.h"
 #include "selection.h"
-#include "light.h"
-#include "client_util.h"
-#include "prop.h"
+#include "e4x/include/light.h"
+#include "e4x/include/client_util.h"
+#include "e4x/include/prop.h"
 
-#include <glm/vec3.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/intersect.hpp>
+#include "e4x/include/glm/vec3.hpp"
+#include "e4x/include/glm/gtc/type_ptr.hpp"
+#include "e4x/include/glm/gtx/intersect.hpp"
+#include "e4x/include/imgui.h"
+
 #include <vector>
 #include <iostream>
-#include <imgui.h>
+
 
 
 namespace map {

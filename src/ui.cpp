@@ -1,25 +1,24 @@
 #include "ui.h"
 
-#include <imgui.h>
+#include "e4x/include/imgui.h"
 #include <iostream>
 #include <algorithm>
 
-#include <GL/gl3w.h>
-#include <GLFW/glfw3.h>
+#include "e4x/include/e4x.h"
 
 #include "circular_buffer.h"
 #include "production.h"
 #include "sim_interface.h"
-#include "mesh.h"
-#include "log.h"
-#include "client_util.h"
+#include "e4x/include/mesh.h"
+#include "e4x/include/log.h"
+#include "e4x/include/client_util.h"
 #include "selection.h"
 #include "unit_definitions.h"
 #include "notification.h"
 #include "terrain_yield.h"
-#include "prop.h"
+#include "e4x/include/prop.h"
 #include "map.h"
-#include "gl.h"
+#include "e4x/include/gl.h"
 
 using namespace e4x;
 

@@ -1,24 +1,25 @@
 #include <iostream>
 #include <vector>
 
-#include <GL/gl3w.h>
-#include <GLFW/glfw3.h>
+#include "e4x/include/e4x.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "e4x/include/glm/glm.hpp"
+#include "e4x/include/glm/gtc/type_ptr.hpp"
 
-#include <imgui.h>
-#include "imgui_impl_glfw_gl3.h"
+#include "e4x/include/imgui.h"
+#include "e4x/include/imgui_impl_glfw_gl3.h"
 
-#include "camera.h"
-#include "gl.h"
+#include "e4x/include/camera.h"
+#include "e4x/include/gl.h"
+#include "e4x/include/mesh.h"
+#include "e4x/include/program.h"
+#include "e4x/include/light.h"
+#include "e4x/include/prop.h"
+
 #include "map.h"
-#include "mesh.h"
 #include "sim_interface.h"
-#include "program.h"
-#include "light.h"
 #include "ui.h"
-#include "prop.h"
+
 
 using namespace e4x;
 

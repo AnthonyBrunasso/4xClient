@@ -1,0 +1,2 @@
+Reevaluation occurs when two units try to attack a unit, it dies.
+Player color.

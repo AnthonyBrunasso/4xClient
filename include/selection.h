@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/vec3.hpp>
+#include "e4x/include/glm/vec3.hpp"
 
 #include "player.h"
 #include "city.h"

@@ -10,7 +10,7 @@
 #include "player.h"
 #include "notification.h"
 
-#include <glm/vec3.hpp>
+#include "e4x/include/glm/vec3.hpp"
 #include <functional>
 
 enum class MULTIPLAYER {

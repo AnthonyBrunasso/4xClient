@@ -3,7 +3,6 @@
 #include "mesh.h"
 #include "program.h"
 #include "camera.h"
-#include "map.h"
 #include "glm_hex.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -22,7 +21,7 @@ namespace prop {
 
 void prop::initialize() {
   // Steal the existing mesh from map.
-  s_tile = map::get_tile_mesh();
+  //s_tile = map::get_tile_mesh();
   s_outlineshader = program::get("outline"); 
 
   s_outlineuniforms.resize(4);
@@ -37,6 +36,7 @@ void prop::spinagon(const glm::ivec3& cube) {
 }
 
 void prop::render() {
+  if (!s_tile) return;
   static float rot = 0.0f;
   rot += 0.015f;
 

@@ -4,9 +4,9 @@
 #include "simulation.h"
 #include "game_types.h"
 #include "network_types.h"
-#include "messaging.h"
+#include "e4x/src/socket/include/messaging.h"
 #include "selection.h"
-#include "client_util.h"
+#include "e4x/include/client_util.h"
 
 #include <chrono>
 #include <thread>
