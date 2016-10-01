@@ -1,6 +1,3 @@
 [submodule "src/4xSimulation"]
 	path = src/4xSimulation
 	url = https://github.com/AnthonyBrunasso/4xSimulation
-[submodule "src/socket"]
-	path = src/socket
-	url = https://github.com/rufeooo/socket
