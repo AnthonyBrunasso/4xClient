@@ -9,6 +9,8 @@
 
 #include <vector>
 
+using namespace e4x;
+
 namespace prop {
   std::vector<glm::ivec3> s_spinagons;
   GLuint s_outlineshader;

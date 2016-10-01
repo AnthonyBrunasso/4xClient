@@ -20,6 +20,8 @@
 #include "ui.h"
 #include "prop.h"
 
+using namespace e4x;
+
 void initialize() {
   program::build("phong", {
     {GL_VERTEX_SHADER, "simple_phong.vert"},

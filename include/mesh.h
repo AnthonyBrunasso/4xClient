@@ -13,6 +13,8 @@
 
 #include <cstdint>
 
+namespace e4x {
+
 class Mesh {
 public:
   glm::vec3 m_position;
@@ -42,7 +44,7 @@ public:
 
   bool m_update_matrix;
   glm::mat4 m_matrix;
- 
+
   // Order is ka, kd, ks. 
   std::vector<glm::vec3> m_light_material;
 
@@ -52,9 +54,9 @@ public:
 namespace mesh {
   // If uniforms exist for MVP they will exist
   // at these locations in the m_uniforms array.
-  static const uint32_t VIEW_IDX = 0; 
-  static const uint32_t PROJ_IDX = 1; 
-  static const uint32_t MODL_IDX = 2; 
+  static const uint32_t VIEW_IDX = 0;
+  static const uint32_t PROJ_IDX = 1;
+  static const uint32_t MODL_IDX = 2;
 
   Mesh* create(const std::string& filename, const std::vector<GLuint>& programs);
 
@@ -85,4 +87,6 @@ namespace mesh {
 
   // Get all the number of vertices that has been sent to the gpu, but not necessarily rendering. 
   uint32_t get_vert_count();
+}
+
 }

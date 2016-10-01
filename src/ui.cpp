@@ -21,6 +21,8 @@
 #include "map.h"
 #include "gl.h"
 
+using namespace e4x;
+
 namespace ui {
   // Cities to render ui for.
   uint32_t s_city = 0;

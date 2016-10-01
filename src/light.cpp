@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <string>
 
+namespace e4x {
+
 namespace light {
 
 #define LIGHT_LOG "light.log"
@@ -31,7 +33,7 @@ void light::apply(Mesh* m) {
   assert(s_lights.size() <= LIGHT_LIMIT);
 
   for (uint32_t i = 0; i < s_lights.size(); ++i) {
-    char name[16]; 
+    char name[16];
     sprintf(name, "lpositions[%d]", i);
     std::string logline = "Applying light source to: ";
     logline += name;
@@ -41,4 +43,6 @@ void light::apply(Mesh* m) {
   }
 
   mesh::add_uniform(m, "lcount", &s_lightcount);
+}
+
 }

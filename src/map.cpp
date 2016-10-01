@@ -21,17 +21,21 @@
 #include <iostream>
 #include <imgui.h>
 
+
 namespace map {
+
+  using namespace e4x;
+
   // Mouse positions.
   double s_xpos, s_ypos;
   glm::ivec3 s_selected;
   glm::ivec3 s_hover;
-  Mesh* s_tile = nullptr;
-  Mesh* s_pawnmesh = nullptr;
-  Mesh* s_rookmesh = nullptr;
-  Mesh* s_queenmesh = nullptr;
-  Mesh* s_bishopmesh = nullptr;
-  Mesh* s_hutmesh = nullptr;
+  e4x::Mesh* s_tile = nullptr;
+  e4x::Mesh* s_pawnmesh = nullptr;
+  e4x::Mesh* s_rookmesh = nullptr;
+  e4x::Mesh* s_queenmesh = nullptr;
+  e4x::Mesh* s_bishopmesh = nullptr;
+  e4x::Mesh* s_hutmesh = nullptr;
   GLint s_texloc = 0;
   GLint s_usetex = 1;
   GLint s_dontusetex = 0;
@@ -155,7 +159,7 @@ namespace map {
       }
       pos = glm::ivec3(u.m_location.x, u.m_location.y, u.m_location.z);
       glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-      Mesh* todraw;
+      e4x::Mesh* todraw;
 
       glStencilFunc(GL_ALWAYS, 1, 0xFF);
       glStencilMask(0xFF);
@@ -218,7 +222,7 @@ namespace map {
         if (pos != s_hover && s.m_selection != SELECTION_TYPE::UNIT) continue;
         if (pos != s_hover && s.m_unit.m_id != u.m_id) continue;
         glm::vec2 world = glm_hex::cube_to_world(pos, 3);
-        Mesh* todraw;
+        e4x::Mesh* todraw;
 
         switch (u.m_type) {
         case UNIT_TYPE::PHALANX:
@@ -403,7 +407,7 @@ void map::draw() {
   render_cities();
 }
 
-Mesh* map::get_tile_mesh() {
+e4x::Mesh* map::get_tile_mesh() {
   return s_tile;
 }
 

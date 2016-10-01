@@ -7,13 +7,15 @@
 
 #include "gl.h"
 
+namespace e4x {
+
 namespace camera {
   // This pointer will point to the most recently created camera
   Camera* s_camera = nullptr;
 }
 
 Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
-    m_speed(25.0f) {
+  m_speed(25.0f) {
   m_projection = glm::perspective(fov, aspect, near_plane, far_plane);
   m_position = glm::vec3(0.0f, -16.0f, 28.0f);
   m_forward = glm::vec3(0.0f, 0.1f, -0.15f);
@@ -22,7 +24,7 @@ Camera::Camera(float near_plane, float far_plane, float fov, float aspect) :
 }
 
 void Camera::update(double delta) {
-  GLFWwindow* window = gl::get_current_window();   
+  GLFWwindow* window = gl::get_current_window();
 
   if (window) {
     float c_speed = m_speed * static_cast<float>(delta);
@@ -58,4 +60,6 @@ void Camera::zoom(float amount) {
 
 Camera* camera::get_current() {
   return s_camera;
+}
+
 }

@@ -10,6 +10,8 @@
 
 #include <glm/gtc/quaternion.hpp>
 
+namespace e4x {
+
 class Camera {
 public:
   Camera(float near_plane, float far_plane, float fov, float aspect);
@@ -38,4 +40,6 @@ public:
 
 namespace camera {
   Camera* get_current();
+}
+
 }

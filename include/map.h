@@ -1,6 +1,8 @@
 #pragma once
 
-class Mesh;
+namespace e4x {
+  class Mesh;
+}
 
 #include <glm/vec3.hpp>
 
@@ -10,7 +12,7 @@ namespace map {
   void update(double delta);
   void draw();
 
-  Mesh* get_tile_mesh();
+  e4x::Mesh* get_tile_mesh();
 
   const glm::ivec3& get_hover();
 }

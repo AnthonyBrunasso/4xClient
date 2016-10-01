@@ -9,6 +9,8 @@
 #include "gl.h"
 #include "camera.h"
 
+using namespace e4x;
+
 glm::vec3 ray::from_mouse(double mx, double my) {
   // Require the current window for frame buffer dimensions.
   GLFWwindow* window = gl::get_current_window();

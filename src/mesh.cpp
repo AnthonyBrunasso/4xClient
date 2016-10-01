@@ -16,10 +16,12 @@
 #define MESH_LOG_FILE "mesh.log"
 #define MESH_DIR "../../data/models/"
 
+namespace e4x {
+
 namespace mesh {
-  static const uint32_t VERT_VBO_IDX = 0; 
-  static const uint32_t NORM_VBO_IDX = 1; 
-  static const uint32_t INDX_VBO_IDX = 2; 
+  static const uint32_t VERT_VBO_IDX = 0;
+  static const uint32_t NORM_VBO_IDX = 1;
+  static const uint32_t INDX_VBO_IDX = 2;
 
   uint32_t s_vert_count = 0;
 
@@ -78,9 +80,9 @@ namespace mesh {
 
     if (m->m_vertices.size()) {
       glBindBuffer(GL_ARRAY_BUFFER, m->m_vbos[VERT_VBO_IDX]);
-      glBufferData(GL_ARRAY_BUFFER, 
-        m->m_vertices.size() * sizeof(GLfloat), 
-        m->m_vertices.data(), 
+      glBufferData(GL_ARRAY_BUFFER,
+        m->m_vertices.size() * sizeof(GLfloat),
+        m->m_vertices.data(),
         GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
@@ -194,9 +196,9 @@ Mesh* mesh::create(const std::string& filename, const std::vector<GLuint>& progr
 }
 
 Mesh* mesh::create(const std::vector<GLfloat>& vertices
-    , const std::vector<GLfloat>& normals
-    , const std::vector<GLuint>& indices
-    , const std::vector<GLuint>& programs) {
+  , const std::vector<GLfloat>& normals
+  , const std::vector<GLuint>& indices
+  , const std::vector<GLuint>& programs) {
   Mesh* mesh = new Mesh();
   mesh::set_position(mesh, glm::vec3(0.0f, 0.0f, 0.0f));
   mesh::set_rotate(mesh, 0, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -227,7 +229,7 @@ void mesh::draw(Mesh* m) {
     uint32_t ucount = 3;
 
     // All meshes must have mvp uniforms.
-    assert(uniforms.size() >= ucount); 
+    assert(uniforms.size() >= ucount);
 
     Camera* c = camera::get_current();
 
@@ -249,14 +251,14 @@ void mesh::draw(Mesh* m) {
     uint32_t idx = 0;
     for (uint32_t i = ucount, e = ucount + m->m_uniform_fdata.size(); i < e; ++i, ++idx) {
       const std::pair<GLenum, GLfloat*> u = m->m_uniform_fdata[idx];
-      switch(u.first) {
+      switch (u.first) {
       case GL_FLOAT_VEC4:
         glUniform4fv(uniforms[i], 1, u.second);
         break;
       case GL_FLOAT_VEC3:
         glUniform3fv(uniforms[i], 1, u.second);
         break;
-      default: 
+      default:
         // Add the case. 
         assert(false);
         break;
@@ -395,3 +397,4 @@ uint32_t mesh::get_vert_count() {
   return s_vert_count;
 }
 
+}
